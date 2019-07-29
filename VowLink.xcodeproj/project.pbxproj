@@ -24,6 +24,8 @@
 		4D23EEBA22EF3517003A9C20 /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EEB922EF3517003A9C20 /* Peer.swift */; };
 		4D23EEBC22EF3A5E003A9C20 /* RateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EEBB22EF3A5E003A9C20 /* RateLimiter.swift */; };
 		4DF7CAFC22EF3F6800CD1C33 /* Channel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7CAFB22EF3F6800CD1C33 /* Channel.swift */; };
+		4DF7CB0B22EF409900CD1C33 /* KeychainAccess.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF7CB0622EF409500CD1C33 /* KeychainAccess.framework */; };
+		4DF7CB0C22EF40C600CD1C33 /* KeychainAccess.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF7CB0622EF409500CD1C33 /* KeychainAccess.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -174,6 +176,27 @@
 			remoteGlobalIDString = BD12FD351D767BA0001815C7;
 			remoteInfo = SwiftProtobuf_iOS;
 		};
+		4DF7CB0522EF409500CD1C33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 140F195C1A49D79400B0016A;
+			remoteInfo = KeychainAccess;
+		};
+		4DF7CB0722EF409500CD1C33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 140F19671A49D79500B0016A;
+			remoteInfo = KeychainAccessTests;
+		};
+		4DF7CB0922EF409500CD1C33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 14A630151D3293C700809B3F;
+			remoteInfo = TestHost;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -192,6 +215,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				4DF7CB0C22EF40C600CD1C33 /* KeychainAccess.framework in Embed Frameworks */,
 				4D23EEB122EF2E13003A9C20 /* Sodium.framework in Embed Frameworks */,
 				4D23EEB522EF2E13003A9C20 /* SwiftProtobuf.framework in Embed Frameworks */,
 			);
@@ -222,6 +246,7 @@
 		4D23EEB922EF3517003A9C20 /* Peer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Peer.swift; sourceTree = "<group>"; };
 		4D23EEBB22EF3A5E003A9C20 /* RateLimiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateLimiter.swift; sourceTree = "<group>"; };
 		4DF7CAFB22EF3F6800CD1C33 /* Channel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Channel.swift; sourceTree = "<group>"; };
+		4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = KeychainAccess.xcodeproj; path = deps/KeychainAccess/Lib/KeychainAccess.xcodeproj; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -229,6 +254,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4DF7CB0B22EF409900CD1C33 /* KeychainAccess.framework in Frameworks */,
 				4D23EEB022EF2E13003A9C20 /* Sodium.framework in Frameworks */,
 				4D23EEB422EF2E13003A9C20 /* SwiftProtobuf.framework in Frameworks */,
 			);
@@ -275,6 +301,7 @@
 		4D23EDD122EECBE4003A9C20 /* VowLink */ = {
 			isa = PBXGroup;
 			children = (
+				4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */,
 				4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */,
 				4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */,
 				4D23EE2C22EF1EBC003A9C20 /* messages.pb.swift */,
@@ -343,6 +370,16 @@
 				4D23EE9B22EF2CEF003A9C20 /* SwiftProtobuf.framework */,
 				4D23EE9D22EF2CEF003A9C20 /* SwiftProtobufTests.xctest */,
 				4D23EE9F22EF2CEF003A9C20 /* SwiftProtobuf.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4DF7CB0022EF409500CD1C33 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4DF7CB0622EF409500CD1C33 /* KeychainAccess.framework */,
+				4DF7CB0822EF409500CD1C33 /* KeychainAccessTests.xctest */,
+				4DF7CB0A22EF409500CD1C33 /* TestHost.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -449,6 +486,10 @@
 			productRefGroup = 4D23EDD022EECBE4003A9C20 /* Products */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = 4DF7CB0022EF409500CD1C33 /* Products */;
+					ProjectRef = 4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */;
+				},
 				{
 					ProductGroup = 4D23EE6E22EF2CEE003A9C20 /* Products */;
 					ProjectRef = 4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */;
@@ -571,6 +612,27 @@
 			fileType = wrapper.framework;
 			path = SwiftProtobuf.framework;
 			remoteRef = 4D23EE9E22EF2CEF003A9C20 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		4DF7CB0622EF409500CD1C33 /* KeychainAccess.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = KeychainAccess.framework;
+			remoteRef = 4DF7CB0522EF409500CD1C33 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		4DF7CB0822EF409500CD1C33 /* KeychainAccessTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = KeychainAccessTests.xctest;
+			remoteRef = 4DF7CB0722EF409500CD1C33 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		4DF7CB0A22EF409500CD1C33 /* TestHost.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = TestHost.app;
+			remoteRef = 4DF7CB0922EF409500CD1C33 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
