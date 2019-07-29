@@ -174,7 +174,7 @@ struct Subscribe {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var channelID: Data = SwiftProtobuf.Internal.emptyData
+  var channelID: [Data] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -186,7 +186,7 @@ struct Unsubscribe {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var channelID: Data = SwiftProtobuf.Internal.emptyData
+  var channelID: [Data] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -201,14 +201,6 @@ struct Packet {
   var content: OneOf_Content? {
     get {return _storage._content}
     set {_uniqueStorage()._content = newValue}
-  }
-
-  var hello: Hello {
-    get {
-      if case .hello(let v)? = _storage._content {return v}
-      return Hello()
-    }
-    set {_uniqueStorage()._content = .hello(newValue)}
   }
 
   var msg: EncryptedMessage {
@@ -238,7 +230,6 @@ struct Packet {
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Content: Equatable {
-    case hello(Hello)
     case msg(EncryptedMessage)
     case subscribe(Subscribe)
     case unsubscribe(Unsubscribe)
@@ -246,7 +237,6 @@ struct Packet {
   #if !swift(>=4.1)
     static func ==(lhs: Packet.OneOf_Content, rhs: Packet.OneOf_Content) -> Bool {
       switch (lhs, rhs) {
-      case (.hello(let l), .hello(let r)): return l == r
       case (.msg(let l), .msg(let r)): return l == r
       case (.subscribe(let l), .subscribe(let r)): return l == r
       case (.unsubscribe(let l), .unsubscribe(let r)): return l == r
@@ -658,7 +648,7 @@ extension Subscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
-      case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
+      case 1: try decoder.decodeRepeatedBytesField(value: &self.channelID)
       default: break
       }
     }
@@ -666,7 +656,7 @@ extension Subscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.channelID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.channelID, fieldNumber: 1)
+      try visitor.visitRepeatedBytesField(value: self.channelID, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -687,7 +677,7 @@ extension Unsubscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
-      case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
+      case 1: try decoder.decodeRepeatedBytesField(value: &self.channelID)
       default: break
       }
     }
@@ -695,7 +685,7 @@ extension Unsubscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.channelID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.channelID, fieldNumber: 1)
+      try visitor.visitRepeatedBytesField(value: self.channelID, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -710,10 +700,9 @@ extension Unsubscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
 extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = "Packet"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "hello"),
-    2: .same(proto: "msg"),
-    3: .same(proto: "subscribe"),
-    4: .same(proto: "unsubscribe"),
+    1: .same(proto: "msg"),
+    2: .same(proto: "subscribe"),
+    3: .same(proto: "unsubscribe"),
   ]
 
   fileprivate class _StorageClass {
@@ -741,14 +730,6 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
       while let fieldNumber = try decoder.nextFieldNumber() {
         switch fieldNumber {
         case 1:
-          var v: Hello?
-          if let current = _storage._content {
-            try decoder.handleConflictingOneOf()
-            if case .hello(let m) = current {v = m}
-          }
-          try decoder.decodeSingularMessageField(value: &v)
-          if let v = v {_storage._content = .hello(v)}
-        case 2:
           var v: EncryptedMessage?
           if let current = _storage._content {
             try decoder.handleConflictingOneOf()
@@ -756,7 +737,7 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
           }
           try decoder.decodeSingularMessageField(value: &v)
           if let v = v {_storage._content = .msg(v)}
-        case 3:
+        case 2:
           var v: Subscribe?
           if let current = _storage._content {
             try decoder.handleConflictingOneOf()
@@ -764,7 +745,7 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
           }
           try decoder.decodeSingularMessageField(value: &v)
           if let v = v {_storage._content = .subscribe(v)}
-        case 4:
+        case 3:
           var v: Unsubscribe?
           if let current = _storage._content {
             try decoder.handleConflictingOneOf()
@@ -781,14 +762,12 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
       switch _storage._content {
-      case .hello(let v)?:
-        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
       case .msg(let v)?:
-        try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
       case .subscribe(let v)?:
-        try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
       case .unsubscribe(let v)?:
-        try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
       case nil: break
       }
     }

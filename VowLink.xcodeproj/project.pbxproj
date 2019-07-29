@@ -21,6 +21,7 @@
 		4D23EEB122EF2E13003A9C20 /* Sodium.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE7922EF2CEE003A9C20 /* Sodium.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4D23EEB422EF2E13003A9C20 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE9722EF2CEF003A9C20 /* SwiftProtobuf.framework */; };
 		4D23EEB522EF2E13003A9C20 /* SwiftProtobuf.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE9722EF2CEF003A9C20 /* SwiftProtobuf.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4D23EEBA22EF3517003A9C20 /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EEB922EF3517003A9C20 /* Peer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -216,6 +217,7 @@
 		4D23EE2C22EF1EBC003A9C20 /* messages.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = messages.pb.swift; sourceTree = "<group>"; };
 		4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Sodium.xcodeproj; path = deps/Sodium/Sodium.xcodeproj; sourceTree = SOURCE_ROOT; };
 		4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SwiftProtobuf.xcodeproj; path = deps/SwiftProtobuf/SwiftProtobuf.xcodeproj; sourceTree = SOURCE_ROOT; };
+		4D23EEB922EF3517003A9C20 /* Peer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Peer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -280,6 +282,7 @@
 				4D23EDE122EECBE5003A9C20 /* Info.plist */,
 				4D23EDD922EECBE5003A9C20 /* VowLink.xcdatamodeld */,
 				4D23EE0322EECBFD003A9C20 /* PeerToPeer.swift */,
+				4D23EEB922EF3517003A9C20 /* Peer.swift */,
 			);
 			path = VowLink;
 			sourceTree = "<group>";
@@ -596,6 +599,7 @@
 				4D23EE2D22EF1EBC003A9C20 /* messages.pb.swift in Sources */,
 				4D23EDD522EECBE4003A9C20 /* ViewController.swift in Sources */,
 				4D23EDDB22EECBE5003A9C20 /* VowLink.xcdatamodeld in Sources */,
+				4D23EEBA22EF3517003A9C20 /* Peer.swift in Sources */,
 				4D23EE0422EECBFD003A9C20 /* PeerToPeer.swift in Sources */,
 				4D23EDD322EECBE4003A9C20 /* AppDelegate.swift in Sources */,
 			);

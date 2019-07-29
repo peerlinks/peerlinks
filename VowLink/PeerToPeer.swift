@@ -8,14 +8,20 @@
 
 import Foundation
 import MultipeerConnectivity
-import Sodium
+
+let RATE_LIMIT: Int32 = 1000
+
+protocol PeerToPeerDelegate {
+    func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Packet)
+}
 
 class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate {
     var peer: MCPeerID!
     var advertiser: MCNearbyServiceAdvertiser!
     var browser: MCNearbyServiceBrowser!
     var session: MCSession!
-    let sodium = Sodium()
+    var delegate: PeerToPeerDelegate?
+    var peers = [MCPeerID:Peer]()
     
     init(serviceType: String) {
         super.init()
@@ -51,17 +57,6 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     // MARK: Public API
 
-    func broadcast() {
-        let packet = Packet.with { (packet) in
-            packet.hello = Hello.with({ hello in
-                hello.rateLimit = 10
-            })
-        }
-        
-        // TODO(indutny): exceptions
-        try! session.send(try! packet.serializedData(), toPeers: session.connectedPeers, with: .unreliable)
-    }
-    
     // MARK: Advertiser
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error) {
@@ -98,24 +93,65 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         debugPrint("[session] received from \(peerID.displayName) data \(data)")
+        guard let peer = peers[peerID] else {
+            debugPrint("[session] unknown peer...")
+            return
+        }
+
+        if !peer.acceptPacket() {
+            debugPrint("[session] reached rate limit")
+            return
+        }
+        
         do {
             let packet = try Packet(serializedData: data)
             debugPrint("[session] packet \(packet)")
+            
+            delegate?.peerToPeer(self, didReceive: packet)
         } catch  {
             debugPrint("[session] parsing error \(error)")
         }
     }
     
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        debugPrint("[session] change state of \(peerID.displayName) to \(state.rawValue)")
+        switch state {
+        case .connecting:
+            debugPrint("[session] connecting to \(peerID.displayName)")
+            return
+        case .notConnected:
+            peers.removeValue(forKey: peerID)
+            debugPrint("[session] disconnected from \(peerID.displayName)")
+            return
+        case .connected:
+            debugPrint("[session] connected to \(peerID.displayName)")
+            break
+        default:
+            debugPrint("[session] unknown state transition for \(peerID.displayName)")
+            return
+        }
+        
+        let hello = Hello.with({ (hello) in
+            hello.rateLimit = RATE_LIMIT
+        })
+        
+        do {
+            let data = try hello.serializedData()
+            try session.send(data, toPeers: [ peerID ], with: .reliable)
+        } catch {
+            debugPrint("[session] failed to send hello to \(peerID.displayName) due to error \(error)")
+        }
+        
+        peers[peerID] = Peer(peerID: peerID, rateLimit: RATE_LIMIT)
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
-        debugPrint("[session] received from \(peerID.displayName) stream")
+        debugPrint("[session] received from \(peerID.displayName) stream, closing immediately")
+        stream.close()
     }
     
     func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
-        debugPrint("[session] received from \(peerID.displayName) resource \(resourceName)")
+        debugPrint("[session] received from \(peerID.displayName) resource \(resourceName), cancelling")
+        progress.cancel()
     }
     
     func session(_ session: MCSession, didReceiveCertificate certificate: [Any]?, fromPeer peerID: MCPeerID, certificateHandler: @escaping (Bool) -> Void) {

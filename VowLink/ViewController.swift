@@ -9,8 +9,6 @@
 import UIKit
 
 class ViewController: UIViewController {
-    var p2p: PeerToPeer = PeerToPeer(serviceType: "com-vowlink")
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -18,7 +16,7 @@ class ViewController: UIViewController {
 
 
     @IBAction func buttonClicked(_ sender: Any) {
-        p2p.broadcast()
+        // let app = UIApplication.shared.delegate as! AppDelegate
     }
 }
 
