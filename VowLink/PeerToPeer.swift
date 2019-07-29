@@ -8,12 +8,15 @@
 
 import Foundation
 import MultipeerConnectivity
+import KeychainAccess
+import Sodium
 
 protocol PeerToPeerDelegate {
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Packet, fromPeer peer: Peer)
 }
 
 class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate {
+    let keychain = Keychain(service: "vowlink")
     var peer: MCPeerID!
     var advertiser: MCNearbyServiceAdvertiser!
     var browser: MCNearbyServiceBrowser!
@@ -21,21 +24,25 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     var delegate: PeerToPeerDelegate?
     var peers = [MCPeerID:Peer]()
     
+    static let PEER_ID_LENGTH: Int = 16;
     static let PROTOCOL_VERSION: Int32 = 1
     static let RATE_LIMIT: Int32 = 1000
     
     init(serviceType: String) {
         super.init()
         
-        let defaults = UserDefaults.standard
-        if let raw_peer = defaults.data(forKey: "peer-id") {
+        if let raw_peer = try? keychain.getData("peer-id") {
             peer = try! NSKeyedUnarchiver.unarchivedObject(ofClass: MCPeerID.self, from: raw_peer)
         } else {
-            peer = MCPeerID(displayName: NSUUID().uuidString)
+            let sodium = Sodium()
+            
+            let rawId = sodium.randomBytes.buf(length: PeerToPeer.PEER_ID_LENGTH)!
+            let displayName = sodium.utils.bin2hex(rawId)!
+            
+            peer = MCPeerID(displayName: displayName)
             let data = try! NSKeyedArchiver.archivedData(withRootObject: peer as Any,
                                                          requiringSecureCoding: true)
-            defaults.set(data, forKey: "peer-id")
-            defaults.synchronize()
+            try? keychain.set(data, key: "peer-id")
         }
         debugPrint("[p2p] start peer.displayName=\(peer.displayName)")
         
