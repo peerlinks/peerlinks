@@ -11,16 +11,16 @@ import Sodium
 import KeychainAccess
 
 class Identity {
-    var sodium: Sodium!
-    var keychain: Keychain!
-
+    var context: Context!
+    
     var links: [Link] = []
     private var secretKey: Bytes!
     var publicKey: Bytes!
     
-    init(sodium: Sodium, keychain: Keychain, identity: String) {
-        self.sodium = sodium
-        self.keychain = keychain
+    init(context: Context, identity: String) {
+        self.context = context
+        
+        let keychain = self.context.keychain
         
         if let secretKey = try? keychain.getData(identity + "/secret_key"),
            let publicKey = try? keychain.getData(identity + "/public_key") {
@@ -30,7 +30,7 @@ class Identity {
             self.publicKey = Bytes(publicKey)
         } else {
             debugPrint("[link-storage] generating new keypair for \(identity)")
-            let keyPair = sodium.sign.keyPair()!
+            let keyPair = self.context.sodium.sign.keyPair()!
             self.secretKey = keyPair.secretKey
             self.publicKey = keyPair.publicKey
             
@@ -46,5 +46,9 @@ class Identity {
             let linkArray = try! LinkArray(serializedData: data)
             links = linkArray.links
         }
+    }
+    
+    deinit {
+        self.context.sodium.utils.zero(&secretKey)
     }
 }
