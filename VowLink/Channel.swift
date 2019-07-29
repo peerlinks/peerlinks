@@ -10,8 +10,7 @@ import Foundation
 import Sodium
 
 class Channel {
-    let sodium = Sodium()
-    
+    var sodium: Sodium!
     var publicKey: Bytes!
     var secretKey: Bytes?
     
@@ -30,17 +29,23 @@ class Channel {
     
     static let CHANNEL_ID_LENGTH = 32
     
-    init() {
+    init(sodium: Sodium) {
+        self.sodium = sodium
+
         let keyPair = sodium.sign.keyPair()!
         publicKey = keyPair.publicKey
         secretKey = keyPair.secretKey
     }
     
-    init(publicKey: Bytes) {
+    init(sodium: Sodium, publicKey: Bytes) {
+        self.sodium = sodium
+
         self.publicKey = publicKey
     }
     
-    init(publicKey: Bytes, secretKey: Bytes) {
+    init(sodium: Sodium, publicKey: Bytes, secretKey: Bytes) {
+        self.sodium = sodium
+
         self.publicKey = publicKey
         self.secretKey = secretKey
     }

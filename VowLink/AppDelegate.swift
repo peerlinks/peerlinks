@@ -8,13 +8,20 @@
 
 import UIKit
 import CoreData
+import KeychainAccess
+import Sodium
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
-    var p2p = PeerToPeer(serviceType: "com-vowlink")
+    let sodium = Sodium()
+    let keychain = Keychain(service: "com.indutny.vowlink")
+        .synchronizable(true)
+
+    var p2p: PeerToPeer!
     var window: UIWindow?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        p2p = PeerToPeer(keychain: keychain, sodium: sodium, serviceType: "com-vowlink")
         p2p.delegate = self
         return true
     }

@@ -16,7 +16,6 @@ protocol PeerToPeerDelegate {
 }
 
 class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate {
-    let keychain = Keychain(service: "vowlink")
     var peer: MCPeerID!
     var advertiser: MCNearbyServiceAdvertiser!
     var browser: MCNearbyServiceBrowser!
@@ -28,14 +27,12 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     static let PROTOCOL_VERSION: Int32 = 1
     static let RATE_LIMIT: Int32 = 1000
     
-    init(serviceType: String) {
+    init(keychain: Keychain, sodium: Sodium, serviceType: String) {
         super.init()
         
         if let raw_peer = try? keychain.getData("peer-id") {
             peer = try! NSKeyedUnarchiver.unarchivedObject(ofClass: MCPeerID.self, from: raw_peer)
-        } else {
-            let sodium = Sodium()
-            
+        } else {           
             let rawId = sodium.randomBytes.buf(length: PeerToPeer.PEER_ID_LENGTH)!
             let displayName = sodium.utils.bin2hex(rawId)!
             
