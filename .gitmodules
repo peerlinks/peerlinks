@@ -1,0 +1,6 @@
+[submodule "deps/Sodium"]
+	path = deps/Sodium
+	url = git@github.com:jedisct1/swift-sodium.git
+[submodule "deps/SwiftProtobuf"]
+	path = deps/SwiftProtobuf
+	url = git@github.com:apple/swift-protobuf.git

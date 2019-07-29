@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+message Hello {
+  int32 version = 1;
+  bytes peer_id = 2; // 32-byte value
+  int32 rate_limit = 3; // maximum number of messages per hour
+}
+
+message EncryptedMessage {
+  message TBS {
+    bytes channel_id = 1;
+    bytes encrypted_content = 3;
+  }
+
+  TBS tbs = 1;
+}
+
+message Link {
+  message TBS {
+    bytes trustee_pub_key = 1;
+    double expiration = 2;
+    string display_name = 3;
+  }
+
+  TBS tbs = 1;
+  bytes signature = 2;
+}
+
+message LinkRequest {
+  bytes trustee_pub_key = 1;
+  string desired_display_name = 2;
+}
+
+message Message {
+  message TBS {
+    repeated Link chain = 1;
+    string content = 2; // JSON
+  }
+
+  TBS tbs = 1;
+  bytes signature = 2;
+}
