@@ -2,7 +2,6 @@ syntax = "proto3";
 
 message Hello {
   int32 version = 1;
-  bytes peer_id = 2; // 32-byte value
   int32 rate_limit = 3; // maximum number of messages per hour
 }
 

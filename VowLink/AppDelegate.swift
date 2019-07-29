@@ -10,12 +10,12 @@ import UIKit
 import CoreData
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
     var p2p = PeerToPeer(serviceType: "com-vowlink")
     var window: UIWindow?
-
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        p2p.delegate = self
         return true
     }
 
@@ -88,5 +88,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
+    // MARK: Peer to Peer
+    func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Packet, fromPeer peer: Peer) {
+        debugPrint("[app] got packet \(packet) from peer \(peer)")
+    }
 }
 

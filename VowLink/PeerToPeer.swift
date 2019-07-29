@@ -9,10 +9,8 @@
 import Foundation
 import MultipeerConnectivity
 
-let RATE_LIMIT: Int32 = 1000
-
 protocol PeerToPeerDelegate {
-    func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Packet)
+    func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Packet, fromPeer peer: Peer)
 }
 
 class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate {
@@ -22,6 +20,9 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     var session: MCSession!
     var delegate: PeerToPeerDelegate?
     var peers = [MCPeerID:Peer]()
+    
+    static let PROTOCOL_VERSION: Int32 = 1
+    static let RATE_LIMIT: Int32 = 1000
     
     init(serviceType: String) {
         super.init()
@@ -106,7 +107,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         
             debugPrint("[session] packet \(packet)")
             
-            delegate?.peerToPeer(self, didReceive: packet)
+            delegate?.peerToPeer(self, didReceive: packet, fromPeer: peer)
         } catch  {
             debugPrint("[session] parsing error \(error)")
         }
@@ -130,7 +131,8 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         }
         
         let hello = Hello.with({ (hello) in
-            hello.rateLimit = RATE_LIMIT
+            hello.version = PeerToPeer.PROTOCOL_VERSION
+            hello.rateLimit = PeerToPeer.RATE_LIMIT
         })
         
         do {
@@ -140,7 +142,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
             debugPrint("[session] failed to send hello to \(peerID.displayName) due to error \(error)")
         }
         
-        peers[peerID] = Peer(peerID: peerID, rateLimit: RATE_LIMIT)
+        peers[peerID] = Peer(session: session, peerID: peerID, rateLimit: PeerToPeer.RATE_LIMIT)
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {

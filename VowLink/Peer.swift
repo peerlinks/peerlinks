@@ -9,25 +9,37 @@
 import Foundation
 import MultipeerConnectivity
 
+enum PeerError: Error {
+    case invalidVersion(Int32)
+}
+
 class Peer: NSObject {
+    var session: MCSession!
     var peerID: MCPeerID!
     var incoming: RateLimiter!
     var outgoing: RateLimiter?
     var hello: Hello?
     
-    init(peerID: MCPeerID, rateLimit: Int32) {
+    init(session: MCSession, peerID: MCPeerID, rateLimit: Int32) {
         super.init()
         
+        self.session = session
         self.peerID = peerID
         incoming = RateLimiter(limit: rateLimit)
     }
     
     func receivePacket(data: Data) throws -> Packet? {
         if hello == nil {
-            hello = try Hello(serializedData: data)
+            let hello = try Hello(serializedData: data)
             
-            debugPrint("[peer] id=\(peerID.displayName) got hello \(hello!)")
-            outgoing = RateLimiter(limit: hello!.rateLimit)
+            if hello.version != PeerToPeer.PROTOCOL_VERSION {
+                debugPrint("[peer] id=\(peerID.displayName) got hello \(hello)")
+                throw PeerError.invalidVersion(hello.version)
+            }
+            
+            debugPrint("[peer] id=\(peerID.displayName) got hello \(hello)")
+            outgoing = RateLimiter(limit: hello.rateLimit)
+            self.hello = hello
             return nil
         }
         
@@ -38,7 +50,12 @@ class Peer: NSObject {
         return try Packet(serializedData: data)
     }
     
-    func sendPacket(data: Data) -> Bool {
-        return outgoing?.takeOne() ?? false
+    func sendPacket(data: Data) throws -> Bool {
+        if !(outgoing?.takeOne() ?? false) {
+            return false
+        }
+
+        try session.send(data, toPeers: [ self.peerID ], with: .reliable)
+        return true
     }
 }
