@@ -66,7 +66,13 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     }
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
-        debugPrint("[advertiser] received invitation from \(peerID.displayName)")
+        if peers[peerID] != nil || peerID == self.peer {
+            debugPrint("[advertiser] declining invitation from \(peerID.displayName)")
+            invitationHandler(false, session)
+            return
+        }
+        
+        debugPrint("[advertiser] accepting invitation from \(peerID.displayName)")
         invitationHandler(true, session)
     }
     
@@ -83,6 +89,10 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
         debugPrint("[browser] found peer \(peerID.displayName) with info \(String(describing: info))")
+        if peers[peerID] != nil || peerID == self.peer {
+            debugPrint("[browser] ignoring peer \(peerID.displayName)")
+            return
+        }
         
         if peerID.displayName > peer.displayName {
             debugPrint("[browser] inviting peer \(peerID.displayName) into session")
