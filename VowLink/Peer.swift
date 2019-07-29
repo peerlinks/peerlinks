@@ -9,38 +9,36 @@
 import Foundation
 import MultipeerConnectivity
 
-let ONE_HOUR = 3600.0
-
 class Peer: NSObject {
     var peerID: MCPeerID!
-    var rateLimit: Int32!
-    var requestsLeft: Int32 = 0
-    var replenishTimer: Timer?
+    var incoming: RateLimiter!
+    var outgoing: RateLimiter?
+    var hello: Hello?
     
     init(peerID: MCPeerID, rateLimit: Int32) {
         super.init()
         
         self.peerID = peerID
-        self.rateLimit = rateLimit
-        requestsLeft = rateLimit
+        incoming = RateLimiter(limit: rateLimit)
     }
     
-    func acceptPacket() -> Bool {
-        if requestsLeft == 0 {
-            return false
+    func receivePacket(data: Data) throws -> Packet? {
+        if hello == nil {
+            hello = try Hello(serializedData: data)
+            
+            debugPrint("[peer] id=\(peerID.displayName) got hello \(hello!)")
+            outgoing = RateLimiter(limit: hello!.rateLimit)
+            return nil
         }
         
-        requestsLeft -= 1
-        debugPrint("[peer] id=\(peerID.displayName) requests left=\(requestsLeft)")
-        
-        if replenishTimer == nil {
-            replenishTimer = Timer.scheduledTimer(withTimeInterval: ONE_HOUR, repeats: false, block: { _ in
-                debugPrint("[peer] id=\(self.peerID.displayName) replenish rate limit")
-                self.requestsLeft = self.rateLimit
-                self.replenishTimer = nil
-            })
+        if !incoming.takeOne() {
+            return nil
         }
         
-        return true
+        return try Packet(serializedData: data)
+    }
+    
+    func sendPacket(data: Data) -> Bool {
+        return outgoing?.takeOne() ?? false
     }
 }

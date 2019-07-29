@@ -98,13 +98,12 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
             return
         }
 
-        if !peer.acceptPacket() {
-            debugPrint("[session] reached rate limit")
-            return
-        }
-        
         do {
-            let packet = try Packet(serializedData: data)
+            guard let packet = try peer.receivePacket(data: data) else {
+                debugPrint("[session] reached rate limit or hello packet")
+                return
+            }
+        
             debugPrint("[session] packet \(packet)")
             
             delegate?.peerToPeer(self, didReceive: packet)
