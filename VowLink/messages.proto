@@ -45,10 +45,15 @@ message Subscribe {
   bytes channel_id = 1;
 }
 
+message Unsubscribe {
+  bytes channel_id = 1;
+}
+
 message Packet {
   oneof content {
     Hello hello = 1;
     EncryptedMessage msg = 2;
     Subscribe subscribe = 3;
+    Unsubscribe unsubscribe = 4;
   }
 }

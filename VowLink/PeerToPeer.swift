@@ -50,9 +50,15 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     // MARK: Public API
 
-    func broadcast(message: String) {
-        let data = message.data(using: .utf8)
-        try! session.send(data!, toPeers: session.connectedPeers, with: .unreliable)
+    func broadcast() {
+        let packet = Packet.with { (packet) in
+            packet.hello = Hello.with({ hello in
+                hello.rateLimit = 10
+            })
+        }
+        
+        // TODO(indutny): exceptions
+        try! session.send(try! packet.serializedData(), toPeers: session.connectedPeers, with: .unreliable)
     }
     
     // MARK: Advertiser
@@ -91,6 +97,12 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         debugPrint("[session] received from \(peerID.displayName) data \(data)")
+        do {
+            let packet = try Packet(serializedData: data)
+            debugPrint("[session] packet \(packet)")
+        } catch  {
+            debugPrint("[session] parsing error \(error)")
+        }
     }
     
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {

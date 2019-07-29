@@ -16,9 +16,9 @@
 		4D23EDEB22EECBE5003A9C20 /* VowLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EDEA22EECBE5003A9C20 /* VowLinkTests.swift */; };
 		4D23EDF622EECBE5003A9C20 /* VowLinkUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EDF522EECBE5003A9C20 /* VowLinkUITests.swift */; };
 		4D23EE0422EECBFD003A9C20 /* PeerToPeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EE0322EECBFD003A9C20 /* PeerToPeer.swift */; };
-		4D23EE2B22EF1DD1003A9C20 /* Sodium.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE1B22EF1DC1003A9C20 /* Sodium.framework */; };
 		4D23EE2D22EF1EBC003A9C20 /* messages.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EE2C22EF1EBC003A9C20 /* messages.pb.swift */; };
-		4D23EE4622EF1F28003A9C20 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE3D22EF1F20003A9C20 /* SwiftProtobuf.framework */; };
+		4D23EE4F22EF28A0003A9C20 /* Sodium.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE4D22EF28A0003A9C20 /* Sodium.framework */; };
+		4D23EE5022EF28A0003A9C20 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE4E22EF28A0003A9C20 /* SwiftProtobuf.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,111 +35,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 4D23EDCE22EECBE4003A9C20;
 			remoteInfo = VowLink;
-		};
-		4D23EE1A22EF1DC1003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE0F22EF1DC1003A9C20 /* Sodium.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 09A943C71A4EB5F500C8A04F;
-			remoteInfo = Sodium_iOS;
-		};
-		4D23EE1C22EF1DC1003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE0F22EF1DC1003A9C20 /* Sodium.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 09A943D21A4EB5F500C8A04F;
-			remoteInfo = SodiumTests;
-		};
-		4D23EE1E22EF1DC1003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE0F22EF1DC1003A9C20 /* Sodium.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 90C75E941AE3571900F1E749;
-			remoteInfo = Sodium_OSX;
-		};
-		4D23EE2022EF1DC1003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE0F22EF1DC1003A9C20 /* Sodium.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D891FE9421642CB40092AA84;
-			remoteInfo = Sodium_watchOS;
-		};
-		4D23EE2222EF1DC1003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE0F22EF1DC1003A9C20 /* Sodium.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 901644B61AE36EA700163E3E;
-			remoteInfo = "Example iOS";
-		};
-		4D23EE2422EF1DC1003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE0F22EF1DC1003A9C20 /* Sodium.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 901644DC1AE36F2D00163E3E;
-			remoteInfo = "Example OSX";
-		};
-		4D23EE2622EF1DC1003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE0F22EF1DC1003A9C20 /* Sodium.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D87D515521647597006D2C03;
-			remoteInfo = "Example Watch";
-		};
-		4D23EE2822EF1DC1003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE0F22EF1DC1003A9C20 /* Sodium.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D87D516121647598006D2C03;
-			remoteInfo = "Example Watch Extension";
-		};
-		4D23EE3822EF1F20003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE2E22EF1F20003A9C20 /* SwiftProtobuf.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = "_____Product_Protobuf_macOS";
-			remoteInfo = SwiftProtobuf_macOS;
-		};
-		4D23EE3A22EF1F20003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE2E22EF1F20003A9C20 /* SwiftProtobuf.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = "_____Product_ProtobufTestSuite_macOS";
-			remoteInfo = SwiftProtobufTestSuite_macOS;
-		};
-		4D23EE3C22EF1F20003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE2E22EF1F20003A9C20 /* SwiftProtobuf.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = "_____Product_Protobuf_iOS";
-			remoteInfo = SwiftProtobuf_iOS;
-		};
-		4D23EE3E22EF1F20003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE2E22EF1F20003A9C20 /* SwiftProtobuf.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = "_____Product_ProtobufTestSuite_iOS";
-			remoteInfo = SwiftProtobufTestSuite_iOS;
-		};
-		4D23EE4022EF1F20003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE2E22EF1F20003A9C20 /* SwiftProtobuf.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F44F936F1DAEA53900BC5B85;
-			remoteInfo = SwiftProtobuf_tvOS;
-		};
-		4D23EE4222EF1F20003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE2E22EF1F20003A9C20 /* SwiftProtobuf.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F44F939F1DAEA7C500BC5B85;
-			remoteInfo = SwiftProtobufTestSuite_tvOS;
-		};
-		4D23EE4422EF1F20003A9C20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D23EE2E22EF1F20003A9C20 /* SwiftProtobuf.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F44F93FE1DAEB13F00BC5B85;
-			remoteInfo = SwiftProtobuf_watchOS;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -171,9 +66,9 @@
 		4D23EDF522EECBE5003A9C20 /* VowLinkUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VowLinkUITests.swift; sourceTree = "<group>"; };
 		4D23EDF722EECBE5003A9C20 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4D23EE0322EECBFD003A9C20 /* PeerToPeer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerToPeer.swift; sourceTree = "<group>"; };
-		4D23EE0F22EF1DC1003A9C20 /* Sodium.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Sodium.xcodeproj; path = deps/Sodium/Sodium.xcodeproj; sourceTree = SOURCE_ROOT; };
 		4D23EE2C22EF1EBC003A9C20 /* messages.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = messages.pb.swift; sourceTree = "<group>"; };
-		4D23EE2E22EF1F20003A9C20 /* SwiftProtobuf.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SwiftProtobuf.xcodeproj; path = deps/SwiftProtobuf/SwiftProtobuf.xcodeproj; sourceTree = SOURCE_ROOT; };
+		4D23EE4D22EF28A0003A9C20 /* Sodium.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sodium.framework; path = Carthage/Build/iOS/Sodium.framework; sourceTree = SOURCE_ROOT; };
+		4D23EE4E22EF28A0003A9C20 /* SwiftProtobuf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftProtobuf.framework; path = Carthage/Build/iOS/SwiftProtobuf.framework; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -181,8 +76,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D23EE4622EF1F28003A9C20 /* SwiftProtobuf.framework in Frameworks */,
-				4D23EE2B22EF1DD1003A9C20 /* Sodium.framework in Frameworks */,
+				4D23EE4F22EF28A0003A9C20 /* Sodium.framework in Frameworks */,
+				4D23EE5022EF28A0003A9C20 /* SwiftProtobuf.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,8 +122,8 @@
 		4D23EDD122EECBE4003A9C20 /* VowLink */ = {
 			isa = PBXGroup;
 			children = (
-				4D23EE2E22EF1F20003A9C20 /* SwiftProtobuf.xcodeproj */,
-				4D23EE0F22EF1DC1003A9C20 /* Sodium.xcodeproj */,
+				4D23EE4D22EF28A0003A9C20 /* Sodium.framework */,
+				4D23EE4E22EF28A0003A9C20 /* SwiftProtobuf.framework */,
 				4D23EE2C22EF1EBC003A9C20 /* messages.pb.swift */,
 				4D23EDD222EECBE4003A9C20 /* AppDelegate.swift */,
 				4D23EDD422EECBE4003A9C20 /* ViewController.swift */,
@@ -260,40 +155,11 @@
 			path = VowLinkUITests;
 			sourceTree = "<group>";
 		};
-		4D23EE1022EF1DC1003A9C20 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				4D23EE1B22EF1DC1003A9C20 /* Sodium.framework */,
-				4D23EE1D22EF1DC1003A9C20 /* SodiumTests.xctest */,
-				4D23EE1F22EF1DC1003A9C20 /* Sodium.framework */,
-				4D23EE2122EF1DC1003A9C20 /* Sodium.framework */,
-				4D23EE2322EF1DC1003A9C20 /* Example iOS.app */,
-				4D23EE2522EF1DC1003A9C20 /* Example OSX.app */,
-				4D23EE2722EF1DC1003A9C20 /* Example Watch.app */,
-				4D23EE2922EF1DC1003A9C20 /* Example Watch Extension.appex */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		4D23EE2A22EF1DD1003A9C20 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		4D23EE2F22EF1F20003A9C20 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				4D23EE3922EF1F20003A9C20 /* SwiftProtobuf.framework */,
-				4D23EE3B22EF1F20003A9C20 /* SwiftProtobufTests.xctest */,
-				4D23EE3D22EF1F20003A9C20 /* SwiftProtobuf.framework */,
-				4D23EE3F22EF1F20003A9C20 /* SwiftProtobufTests.xctest */,
-				4D23EE4122EF1F20003A9C20 /* SwiftProtobuf.framework */,
-				4D23EE4322EF1F20003A9C20 /* SwiftProtobufTests.xctest */,
-				4D23EE4522EF1F20003A9C20 /* SwiftProtobuf.framework */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -387,16 +253,6 @@
 			mainGroup = 4D23EDC622EECBE4003A9C20;
 			productRefGroup = 4D23EDD022EECBE4003A9C20 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 4D23EE1022EF1DC1003A9C20 /* Products */;
-					ProjectRef = 4D23EE0F22EF1DC1003A9C20 /* Sodium.xcodeproj */;
-				},
-				{
-					ProductGroup = 4D23EE2F22EF1F20003A9C20 /* Products */;
-					ProjectRef = 4D23EE2E22EF1F20003A9C20 /* SwiftProtobuf.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				4D23EDCE22EECBE4003A9C20 /* VowLink */,
@@ -405,114 +261,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		4D23EE1B22EF1DC1003A9C20 /* Sodium.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Sodium.framework;
-			remoteRef = 4D23EE1A22EF1DC1003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE1D22EF1DC1003A9C20 /* SodiumTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = SodiumTests.xctest;
-			remoteRef = 4D23EE1C22EF1DC1003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE1F22EF1DC1003A9C20 /* Sodium.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Sodium.framework;
-			remoteRef = 4D23EE1E22EF1DC1003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE2122EF1DC1003A9C20 /* Sodium.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Sodium.framework;
-			remoteRef = 4D23EE2022EF1DC1003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE2322EF1DC1003A9C20 /* Example iOS.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = "Example iOS.app";
-			remoteRef = 4D23EE2222EF1DC1003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE2522EF1DC1003A9C20 /* Example OSX.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = "Example OSX.app";
-			remoteRef = 4D23EE2422EF1DC1003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE2722EF1DC1003A9C20 /* Example Watch.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = "Example Watch.app";
-			remoteRef = 4D23EE2622EF1DC1003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE2922EF1DC1003A9C20 /* Example Watch Extension.appex */ = {
-			isa = PBXReferenceProxy;
-			fileType = "wrapper.app-extension";
-			path = "Example Watch Extension.appex";
-			remoteRef = 4D23EE2822EF1DC1003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE3922EF1F20003A9C20 /* SwiftProtobuf.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = SwiftProtobuf.framework;
-			remoteRef = 4D23EE3822EF1F20003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE3B22EF1F20003A9C20 /* SwiftProtobufTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = SwiftProtobufTests.xctest;
-			remoteRef = 4D23EE3A22EF1F20003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE3D22EF1F20003A9C20 /* SwiftProtobuf.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = SwiftProtobuf.framework;
-			remoteRef = 4D23EE3C22EF1F20003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE3F22EF1F20003A9C20 /* SwiftProtobufTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = SwiftProtobufTests.xctest;
-			remoteRef = 4D23EE3E22EF1F20003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE4122EF1F20003A9C20 /* SwiftProtobuf.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = SwiftProtobuf.framework;
-			remoteRef = 4D23EE4022EF1F20003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE4322EF1F20003A9C20 /* SwiftProtobufTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = SwiftProtobufTests.xctest;
-			remoteRef = 4D23EE4222EF1F20003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D23EE4522EF1F20003A9C20 /* SwiftProtobuf.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = SwiftProtobuf.framework;
-			remoteRef = 4D23EE4422EF1F20003A9C20 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		4D23EDCD22EECBE4003A9C20 /* Resources */ = {
@@ -729,7 +477,7 @@
 				DEVELOPMENT_TEAM = VHWE95VV4E;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/deps",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
 				INFOPLIST_FILE = VowLink/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -738,10 +486,11 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/deps",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.indutny.VowLink;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(PROJECT_DIR)/Carthage/Build/iOS";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -755,7 +504,7 @@
 				DEVELOPMENT_TEAM = VHWE95VV4E;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/deps",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
 				INFOPLIST_FILE = VowLink/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -764,10 +513,11 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/deps",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.indutny.VowLink;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(PROJECT_DIR)/Carthage/Build/iOS";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

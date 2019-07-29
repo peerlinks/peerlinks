@@ -1,0 +1,2 @@
+github "apple/swift-protobuf" ~> 1.0
+# github "jedisct1/swift-sodium" ~> 0.8

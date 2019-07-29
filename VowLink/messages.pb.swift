@@ -181,6 +181,18 @@ struct Subscribe {
   init() {}
 }
 
+struct Unsubscribe {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var channelID: Data = SwiftProtobuf.Internal.emptyData
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 struct Packet {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -215,12 +227,21 @@ struct Packet {
     set {_uniqueStorage()._content = .subscribe(newValue)}
   }
 
+  var unsubscribe: Unsubscribe {
+    get {
+      if case .unsubscribe(let v)? = _storage._content {return v}
+      return Unsubscribe()
+    }
+    set {_uniqueStorage()._content = .unsubscribe(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Content: Equatable {
     case hello(Hello)
     case msg(EncryptedMessage)
     case subscribe(Subscribe)
+    case unsubscribe(Unsubscribe)
 
   #if !swift(>=4.1)
     static func ==(lhs: Packet.OneOf_Content, rhs: Packet.OneOf_Content) -> Bool {
@@ -228,6 +249,7 @@ struct Packet {
       case (.hello(let l), .hello(let r)): return l == r
       case (.msg(let l), .msg(let r)): return l == r
       case (.subscribe(let l), .subscribe(let r)): return l == r
+      case (.unsubscribe(let l), .unsubscribe(let r)): return l == r
       default: return false
       }
     }
@@ -656,12 +678,42 @@ extension Subscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
   }
 }
 
+extension Unsubscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = "Unsubscribe"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "channel_id"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.channelID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.channelID, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Unsubscribe, rhs: Unsubscribe) -> Bool {
+    if lhs.channelID != rhs.channelID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = "Packet"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "hello"),
     2: .same(proto: "msg"),
     3: .same(proto: "subscribe"),
+    4: .same(proto: "unsubscribe"),
   ]
 
   fileprivate class _StorageClass {
@@ -712,6 +764,14 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
           }
           try decoder.decodeSingularMessageField(value: &v)
           if let v = v {_storage._content = .subscribe(v)}
+        case 4:
+          var v: Unsubscribe?
+          if let current = _storage._content {
+            try decoder.handleConflictingOneOf()
+            if case .unsubscribe(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {_storage._content = .unsubscribe(v)}
         default: break
         }
       }
@@ -727,6 +787,8 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
         try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
       case .subscribe(let v)?:
         try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      case .unsubscribe(let v)?:
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
       case nil: break
       }
     }
