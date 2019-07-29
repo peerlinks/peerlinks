@@ -10,9 +10,9 @@ import Foundation
 import Sodium
 
 class Channel {
-    var sodium: Sodium!
+    var context: Context!
     var publicKey: Bytes!
-    var secretKey: Bytes?
+    private var secretKey: Bytes?
     
     private var lazyChannelID: Bytes?
     var channelID: Bytes {
@@ -20,33 +20,39 @@ class Channel {
             if let id = lazyChannelID {
                 return id
             }
-            lazyChannelID = sodium.genericHash.hash(message: publicKey,
-                                                    key: "vowlink-channel-id".bytes,
-                                                    outputLength: Channel.CHANNEL_ID_LENGTH)
+            lazyChannelID = self.context.sodium.genericHash.hash(message: publicKey,
+                                                                 key: "vowlink-channel-id".bytes,
+                                                                 outputLength:  Channel.CHANNEL_ID_LENGTH)
             return lazyChannelID!
         }
     }
     
     static let CHANNEL_ID_LENGTH = 32
     
-    init(sodium: Sodium) {
-        self.sodium = sodium
+    init(context: Context) {
+        self.context = context
 
-        let keyPair = sodium.sign.keyPair()!
+        let keyPair = self.context.sodium.sign.keyPair()!
         publicKey = keyPair.publicKey
         secretKey = keyPair.secretKey
     }
     
-    init(sodium: Sodium, publicKey: Bytes) {
-        self.sodium = sodium
+    init(context: Context, publicKey: Bytes) {
+        self.context = context
 
         self.publicKey = publicKey
     }
     
-    init(sodium: Sodium, publicKey: Bytes, secretKey: Bytes) {
-        self.sodium = sodium
+    init(context: Context, publicKey: Bytes, secretKey: Bytes) {
+        self.context = context
 
         self.publicKey = publicKey
         self.secretKey = secretKey
+    }
+    
+    deinit {
+        if var secretKey = self.secretKey {
+            self.context.sodium.utils.zero(&secretKey)
+        }
     }
 }

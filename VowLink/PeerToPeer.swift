@@ -16,6 +16,7 @@ protocol PeerToPeerDelegate {
 }
 
 class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate {
+    var context: Context!
     var peer: MCPeerID!
     var advertiser: MCNearbyServiceAdvertiser!
     var browser: MCNearbyServiceBrowser!
@@ -23,24 +24,22 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     var delegate: PeerToPeerDelegate?
     var peers = [MCPeerID:Peer]()
     
-    static let PEER_ID_LENGTH: Int = 16;
-    static let PROTOCOL_VERSION: Int32 = 1
-    static let RATE_LIMIT: Int32 = 1000
-    
-    init(keychain: Keychain, sodium: Sodium, serviceType: String) {
+    init(context: Context, serviceType: String) {
         super.init()
         
-        if let raw_peer = try? keychain.getData("peer-id") {
+        self.context = context
+        
+        let defaults = UserDefaults.standard
+        if let raw_peer = defaults.data(forKey: "peer-id") {
             peer = try! NSKeyedUnarchiver.unarchivedObject(ofClass: MCPeerID.self, from: raw_peer)
-        } else {           
-            let rawId = sodium.randomBytes.buf(length: PeerToPeer.PEER_ID_LENGTH)!
-            let displayName = sodium.utils.bin2hex(rawId)!
-            
-            peer = MCPeerID(displayName: displayName)
+        } else {
+            peer = MCPeerID(displayName: NSUUID().uuidString)
             let data = try! NSKeyedArchiver.archivedData(withRootObject: peer as Any,
                                                          requiringSecureCoding: true)
-            try? keychain.set(data, key: "peer-id")
+            defaults.set(data, forKey: "peer-id")
+            defaults.synchronize()
         }
+        
         debugPrint("[p2p] start peer.displayName=\(peer.displayName)")
         
         session = MCSession(peer: peer, securityIdentity: nil, encryptionPreference: .required)
@@ -143,20 +142,13 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
             debugPrint("[session] unknown state transition for \(peerID.displayName)")
             return
         }
-        
-        let hello = Hello.with({ (hello) in
-            hello.version = PeerToPeer.PROTOCOL_VERSION
-            hello.rateLimit = PeerToPeer.RATE_LIMIT
-        })
-        
+        let peer = Peer(context: context, session: session, peerID: peerID)
         do {
-            let data = try hello.serializedData()
-            try session.send(data, toPeers: [ peerID ], with: .reliable)
+            try peer.sendHello()
+            peers[peerID] = peer
         } catch {
             debugPrint("[session] failed to send hello to \(peerID.displayName) due to error \(error)")
         }
-        
-        peers[peerID] = Peer(session: session, peerID: peerID, rateLimit: PeerToPeer.RATE_LIMIT)
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {

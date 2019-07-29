@@ -26,9 +26,6 @@ struct Hello {
 
   var version: Int32 = 0
 
-  /// 32-byte value
-  var peerID: Data = SwiftProtobuf.Internal.emptyData
-
   /// maximum number of messages per hour
   var rateLimit: Int32 = 0
 
@@ -128,6 +125,18 @@ struct LinkRequest {
   init() {}
 }
 
+struct LinkArray {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var links: [Link] = []
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 struct Message {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -154,14 +163,26 @@ struct Message {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var chain: [Link] = []
+    var chain: LinkArray {
+      get {return _storage._chain ?? LinkArray()}
+      set {_uniqueStorage()._chain = newValue}
+    }
+    /// Returns true if `chain` has been explicitly set.
+    var hasChain: Bool {return _storage._chain != nil}
+    /// Clears the value of `chain`. Subsequent reads from it will return its default value.
+    mutating func clearChain() {_uniqueStorage()._chain = nil}
 
     /// JSON
-    var content: String = String()
+    var content: String {
+      get {return _storage._content}
+      set {_uniqueStorage()._content = newValue}
+    }
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
+
+    fileprivate var _storage = _StorageClass.defaultInstance
   }
 
   init() {}
@@ -257,7 +278,6 @@ extension Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase
   static let protoMessageName: String = "Hello"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "version"),
-    2: .standard(proto: "peer_id"),
     3: .standard(proto: "rate_limit"),
   ]
 
@@ -265,7 +285,6 @@ extension Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
       case 1: try decoder.decodeSingularInt32Field(value: &self.version)
-      case 2: try decoder.decodeSingularBytesField(value: &self.peerID)
       case 3: try decoder.decodeSingularInt32Field(value: &self.rateLimit)
       default: break
       }
@@ -276,9 +295,6 @@ extension Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase
     if self.version != 0 {
       try visitor.visitSingularInt32Field(value: self.version, fieldNumber: 1)
     }
-    if !self.peerID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.peerID, fieldNumber: 2)
-    }
     if self.rateLimit != 0 {
       try visitor.visitSingularInt32Field(value: self.rateLimit, fieldNumber: 3)
     }
@@ -287,7 +303,6 @@ extension Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase
 
   static func ==(lhs: Hello, rhs: Hello) -> Bool {
     if lhs.version != rhs.version {return false}
-    if lhs.peerID != rhs.peerID {return false}
     if lhs.rateLimit != rhs.rateLimit {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -535,6 +550,35 @@ extension LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
   }
 }
 
+extension LinkArray: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = "LinkArray"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "links"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try decoder.decodeRepeatedMessageField(value: &self.links)
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.links.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.links, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: LinkArray, rhs: LinkArray) -> Bool {
+    if lhs.links != rhs.links {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 extension Message: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = "Message"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -611,29 +655,63 @@ extension Message.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
     2: .same(proto: "content"),
   ]
 
+  fileprivate class _StorageClass {
+    var _chain: LinkArray? = nil
+    var _content: String = String()
+
+    static let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _chain = source._chain
+      _content = source._content
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      switch fieldNumber {
-      case 1: try decoder.decodeRepeatedMessageField(value: &self.chain)
-      case 2: try decoder.decodeSingularStringField(value: &self.content)
-      default: break
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        switch fieldNumber {
+        case 1: try decoder.decodeSingularMessageField(value: &_storage._chain)
+        case 2: try decoder.decodeSingularStringField(value: &_storage._content)
+        default: break
+        }
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.chain.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.chain, fieldNumber: 1)
-    }
-    if !self.content.isEmpty {
-      try visitor.visitSingularStringField(value: self.content, fieldNumber: 2)
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      if let v = _storage._chain {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+      }
+      if !_storage._content.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._content, fieldNumber: 2)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Message.TBS, rhs: Message.TBS) -> Bool {
-    if lhs.chain != rhs.chain {return false}
-    if lhs.content != rhs.content {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._chain != rhs_storage._chain {return false}
+        if _storage._content != rhs_storage._content {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

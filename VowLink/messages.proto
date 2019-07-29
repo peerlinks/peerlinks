@@ -30,9 +30,13 @@ message LinkRequest {
   string desired_display_name = 2;
 }
 
+message LinkArray {
+  repeated Link links = 1;
+}
+
 message Message {
   message TBS {
-    repeated Link chain = 1;
+    LinkArray chain = 1;
     string content = 2; // JSON
   }
 

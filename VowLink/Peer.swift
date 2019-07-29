@@ -14,25 +14,30 @@ enum PeerError: Error {
 }
 
 class Peer: NSObject {
+    var context: Context!
     var session: MCSession!
     var peerID: MCPeerID!
     var incoming: RateLimiter!
     var outgoing: RateLimiter?
     var hello: Hello?
+
+    static let PROTOCOL_VERSION: Int32 = 1
+    static let RATE_LIMIT: Int32 = 1000
     
-    init(session: MCSession, peerID: MCPeerID, rateLimit: Int32) {
+    init(context: Context, session: MCSession, peerID: MCPeerID) {
         super.init()
         
+        self.context = context
         self.session = session
         self.peerID = peerID
-        incoming = RateLimiter(limit: rateLimit)
+        incoming = RateLimiter(limit: Peer.RATE_LIMIT)
     }
     
     func receivePacket(data: Data) throws -> Packet? {
         if hello == nil {
             let hello = try Hello(serializedData: data)
             
-            if hello.version != PeerToPeer.PROTOCOL_VERSION {
+            if hello.version != Peer.PROTOCOL_VERSION {
                 debugPrint("[peer] id=\(peerID.displayName) got hello \(hello)")
                 throw PeerError.invalidVersion(hello.version)
             }
@@ -48,6 +53,16 @@ class Peer: NSObject {
         }
         
         return try Packet(serializedData: data)
+    }
+    
+    func sendHello() throws {
+        let hello = Hello.with({ (hello) in
+            hello.version = Peer.PROTOCOL_VERSION
+            hello.rateLimit = Peer.RATE_LIMIT
+        })
+        
+        let data = try hello.serializedData()
+        try session.send(data, toPeers: [ peerID ], with: .reliable)
     }
     
     func sendPacket(data: Data) throws -> Bool {
