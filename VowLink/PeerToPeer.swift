@@ -11,10 +11,11 @@ import MultipeerConnectivity
 import Sodium
 
 class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate {
-    var peer: MCPeerID!;
-    var advertiser: MCNearbyServiceAdvertiser!;
-    var browser: MCNearbyServiceBrowser!;
-    var session: MCSession!;
+    var peer: MCPeerID!
+    var advertiser: MCNearbyServiceAdvertiser!
+    var browser: MCNearbyServiceBrowser!
+    var session: MCSession!
+    let sodium = Sodium()
     
     init(serviceType: String) {
         super.init()
@@ -36,7 +37,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         
         advertiser = MCNearbyServiceAdvertiser(peer: peer, discoveryInfo: nil, serviceType: serviceType)
         advertiser.delegate = self
-        advertiser.startAdvertisingPeer();
+        advertiser.startAdvertisingPeer()
         
         browser = MCNearbyServiceBrowser(peer: peer, serviceType: serviceType)
         browser.delegate = self
