@@ -1,4 +1,5 @@
 syntax = "proto3";
+package proto;
 
 //
 // Network
@@ -64,7 +65,7 @@ message Packet {
 // Storage
 //
 
-message SecretIdentity {
+message Identity {
   bytes publicKey = 1;
   bytes secretKey = 2;
   repeated Link links = 3;

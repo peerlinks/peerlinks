@@ -92,7 +92,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
     }
 
     // MARK: Peer to Peer
-    func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Packet, fromPeer peer: Peer) {
+    func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer) {
         debugPrint("[app] got packet \(packet) from peer \(peer)")
     }
 }

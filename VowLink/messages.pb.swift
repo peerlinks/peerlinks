@@ -19,7 +19,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-struct Hello {
+struct Proto_Hello {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -34,13 +34,13 @@ struct Hello {
   init() {}
 }
 
-struct EncryptedMessage {
+struct Proto_EncryptedMessage {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var tbs: EncryptedMessage.TBS {
-    get {return _storage._tbs ?? EncryptedMessage.TBS()}
+  var tbs: Proto_EncryptedMessage.TBS {
+    get {return _storage._tbs ?? Proto_EncryptedMessage.TBS()}
     set {_uniqueStorage()._tbs = newValue}
   }
   /// Returns true if `tbs` has been explicitly set.
@@ -69,13 +69,13 @@ struct EncryptedMessage {
   fileprivate var _storage = _StorageClass.defaultInstance
 }
 
-struct Link {
+struct Proto_Link {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var tbs: Link.TBS {
-    get {return _storage._tbs ?? Link.TBS()}
+  var tbs: Proto_Link.TBS {
+    get {return _storage._tbs ?? Proto_Link.TBS()}
     set {_uniqueStorage()._tbs = newValue}
   }
   /// Returns true if `tbs` has been explicitly set.
@@ -111,7 +111,7 @@ struct Link {
   fileprivate var _storage = _StorageClass.defaultInstance
 }
 
-struct LinkRequest {
+struct Proto_LinkRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -125,13 +125,13 @@ struct LinkRequest {
   init() {}
 }
 
-struct Message {
+struct Proto_Message {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var tbs: Message.TBS {
-    get {return _storage._tbs ?? Message.TBS()}
+  var tbs: Proto_Message.TBS {
+    get {return _storage._tbs ?? Proto_Message.TBS()}
     set {_uniqueStorage()._tbs = newValue}
   }
   /// Returns true if `tbs` has been explicitly set.
@@ -151,7 +151,7 @@ struct Message {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var chain: [Link] = []
+    var chain: [Proto_Link] = []
 
     /// JSON
     var content: String = String()
@@ -166,7 +166,7 @@ struct Message {
   fileprivate var _storage = _StorageClass.defaultInstance
 }
 
-struct Subscribe {
+struct Proto_Subscribe {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -178,7 +178,7 @@ struct Subscribe {
   init() {}
 }
 
-struct Unsubscribe {
+struct Proto_Unsubscribe {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -190,7 +190,7 @@ struct Unsubscribe {
   init() {}
 }
 
-struct Packet {
+struct Proto_Packet {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -200,26 +200,26 @@ struct Packet {
     set {_uniqueStorage()._content = newValue}
   }
 
-  var msg: EncryptedMessage {
+  var msg: Proto_EncryptedMessage {
     get {
       if case .msg(let v)? = _storage._content {return v}
-      return EncryptedMessage()
+      return Proto_EncryptedMessage()
     }
     set {_uniqueStorage()._content = .msg(newValue)}
   }
 
-  var subscribe: Subscribe {
+  var subscribe: Proto_Subscribe {
     get {
       if case .subscribe(let v)? = _storage._content {return v}
-      return Subscribe()
+      return Proto_Subscribe()
     }
     set {_uniqueStorage()._content = .subscribe(newValue)}
   }
 
-  var unsubscribe: Unsubscribe {
+  var unsubscribe: Proto_Unsubscribe {
     get {
       if case .unsubscribe(let v)? = _storage._content {return v}
-      return Unsubscribe()
+      return Proto_Unsubscribe()
     }
     set {_uniqueStorage()._content = .unsubscribe(newValue)}
   }
@@ -227,12 +227,12 @@ struct Packet {
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Content: Equatable {
-    case msg(EncryptedMessage)
-    case subscribe(Subscribe)
-    case unsubscribe(Unsubscribe)
+    case msg(Proto_EncryptedMessage)
+    case subscribe(Proto_Subscribe)
+    case unsubscribe(Proto_Unsubscribe)
 
   #if !swift(>=4.1)
-    static func ==(lhs: Packet.OneOf_Content, rhs: Packet.OneOf_Content) -> Bool {
+    static func ==(lhs: Proto_Packet.OneOf_Content, rhs: Proto_Packet.OneOf_Content) -> Bool {
       switch (lhs, rhs) {
       case (.msg(let l), .msg(let r)): return l == r
       case (.subscribe(let l), .subscribe(let r)): return l == r
@@ -248,7 +248,7 @@ struct Packet {
   fileprivate var _storage = _StorageClass.defaultInstance
 }
 
-struct SecretIdentity {
+struct Proto_Identity {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -257,7 +257,7 @@ struct SecretIdentity {
 
   var secretKey: Data = SwiftProtobuf.Internal.emptyData
 
-  var links: [Link] = []
+  var links: [Proto_Link] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -266,8 +266,10 @@ struct SecretIdentity {
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-extension Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = "Hello"
+fileprivate let _protobuf_package = "proto"
+
+extension Proto_Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Hello"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "version"),
     3: .standard(proto: "rate_limit"),
@@ -293,7 +295,7 @@ extension Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Hello, rhs: Hello) -> Bool {
+  static func ==(lhs: Proto_Hello, rhs: Proto_Hello) -> Bool {
     if lhs.version != rhs.version {return false}
     if lhs.rateLimit != rhs.rateLimit {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -301,14 +303,14 @@ extension Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase
   }
 }
 
-extension EncryptedMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = "EncryptedMessage"
+extension Proto_EncryptedMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".EncryptedMessage"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "tbs"),
   ]
 
   fileprivate class _StorageClass {
-    var _tbs: EncryptedMessage.TBS? = nil
+    var _tbs: Proto_EncryptedMessage.TBS? = nil
 
     static let defaultInstance = _StorageClass()
 
@@ -347,7 +349,7 @@ extension EncryptedMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: EncryptedMessage, rhs: EncryptedMessage) -> Bool {
+  static func ==(lhs: Proto_EncryptedMessage, rhs: Proto_EncryptedMessage) -> Bool {
     if lhs._storage !== rhs._storage {
       let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
         let _storage = _args.0
@@ -362,8 +364,8 @@ extension EncryptedMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
   }
 }
 
-extension EncryptedMessage.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = EncryptedMessage.protoMessageName + ".TBS"
+extension Proto_EncryptedMessage.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Proto_EncryptedMessage.protoMessageName + ".TBS"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "channel_id"),
     3: .standard(proto: "encrypted_content"),
@@ -389,7 +391,7 @@ extension EncryptedMessage.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: EncryptedMessage.TBS, rhs: EncryptedMessage.TBS) -> Bool {
+  static func ==(lhs: Proto_EncryptedMessage.TBS, rhs: Proto_EncryptedMessage.TBS) -> Bool {
     if lhs.channelID != rhs.channelID {return false}
     if lhs.encryptedContent != rhs.encryptedContent {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -397,15 +399,15 @@ extension EncryptedMessage.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
   }
 }
 
-extension Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = "Link"
+extension Proto_Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Link"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "tbs"),
     2: .same(proto: "signature"),
   ]
 
   fileprivate class _StorageClass {
-    var _tbs: Link.TBS? = nil
+    var _tbs: Proto_Link.TBS? = nil
     var _signature: Data = SwiftProtobuf.Internal.emptyData
 
     static let defaultInstance = _StorageClass()
@@ -450,7 +452,7 @@ extension Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Link, rhs: Link) -> Bool {
+  static func ==(lhs: Proto_Link, rhs: Proto_Link) -> Bool {
     if lhs._storage !== rhs._storage {
       let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
         let _storage = _args.0
@@ -466,8 +468,8 @@ extension Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
   }
 }
 
-extension Link.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Link.protoMessageName + ".TBS"
+extension Proto_Link.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Proto_Link.protoMessageName + ".TBS"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "trustee_pub_key"),
     2: .same(proto: "expiration"),
@@ -498,7 +500,7 @@ extension Link.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationB
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Link.TBS, rhs: Link.TBS) -> Bool {
+  static func ==(lhs: Proto_Link.TBS, rhs: Proto_Link.TBS) -> Bool {
     if lhs.trusteePubKey != rhs.trusteePubKey {return false}
     if lhs.expiration != rhs.expiration {return false}
     if lhs.displayName != rhs.displayName {return false}
@@ -507,8 +509,8 @@ extension Link.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationB
   }
 }
 
-extension LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = "LinkRequest"
+extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".LinkRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "trustee_pub_key"),
     2: .standard(proto: "desired_display_name"),
@@ -534,7 +536,7 @@ extension LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: LinkRequest, rhs: LinkRequest) -> Bool {
+  static func ==(lhs: Proto_LinkRequest, rhs: Proto_LinkRequest) -> Bool {
     if lhs.trusteePubKey != rhs.trusteePubKey {return false}
     if lhs.desiredDisplayName != rhs.desiredDisplayName {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -542,15 +544,15 @@ extension LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
   }
 }
 
-extension Message: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = "Message"
+extension Proto_Message: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Message"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "tbs"),
     2: .same(proto: "signature"),
   ]
 
   fileprivate class _StorageClass {
-    var _tbs: Message.TBS? = nil
+    var _tbs: Proto_Message.TBS? = nil
     var _signature: Data = SwiftProtobuf.Internal.emptyData
 
     static let defaultInstance = _StorageClass()
@@ -595,7 +597,7 @@ extension Message: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBa
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Message, rhs: Message) -> Bool {
+  static func ==(lhs: Proto_Message, rhs: Proto_Message) -> Bool {
     if lhs._storage !== rhs._storage {
       let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
         let _storage = _args.0
@@ -611,8 +613,8 @@ extension Message: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBa
   }
 }
 
-extension Message.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Message.protoMessageName + ".TBS"
+extension Proto_Message.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Proto_Message.protoMessageName + ".TBS"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "chain"),
     2: .same(proto: "content"),
@@ -638,7 +640,7 @@ extension Message.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Message.TBS, rhs: Message.TBS) -> Bool {
+  static func ==(lhs: Proto_Message.TBS, rhs: Proto_Message.TBS) -> Bool {
     if lhs.chain != rhs.chain {return false}
     if lhs.content != rhs.content {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -646,8 +648,8 @@ extension Message.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
   }
 }
 
-extension Subscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = "Subscribe"
+extension Proto_Subscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Subscribe"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "channel_id"),
   ]
@@ -668,15 +670,15 @@ extension Subscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Subscribe, rhs: Subscribe) -> Bool {
+  static func ==(lhs: Proto_Subscribe, rhs: Proto_Subscribe) -> Bool {
     if lhs.channelID != rhs.channelID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Unsubscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = "Unsubscribe"
+extension Proto_Unsubscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Unsubscribe"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "channel_id"),
   ]
@@ -697,15 +699,15 @@ extension Unsubscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Unsubscribe, rhs: Unsubscribe) -> Bool {
+  static func ==(lhs: Proto_Unsubscribe, rhs: Proto_Unsubscribe) -> Bool {
     if lhs.channelID != rhs.channelID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = "Packet"
+extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Packet"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "msg"),
     2: .same(proto: "subscribe"),
@@ -713,7 +715,7 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
   ]
 
   fileprivate class _StorageClass {
-    var _content: Packet.OneOf_Content?
+    var _content: Proto_Packet.OneOf_Content?
 
     static let defaultInstance = _StorageClass()
 
@@ -737,7 +739,7 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
       while let fieldNumber = try decoder.nextFieldNumber() {
         switch fieldNumber {
         case 1:
-          var v: EncryptedMessage?
+          var v: Proto_EncryptedMessage?
           if let current = _storage._content {
             try decoder.handleConflictingOneOf()
             if case .msg(let m) = current {v = m}
@@ -745,7 +747,7 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
           try decoder.decodeSingularMessageField(value: &v)
           if let v = v {_storage._content = .msg(v)}
         case 2:
-          var v: Subscribe?
+          var v: Proto_Subscribe?
           if let current = _storage._content {
             try decoder.handleConflictingOneOf()
             if case .subscribe(let m) = current {v = m}
@@ -753,7 +755,7 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
           try decoder.decodeSingularMessageField(value: &v)
           if let v = v {_storage._content = .subscribe(v)}
         case 3:
-          var v: Unsubscribe?
+          var v: Proto_Unsubscribe?
           if let current = _storage._content {
             try decoder.handleConflictingOneOf()
             if case .unsubscribe(let m) = current {v = m}
@@ -781,7 +783,7 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Packet, rhs: Packet) -> Bool {
+  static func ==(lhs: Proto_Packet, rhs: Proto_Packet) -> Bool {
     if lhs._storage !== rhs._storage {
       let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
         let _storage = _args.0
@@ -796,8 +798,8 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
   }
 }
 
-extension SecretIdentity: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = "SecretIdentity"
+extension Proto_Identity: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Identity"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "publicKey"),
     2: .same(proto: "secretKey"),
@@ -828,7 +830,7 @@ extension SecretIdentity: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: SecretIdentity, rhs: SecretIdentity) -> Bool {
+  static func ==(lhs: Proto_Identity, rhs: Proto_Identity) -> Bool {
     if lhs.publicKey != rhs.publicKey {return false}
     if lhs.secretKey != rhs.secretKey {return false}
     if lhs.links != rhs.links {return false}

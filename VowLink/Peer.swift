@@ -19,7 +19,7 @@ class Peer: NSObject {
     let peerID: MCPeerID
     let incoming: RateLimiter
     var outgoing: RateLimiter?
-    var hello: Hello?
+    var hello: Proto_Hello?
 
     static let PROTOCOL_VERSION: Int32 = 1
     static let RATE_LIMIT: Int32 = 1000
@@ -33,9 +33,9 @@ class Peer: NSObject {
         super.init()
     }
     
-    func receivePacket(data: Data) throws -> Packet? {
+    func receivePacket(data: Data) throws -> Proto_Packet? {
         if hello == nil {
-            let hello = try Hello(serializedData: data)
+            let hello = try Proto_Hello(serializedData: data)
             
             if hello.version != Peer.PROTOCOL_VERSION {
                 debugPrint("[peer] id=\(peerID.displayName) got hello \(hello)")
@@ -52,11 +52,11 @@ class Peer: NSObject {
             return nil
         }
         
-        return try Packet(serializedData: data)
+        return try Proto_Packet(serializedData: data)
     }
     
     func sendHello() throws {
-        let hello = Hello.with({ (hello) in
+        let hello = Proto_Hello.with({ (hello) in
             hello.version = Peer.PROTOCOL_VERSION
             hello.rateLimit = Peer.RATE_LIMIT
         })

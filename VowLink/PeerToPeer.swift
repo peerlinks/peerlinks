@@ -12,7 +12,7 @@ import KeychainAccess
 import Sodium
 
 protocol PeerToPeerDelegate {
-    func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Packet, fromPeer peer: Peer)
+    func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer)
 }
 
 class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate {

@@ -14,7 +14,7 @@ class Identity {
     let context: Context
     
     let identity: String
-    var links: [Link] = []
+    var links: [Proto_Link] = []
     private var secretKey: Bytes
     let publicKey: Bytes
     
@@ -25,7 +25,7 @@ class Identity {
         let keychain = self.context.keychain
         
         if let data = try keychain.getData("identity/" + identity) {
-            let id = try SecretIdentity(serializedData: data)
+            let id = try Proto_Identity(serializedData: data)
             debugPrint("[link-storage] loading existing identity \(identity)")
             
             secretKey = Bytes(id.secretKey)
@@ -46,7 +46,7 @@ class Identity {
     }
     
     func save() throws {
-        let data = try SecretIdentity.with { (id) in
+        let data = try Proto_Identity.with { (id) in
             id.secretKey = Data(self.secretKey)
             id.publicKey = Data(self.publicKey)
             id.links = []
