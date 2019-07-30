@@ -39,34 +39,13 @@ struct Proto_EncryptedMessage {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var tbs: Proto_EncryptedMessage.TBS {
-    get {return _storage._tbs ?? Proto_EncryptedMessage.TBS()}
-    set {_uniqueStorage()._tbs = newValue}
-  }
-  /// Returns true if `tbs` has been explicitly set.
-  var hasTbs: Bool {return _storage._tbs != nil}
-  /// Clears the value of `tbs`. Subsequent reads from it will return its default value.
-  mutating func clearTbs() {_uniqueStorage()._tbs = nil}
+  var channelID: Data = SwiftProtobuf.Internal.emptyData
+
+  var encryptedContent: Data = SwiftProtobuf.Internal.emptyData
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  struct TBS {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var channelID: Data = SwiftProtobuf.Internal.emptyData
-
-    var encryptedContent: Data = SwiftProtobuf.Internal.emptyData
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-  }
-
   init() {}
-
-  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 struct Proto_Link {
@@ -125,24 +104,12 @@ struct Proto_LinkRequest {
   init() {}
 }
 
-struct Proto_Message {
+struct Proto_SignedMessage {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var tbs: Proto_Message.TBS {
-    get {return _storage._tbs ?? Proto_Message.TBS()}
-    set {_uniqueStorage()._tbs = newValue}
-  }
-  /// Returns true if `tbs` has been explicitly set.
-  var hasTbs: Bool {return _storage._tbs != nil}
-  /// Clears the value of `tbs`. Subsequent reads from it will return its default value.
-  mutating func clearTbs() {_uniqueStorage()._tbs = nil}
-
-  var signature: Data {
-    get {return _storage._signature}
-    set {_uniqueStorage()._signature = newValue}
-  }
+  var contents: Data = SwiftProtobuf.Internal.emptyData
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -162,8 +129,6 @@ struct Proto_Message {
   }
 
   init() {}
-
-  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 struct Proto_Subscribe {
@@ -306,76 +271,15 @@ extension Proto_Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
 extension Proto_EncryptedMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".EncryptedMessage"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "tbs"),
-  ]
-
-  fileprivate class _StorageClass {
-    var _tbs: Proto_EncryptedMessage.TBS? = nil
-
-    static let defaultInstance = _StorageClass()
-
-    private init() {}
-
-    init(copying source: _StorageClass) {
-      _tbs = source._tbs
-    }
-  }
-
-  fileprivate mutating func _uniqueStorage() -> _StorageClass {
-    if !isKnownUniquelyReferenced(&_storage) {
-      _storage = _StorageClass(copying: _storage)
-    }
-    return _storage
-  }
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    _ = _uniqueStorage()
-    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
-      while let fieldNumber = try decoder.nextFieldNumber() {
-        switch fieldNumber {
-        case 1: try decoder.decodeSingularMessageField(value: &_storage._tbs)
-        default: break
-        }
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
-      if let v = _storage._tbs {
-        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-      }
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Proto_EncryptedMessage, rhs: Proto_EncryptedMessage) -> Bool {
-    if lhs._storage !== rhs._storage {
-      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
-        let _storage = _args.0
-        let rhs_storage = _args.1
-        if _storage._tbs != rhs_storage._tbs {return false}
-        return true
-      }
-      if !storagesAreEqual {return false}
-    }
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Proto_EncryptedMessage.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Proto_EncryptedMessage.protoMessageName + ".TBS"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "channel_id"),
-    3: .standard(proto: "encrypted_content"),
+    2: .standard(proto: "encrypted_content"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
       case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
-      case 3: try decoder.decodeSingularBytesField(value: &self.encryptedContent)
+      case 2: try decoder.decodeSingularBytesField(value: &self.encryptedContent)
       default: break
       }
     }
@@ -386,12 +290,12 @@ extension Proto_EncryptedMessage.TBS: SwiftProtobuf.Message, SwiftProtobuf._Mess
       try visitor.visitSingularBytesField(value: self.channelID, fieldNumber: 1)
     }
     if !self.encryptedContent.isEmpty {
-      try visitor.visitSingularBytesField(value: self.encryptedContent, fieldNumber: 3)
+      try visitor.visitSingularBytesField(value: self.encryptedContent, fieldNumber: 2)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Proto_EncryptedMessage.TBS, rhs: Proto_EncryptedMessage.TBS) -> Bool {
+  static func ==(lhs: Proto_EncryptedMessage, rhs: Proto_EncryptedMessage) -> Bool {
     if lhs.channelID != rhs.channelID {return false}
     if lhs.encryptedContent != rhs.encryptedContent {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -544,77 +448,37 @@ extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
   }
 }
 
-extension Proto_Message: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".Message"
+extension Proto_SignedMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".SignedMessage"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "tbs"),
-    2: .same(proto: "signature"),
+    1: .same(proto: "contents"),
   ]
 
-  fileprivate class _StorageClass {
-    var _tbs: Proto_Message.TBS? = nil
-    var _signature: Data = SwiftProtobuf.Internal.emptyData
-
-    static let defaultInstance = _StorageClass()
-
-    private init() {}
-
-    init(copying source: _StorageClass) {
-      _tbs = source._tbs
-      _signature = source._signature
-    }
-  }
-
-  fileprivate mutating func _uniqueStorage() -> _StorageClass {
-    if !isKnownUniquelyReferenced(&_storage) {
-      _storage = _StorageClass(copying: _storage)
-    }
-    return _storage
-  }
-
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    _ = _uniqueStorage()
-    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
-      while let fieldNumber = try decoder.nextFieldNumber() {
-        switch fieldNumber {
-        case 1: try decoder.decodeSingularMessageField(value: &_storage._tbs)
-        case 2: try decoder.decodeSingularBytesField(value: &_storage._signature)
-        default: break
-        }
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try decoder.decodeSingularBytesField(value: &self.contents)
+      default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
-      if let v = _storage._tbs {
-        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-      }
-      if !_storage._signature.isEmpty {
-        try visitor.visitSingularBytesField(value: _storage._signature, fieldNumber: 2)
-      }
+    if !self.contents.isEmpty {
+      try visitor.visitSingularBytesField(value: self.contents, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Proto_Message, rhs: Proto_Message) -> Bool {
-    if lhs._storage !== rhs._storage {
-      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
-        let _storage = _args.0
-        let rhs_storage = _args.1
-        if _storage._tbs != rhs_storage._tbs {return false}
-        if _storage._signature != rhs_storage._signature {return false}
-        return true
-      }
-      if !storagesAreEqual {return false}
-    }
+  static func ==(lhs: Proto_SignedMessage, rhs: Proto_SignedMessage) -> Bool {
+    if lhs.contents != rhs.contents {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Proto_Message.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Proto_Message.protoMessageName + ".TBS"
+extension Proto_SignedMessage.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Proto_SignedMessage.protoMessageName + ".TBS"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "chain"),
     2: .same(proto: "content"),
@@ -640,7 +504,7 @@ extension Proto_Message.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Proto_Message.TBS, rhs: Proto_Message.TBS) -> Bool {
+  static func ==(lhs: Proto_SignedMessage.TBS, rhs: Proto_SignedMessage.TBS) -> Bool {
     if lhs.chain != rhs.chain {return false}
     if lhs.content != rhs.content {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}

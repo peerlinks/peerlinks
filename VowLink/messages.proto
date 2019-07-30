@@ -11,12 +11,8 @@ message Hello {
 }
 
 message EncryptedMessage {
-  message TBS {
-    bytes channel_id = 1;
-    bytes encrypted_content = 3;
-  }
-
-  TBS tbs = 1;
+  bytes channel_id = 1;
+  bytes encrypted_content = 2;
 }
 
 message Link {
@@ -35,14 +31,13 @@ message LinkRequest {
   string desired_display_name = 2;
 }
 
-message Message {
+message SignedMessage {
   message TBS {
     repeated Link chain = 1;
     string content = 2; // JSON
   }
 
-  TBS tbs = 1;
-  bytes signature = 2;
+  bytes contents = 1;
 }
 
 message Subscribe {
