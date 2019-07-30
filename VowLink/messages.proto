@@ -64,11 +64,8 @@ message Packet {
 // Storage
 //
 
-message LinkArray {
-  repeated Link links = 1;
-}
-
 message SecretIdentity {
   bytes publicKey = 1;
   bytes secretKey = 2;
+  repeated Link links = 3;
 }

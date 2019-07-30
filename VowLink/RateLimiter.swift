@@ -10,21 +10,22 @@ import Foundation
 
 class RateLimiter {
     var replenishTimer: Timer?
-    var limit: Int32!
+    let limit: Int32
     var left: Int32 = 0
     
     static let DEFAULT_TIMEOUT = 3600.0
     
     init(limit: Int32) {
         self.limit = limit
+        self.left = limit
     }
     
     func takeOne() -> Bool {
-        if limit == 0 {
+        if left == 0 {
             return false
         }
         
-        limit -= 1
+        left -= 1
         
         if replenishTimer == nil {
             replenishTimer = Timer.scheduledTimer(withTimeInterval: RateLimiter.DEFAULT_TIMEOUT, repeats: false, block: { _ in

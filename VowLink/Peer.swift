@@ -14,10 +14,10 @@ enum PeerError: Error {
 }
 
 class Peer: NSObject {
-    var context: Context!
-    var session: MCSession!
-    var peerID: MCPeerID!
-    var incoming: RateLimiter!
+    let context: Context
+    let session: MCSession
+    let peerID: MCPeerID
+    let incoming: RateLimiter
     var outgoing: RateLimiter?
     var hello: Hello?
 
@@ -25,12 +25,12 @@ class Peer: NSObject {
     static let RATE_LIMIT: Int32 = 1000
     
     init(context: Context, session: MCSession, peerID: MCPeerID) {
-        super.init()
-        
         self.context = context
         self.session = session
         self.peerID = peerID
         incoming = RateLimiter(limit: Peer.RATE_LIMIT)
+
+        super.init()
     }
     
     func receivePacket(data: Data) throws -> Packet? {

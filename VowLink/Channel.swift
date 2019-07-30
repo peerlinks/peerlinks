@@ -10,8 +10,8 @@ import Foundation
 import Sodium
 
 class Channel {
-    var context: Context!
-    var publicKey: Bytes!
+    let context: Context
+    let publicKey: Bytes
     private var secretKey: Bytes?
     
     private var lazyChannelID: Bytes?

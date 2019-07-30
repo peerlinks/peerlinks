@@ -16,22 +16,20 @@ protocol PeerToPeerDelegate {
 }
 
 class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate {
-    var context: Context!
-    var peer: MCPeerID!
-    var advertiser: MCNearbyServiceAdvertiser!
-    var browser: MCNearbyServiceBrowser!
-    var session: MCSession!
+    let context: Context
+    let peer: MCPeerID
+    let advertiser: MCNearbyServiceAdvertiser
+    let browser: MCNearbyServiceBrowser
+    let session: MCSession
     var delegate: PeerToPeerDelegate?
     var peers = [MCPeerID:Peer]()
     
     init(context: Context, serviceType: String) {
-        super.init()
-        
         self.context = context
         
         let defaults = UserDefaults.standard
         if let raw_peer = defaults.data(forKey: "peer-id") {
-            peer = try! NSKeyedUnarchiver.unarchivedObject(ofClass: MCPeerID.self, from: raw_peer)
+            peer = try! NSKeyedUnarchiver.unarchivedObject(ofClass: MCPeerID.self, from: raw_peer)!
         } else {
             peer = MCPeerID(displayName: NSUUID().uuidString)
             let data = try! NSKeyedArchiver.archivedData(withRootObject: peer as Any,
@@ -43,15 +41,18 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         debugPrint("[p2p] start peer.displayName=\(peer.displayName)")
         
         session = MCSession(peer: peer, securityIdentity: nil, encryptionPreference: .required)
-        session.delegate = self
         
         advertiser = MCNearbyServiceAdvertiser(peer: peer, discoveryInfo: nil, serviceType: serviceType)
-        advertiser.delegate = self
         advertiser.startAdvertisingPeer()
         
         browser = MCNearbyServiceBrowser(peer: peer, serviceType: serviceType)
-        browser.delegate = self
         browser.startBrowsingForPeers()
+        
+        super.init()
+        
+        session.delegate = self
+        advertiser.delegate = self
+        browser.delegate = self
     }
     
     deinit {

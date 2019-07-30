@@ -11,47 +11,46 @@ import Sodium
 import KeychainAccess
 
 class Identity {
-    var context: Context!
+    let context: Context
     
+    let identity: String
     var links: [Link] = []
-    private var secretKey: Bytes!
-    var publicKey: Bytes!
+    private var secretKey: Bytes
+    let publicKey: Bytes
     
-    init(context: Context, identity: String) {
+    init(context: Context, identity: String) throws {
+        self.identity = identity
         self.context = context
         
         let keychain = self.context.keychain
         
-        if let data = try? keychain.getData("identity/" + identity),
-           let serialized = try? SecretIdentity(serializedData: data) {
+        if let data = try keychain.getData("identity/" + identity) {
+            let id = try SecretIdentity(serializedData: data)
             debugPrint("[link-storage] loading existing identity \(identity)")
             
-            self.secretKey = Bytes(serialized.secretKey)
-            self.publicKey = Bytes(serialized.publicKey)
+            secretKey = Bytes(id.secretKey)
+            publicKey = Bytes(id.publicKey)
+            links = id.links
         } else {
             debugPrint("[link-storage] generating new keypair for \(identity)")
             let keyPair = self.context.sodium.sign.keyPair()!
-            self.secretKey = keyPair.secretKey
-            self.publicKey = keyPair.publicKey
+            secretKey = keyPair.secretKey
+            publicKey = keyPair.publicKey
             
-            do {
-                let data = try SecretIdentity.with { (id) in
-                    id.secretKey = Data(self.secretKey)
-                    id.publicKey = Data(self.publicKey)
-                }.serializedData()
-                try keychain.set(data, key: "identity/" + identity)
-            } catch {
-                fatalError("[link-storage] failed to store keypair in the keychain due to error \(error) for identity \(identity)")
-            }
-        }
-        
-        if let data = try? keychain.getData(identity + "/links") {
-            let linkArray = try! LinkArray(serializedData: data)
-            links = linkArray.links
+            try save()
         }
     }
     
     deinit {
         self.context.sodium.utils.zero(&secretKey)
+    }
+    
+    func save() throws {
+        let data = try SecretIdentity.with { (id) in
+            id.secretKey = Data(self.secretKey)
+            id.publicKey = Data(self.publicKey)
+            id.links = []
+        }.serializedData()
+        try self.context.keychain.set(data, key: "identity/" + identity)
     }
 }

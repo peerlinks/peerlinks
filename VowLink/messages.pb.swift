@@ -248,18 +248,6 @@ struct Packet {
   fileprivate var _storage = _StorageClass.defaultInstance
 }
 
-struct LinkArray {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  var links: [Link] = []
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
 struct SecretIdentity {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -268,6 +256,8 @@ struct SecretIdentity {
   var publicKey: Data = SwiftProtobuf.Internal.emptyData
 
   var secretKey: Data = SwiftProtobuf.Internal.emptyData
+
+  var links: [Link] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -806,40 +796,12 @@ extension Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBas
   }
 }
 
-extension LinkArray: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = "LinkArray"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "links"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      switch fieldNumber {
-      case 1: try decoder.decodeRepeatedMessageField(value: &self.links)
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.links.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.links, fieldNumber: 1)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: LinkArray, rhs: LinkArray) -> Bool {
-    if lhs.links != rhs.links {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
 extension SecretIdentity: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = "SecretIdentity"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "publicKey"),
     2: .same(proto: "secretKey"),
+    3: .same(proto: "links"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -847,6 +809,7 @@ extension SecretIdentity: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
       switch fieldNumber {
       case 1: try decoder.decodeSingularBytesField(value: &self.publicKey)
       case 2: try decoder.decodeSingularBytesField(value: &self.secretKey)
+      case 3: try decoder.decodeRepeatedMessageField(value: &self.links)
       default: break
       }
     }
@@ -859,12 +822,16 @@ extension SecretIdentity: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
     if !self.secretKey.isEmpty {
       try visitor.visitSingularBytesField(value: self.secretKey, fieldNumber: 2)
     }
+    if !self.links.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.links, fieldNumber: 3)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: SecretIdentity, rhs: SecretIdentity) -> Bool {
     if lhs.publicKey != rhs.publicKey {return false}
     if lhs.secretKey != rhs.secretKey {return false}
+    if lhs.links != rhs.links {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
