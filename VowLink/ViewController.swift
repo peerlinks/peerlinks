@@ -13,10 +13,5 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
     }
-
-
-    @IBAction func buttonClicked(_ sender: Any) {
-        // let app = UIApplication.shared.delegate as! AppDelegate
-    }
 }
 
