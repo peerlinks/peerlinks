@@ -14,14 +14,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
     let context = Context()
 
     var p2p: PeerToPeer!
-    var identityManager: IdentityManager!
+    var identity: Identity?
     var window: UIWindow?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         p2p = PeerToPeer(context: context, serviceType: "com-vowlink")
         p2p.delegate = self
-        
-        identityManager = IdentityManager(context: context)
         
         return true
     }

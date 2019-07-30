@@ -24,10 +24,11 @@ class NewIdentityController : UITableViewController {
     @IBAction func saveClicked(_ sender: Any) {
         let name = nameField.text ?? ""
         
-        let app = UIApplication.shared.delegate as! AppDelegate
+        let parent = navigationController?.viewControllers.first
+        let identityController = parent as? IdentityController
         
         do {
-            try app.identityManager.createIdentity(name: name)
+            try identityController?.createIdentity(name: name)
         } catch {
             debugPrint("failed to create identity \(error)")
             return

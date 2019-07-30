@@ -30,7 +30,6 @@
 		4DF7CB0E22EF4C4500CD1C33 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7CB0D22EF4C4500CD1C33 /* Identity.swift */; };
 		4DF7CB1022EFB63F00CD1C33 /* Context.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7CB0F22EFB63F00CD1C33 /* Context.swift */; };
 		4DF7CB1222F05CC800CD1C33 /* Link.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7CB1122F05CC800CD1C33 /* Link.swift */; };
-		4DF7CB1422F0C24300CD1C33 /* IdentityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7CB1322F0C24300CD1C33 /* IdentityManager.swift */; };
 		4DF7CB1822F0CD6A00CD1C33 /* IdentityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7CB1722F0CD6A00CD1C33 /* IdentityController.swift */; };
 /* End PBXBuildFile section */
 
@@ -257,7 +256,6 @@
 		4DF7CB0D22EF4C4500CD1C33 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
 		4DF7CB0F22EFB63F00CD1C33 /* Context.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Context.swift; sourceTree = "<group>"; };
 		4DF7CB1122F05CC800CD1C33 /* Link.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Link.swift; sourceTree = "<group>"; };
-		4DF7CB1322F0C24300CD1C33 /* IdentityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityManager.swift; sourceTree = "<group>"; };
 		4DF7CB1722F0CD6A00CD1C33 /* IdentityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -319,7 +317,6 @@
 				4DF7CB0F22EFB63F00CD1C33 /* Context.swift */,
 				4DF7CB0D22EF4C4500CD1C33 /* Identity.swift */,
 				4DF7CB1722F0CD6A00CD1C33 /* IdentityController.swift */,
-				4DF7CB1322F0C24300CD1C33 /* IdentityManager.swift */,
 				4D23EDE122EECBE5003A9C20 /* Info.plist */,
 				4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */,
 				4D23EDDE22EECBE5003A9C20 /* LaunchScreen.storyboard */,
@@ -694,7 +691,6 @@
 				4DF7CB1022EFB63F00CD1C33 /* Context.swift in Sources */,
 				4DF7CB1222F05CC800CD1C33 /* Link.swift in Sources */,
 				4D339E4022F0E36300EABA71 /* NewIdentityController.swift in Sources */,
-				4DF7CB1422F0C24300CD1C33 /* IdentityManager.swift in Sources */,
 				4D23EDDB22EECBE5003A9C20 /* VowLink.xcdatamodeld in Sources */,
 				4D23EEBA22EF3517003A9C20 /* Peer.swift in Sources */,
 				4D23EEBC22EF3A5E003A9C20 /* RateLimiter.swift in Sources */,

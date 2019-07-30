@@ -8,25 +8,32 @@
 
 import UIKit
 
-class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, IdentityManagerDelegate {
+class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     @IBOutlet weak var identityPicker: UIPickerView!
-    var identityManager: IdentityManager!
+    var context: Context!
+    var identities = [Identity]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let app = (UIApplication.shared.delegate as! AppDelegate)
+        context = app.context
+        
+        let keys = context.keychain.allKeys().filter { (key) -> Bool in
+            return key.starts(with: "identity/")
+        }
+        
+        for key in keys {
+            let index = key.index(key.startIndex, offsetBy: 9)
+            do {
+                identities.append(try Identity(context: context, name: String(key[index...])))
+            } catch {
+                debugPrint("failed to fetch identity due to error \(error)")
+            }
+        }
+        
         identityPicker.delegate = self
         identityPicker.dataSource = self
-        
-        let app = (UIApplication.shared.delegate as! AppDelegate)
-        identityManager = app.identityManager
-        
-        // TODO(indutny): this has bad code smell
-        identityManager.delegate = self
-    }
-    
-    deinit {
-        identityManager.delegate = nil
     }
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -34,16 +41,19 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return identityManager.identities.count
+        return identities.count
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return identityManager.identities[row]
+        return identities[row].name
     }
     
     // MARK: - Identity Manager
-
-    func identityManager(_ manager: IdentityManager, createdIdentity identity: Identity) {
+    
+    func createIdentity(name: String) throws {
+        // TODO(indutny): avoid duplicates by throwing
+        let id = try Identity(context: context, name: name)
+        identities.append(id)
         identityPicker.reloadAllComponents()
     }
 }
