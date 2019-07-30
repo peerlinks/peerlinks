@@ -22,12 +22,12 @@ class Identity {
         
         let keychain = self.context.keychain
         
-        if let secretKey = try? keychain.getData(identity + "/secret_key"),
-           let publicKey = try? keychain.getData(identity + "/public_key") {
-            debugPrint("[link-storage] loading existing keypair for \(identity)")
+        if let data = try? keychain.getData("identity/" + identity),
+           let serialized = try? SecretIdentity(serializedData: data) {
+            debugPrint("[link-storage] loading existing identity \(identity)")
             
-            self.secretKey = Bytes(secretKey)
-            self.publicKey = Bytes(publicKey)
+            self.secretKey = Bytes(serialized.secretKey)
+            self.publicKey = Bytes(serialized.publicKey)
         } else {
             debugPrint("[link-storage] generating new keypair for \(identity)")
             let keyPair = self.context.sodium.sign.keyPair()!
@@ -35,8 +35,11 @@ class Identity {
             self.publicKey = keyPair.publicKey
             
             do {
-                try keychain.set(Data(self.secretKey), key: identity + "/secret_key")
-                try keychain.set(Data(self.publicKey), key: identity + "/public_key")
+                let data = try SecretIdentity.with { (id) in
+                    id.secretKey = Data(self.secretKey)
+                    id.publicKey = Data(self.publicKey)
+                }.serializedData()
+                try keychain.set(data, key: "identity/" + identity)
             } catch {
                 fatalError("[link-storage] failed to store keypair in the keychain due to error \(error) for identity \(identity)")
             }

@@ -1,5 +1,9 @@
 syntax = "proto3";
 
+//
+// Network
+//
+
 message Hello {
   int32 version = 1;
   int32 rate_limit = 3; // maximum number of messages per hour
@@ -30,13 +34,9 @@ message LinkRequest {
   string desired_display_name = 2;
 }
 
-message LinkArray {
-  repeated Link links = 1;
-}
-
 message Message {
   message TBS {
-    LinkArray chain = 1;
+    repeated Link chain = 1;
     string content = 2; // JSON
   }
 
@@ -58,4 +58,17 @@ message Packet {
     Subscribe subscribe = 2;
     Unsubscribe unsubscribe = 3;
   }
+}
+
+//
+// Storage
+//
+
+message LinkArray {
+  repeated Link links = 1;
+}
+
+message SecretIdentity {
+  bytes publicKey = 1;
+  bytes secretKey = 2;
 }
