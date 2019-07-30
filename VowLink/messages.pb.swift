@@ -90,10 +90,24 @@ struct Proto_Link {
   fileprivate var _storage = _StorageClass.defaultInstance
 }
 
+struct Proto_EncryptedLink {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var box: Data = SwiftProtobuf.Internal.emptyData
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 struct Proto_LinkRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
+
+  var peerID: String = String()
 
   var trusteePubKey: Data = SwiftProtobuf.Internal.emptyData
 
@@ -413,34 +427,69 @@ extension Proto_Link.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
   }
 }
 
-extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".LinkRequest"
+extension Proto_EncryptedLink: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".EncryptedLink"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "trustee_pub_key"),
-    2: .standard(proto: "desired_display_name"),
+    1: .same(proto: "box"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
-      case 1: try decoder.decodeSingularBytesField(value: &self.trusteePubKey)
-      case 2: try decoder.decodeSingularStringField(value: &self.desiredDisplayName)
+      case 1: try decoder.decodeSingularBytesField(value: &self.box)
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.box.isEmpty {
+      try visitor.visitSingularBytesField(value: self.box, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Proto_EncryptedLink, rhs: Proto_EncryptedLink) -> Bool {
+    if lhs.box != rhs.box {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".LinkRequest"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "peer_id"),
+    2: .standard(proto: "trustee_pub_key"),
+    3: .standard(proto: "desired_display_name"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try decoder.decodeSingularStringField(value: &self.peerID)
+      case 2: try decoder.decodeSingularBytesField(value: &self.trusteePubKey)
+      case 3: try decoder.decodeSingularStringField(value: &self.desiredDisplayName)
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.peerID.isEmpty {
+      try visitor.visitSingularStringField(value: self.peerID, fieldNumber: 1)
+    }
     if !self.trusteePubKey.isEmpty {
-      try visitor.visitSingularBytesField(value: self.trusteePubKey, fieldNumber: 1)
+      try visitor.visitSingularBytesField(value: self.trusteePubKey, fieldNumber: 2)
     }
     if !self.desiredDisplayName.isEmpty {
-      try visitor.visitSingularStringField(value: self.desiredDisplayName, fieldNumber: 2)
+      try visitor.visitSingularStringField(value: self.desiredDisplayName, fieldNumber: 3)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Proto_LinkRequest, rhs: Proto_LinkRequest) -> Bool {
+    if lhs.peerID != rhs.peerID {return false}
     if lhs.trusteePubKey != rhs.trusteePubKey {return false}
     if lhs.desiredDisplayName != rhs.desiredDisplayName {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -665,8 +714,8 @@ extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
 extension Proto_Identity: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Identity"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "publicKey"),
-    2: .same(proto: "secretKey"),
+    1: .standard(proto: "public_key"),
+    2: .standard(proto: "secret_key"),
     3: .same(proto: "links"),
   ]
 

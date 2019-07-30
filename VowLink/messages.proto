@@ -26,9 +26,14 @@ message Link {
   bytes signature = 2;
 }
 
+message EncryptedLink {
+  bytes box = 1;
+}
+
 message LinkRequest {
-  bytes trustee_pub_key = 1;
-  string desired_display_name = 2;
+  string peer_id = 1;
+  bytes trustee_pub_key = 2;
+  string desired_display_name = 3;
 }
 
 message SignedMessage {
@@ -61,7 +66,7 @@ message Packet {
 //
 
 message Identity {
-  bytes publicKey = 1;
-  bytes secretKey = 2;
+  bytes public_key = 1;
+  bytes secret_key = 2;
   repeated Link links = 3;
 }

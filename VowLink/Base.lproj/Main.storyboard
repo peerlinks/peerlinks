@@ -89,19 +89,30 @@
                                     <segue destination="nmG-4B-MbM" kind="show" id="QNC-8T-yAm"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="I0j-6n-nue">
+                                <rect key="frame" x="0.0" y="137" width="414" height="41"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <state key="normal" title="Approve Link"/>
+                                <connections>
+                                    <segue destination="5D6-c5-NkT" kind="show" id="LLc-yB-hLy"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstItem="I0j-6n-nue" firstAttribute="top" secondItem="p6j-tt-kQb" secondAttribute="bottom" constant="8" id="6aW-i8-Bn2"/>
                             <constraint firstItem="p6j-tt-kQb" firstAttribute="top" secondItem="UYK-z3-7rn" secondAttribute="top" id="CNt-5J-hfj"/>
+                            <constraint firstItem="I0j-6n-nue" firstAttribute="leading" secondItem="UYK-z3-7rn" secondAttribute="leading" id="PTh-Th-Rrg"/>
                             <constraint firstItem="UYK-z3-7rn" firstAttribute="trailing" secondItem="p6j-tt-kQb" secondAttribute="trailing" id="jDs-wN-vqa"/>
                             <constraint firstItem="p6j-tt-kQb" firstAttribute="leading" secondItem="UYK-z3-7rn" secondAttribute="leading" id="twm-Bw-FhQ"/>
+                            <constraint firstItem="UYK-z3-7rn" firstAttribute="trailing" secondItem="I0j-6n-nue" secondAttribute="trailing" id="uWA-wa-Kz3"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="UYK-z3-7rn"/>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Byv-vn-x71" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="496" y="424"/>
+            <point key="canvasLocation" x="495.6521739130435" y="423.88392857142856"/>
         </scene>
         <!--Link Request-->
         <scene sceneID="SAt-ci-qJq">
@@ -132,7 +143,22 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4vt-e3-Abn" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1346.376811594203" y="423.88392857142856"/>
+            <point key="canvasLocation" x="1352" y="82"/>
+        </scene>
+        <!--Link Approval-->
+        <scene sceneID="NFr-eS-4CU">
+            <objects>
+                <viewController title="Link Approval" id="5D6-c5-NkT" customClass="LinkApprovalController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="SfE-Vg-K8S">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="Abj-Vi-6z9"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="N8Q-UB-rNY" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1351" y="907"/>
         </scene>
         <!--New Identity-->
         <scene sceneID="cYz-U4-she">

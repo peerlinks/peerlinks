@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Sodium
 
 class LinkRequestController : UIViewController {
     @IBOutlet weak var imageView: UIImageView!
@@ -18,14 +19,17 @@ class LinkRequestController : UIViewController {
         let identity = app.identity!
         
         let req = Proto_LinkRequest.with { (req) in
+            req.peerID = app.p2p.peer.displayName
             req.trusteePubKey = Data(identity.publicKey)
             req.desiredDisplayName = identity.name
         }
         let binary = try! req.serializedData()
+        let b64 = app.context.sodium.utils.bin2base64(Bytes(binary))!
+        let uri = "vow-link://link-request/\(b64)"
         
         let filter = CIFilter(name: "CIQRCodeGenerator")
         
-        filter?.setValue(binary, forKey: "inputMessage")
+        filter?.setValue(Data(uri.bytes), forKey: "inputMessage")
         filter?.setValue("Q", forKey: "inputCorrectionLevel")
         
         guard let image = filter?.outputImage else {
