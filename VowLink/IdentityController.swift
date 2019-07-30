@@ -10,6 +10,7 @@ import UIKit
 
 class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     @IBOutlet weak var identityPicker: UIPickerView!
+    @IBOutlet weak var selectButton: UIButton!
     var context: Context!
     var identities = [Identity]()
     
@@ -32,6 +33,9 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
             }
         }
         
+        selectButton.isEnabled = identities.count != 0
+        app.identity = identities[0]
+        
         identityPicker.delegate = self
         identityPicker.dataSource = self
     }
@@ -48,12 +52,19 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
         return identities[row].name
     }
     
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        let app = (UIApplication.shared.delegate as! AppDelegate)
+        app.identity = identities[row]
+    }
+
+    
     // MARK: - Identity Manager
     
     func createIdentity(name: String) throws {
         // TODO(indutny): avoid duplicates by throwing
         let id = try Identity(context: context, name: name)
         identities.append(id)
+        selectButton.isEnabled = true
         identityPicker.reloadAllComponents()
     }
 }
