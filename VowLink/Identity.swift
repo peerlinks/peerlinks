@@ -12,7 +12,7 @@ import KeychainAccess
 
 enum IdentityError: Error {
     case signatureError
-    case linkDecryptError
+    case linkExpired
     case linkPubkeyMismatch
 }
 
@@ -74,7 +74,7 @@ class Identity {
                    displayName: String = "") throws -> Link {
         let tbs = Proto_Link.TBS.with { (tbs) in
             tbs.trusteePubKey = Data(trusteePubKey)
-            tbs.expiration = expiration
+            tbs.expiration = NSDate().timeIntervalSince1970 + expiration
             tbs.displayName = displayName
         }
         let tbsData = try tbs.serializedData()
@@ -91,22 +91,15 @@ class Identity {
         return Link(proto)
     }
     
-    func addLink(_ encrypted: Proto_EncryptedLink) throws -> Link {
-        guard let data = context.sodium.box.open(anonymousCipherText: Bytes(encrypted.box),
-                                                 recipientPublicKey: publicKey,
-                                                 recipientSecretKey: secretKey) else {
-            throw IdentityError.linkDecryptError
+    func addLink(_ link: Link) throws {
+        if link.expiration <= NSDate().timeIntervalSince1970 {
+            throw IdentityError.linkExpired
         }
         
-        let proto = try Proto_Link(serializedData: Data(data))
-        
-        let link = Link(proto)
-        
-        if !link.trusteePubKey.elementsEqual(publicKey) {
+        if !context.sodium.utils.equals(link.trusteePubKey, publicKey) {
             throw IdentityError.linkPubkeyMismatch
         }
         
         links.append(link)
-        return link
     }
 }

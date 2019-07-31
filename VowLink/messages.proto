@@ -34,6 +34,7 @@ message LinkRequest {
   string peer_id = 1;
   bytes trustee_pub_key = 2;
   string desired_display_name = 3;
+  bytes box_pub_key = 4;
 }
 
 message SignedMessage {

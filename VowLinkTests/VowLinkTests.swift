@@ -32,5 +32,12 @@ class VowLinkTests: XCTestCase {
         
         XCTAssertEqual(link.displayName, "hello")
         XCTAssert(try! link.verify(withContext: context, publicKey: id.publicKey))
+        
+        let keyPair = context.sodium.box.keyPair()!
+        
+        let encrypted = try! link.encrypt(withContext: context, andPubKey: keyPair.publicKey)
+        let decrypted = try! Link(encrypted, context: context, withPublicKey: keyPair.publicKey, secretKey: keyPair.secretKey)
+        
+        XCTAssertEqual(decrypted.displayName, link.displayName)
     }
 }

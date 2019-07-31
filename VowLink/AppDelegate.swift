@@ -8,8 +8,12 @@
 
 import UIKit
 import CoreData
+import Sodium
 
 protocol LinkNotificationDelegate: AnyObject {
+    var boxPublicKey: Bytes? { get }
+    var boxSecretKey: Bytes? { get }
+    
     func link(received link: Link)
 }
 
@@ -110,10 +114,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
         
         switch packet.content {
         case .some(.link(let encryptedLink)):
+            guard let linkDelegate = linkDelegate else {
+                return
+            }
             do {
-                let link = try identity.addLink(encryptedLink)
+                let link = try Link(encryptedLink,
+                                    context: context,
+                                    withPublicKey: linkDelegate.boxPublicKey!,
+                                    secretKey: linkDelegate.boxSecretKey!)
+
+                try identity.addLink(link)
                 
-                linkDelegate?.link(received: link)
+                linkDelegate.link(received: link)
             } catch {
                 debugPrint("[app] failed to decrypt link due to error \(error)")
             }

@@ -47,7 +47,13 @@ class LinkConfirmalController : UITableViewController {
             let link = try id.issueLink(for: Bytes(request.trusteePubKey),
                                         displayName: request.desiredDisplayName)
             
-            try app.p2p.send(link: link, to: request.peerID)
+            let encryptedLink = try link.encrypt(withContext: id.context, andPubKey: Bytes(request.boxPubKey))
+            
+            let packet = Proto_Packet.with { (packet) in
+                packet.link = encryptedLink
+            }
+            
+            try app.p2p.send(packet, to: request.peerID)
         } catch {
             fatalError("failed to issue link \(request) due to error \(error)")
         }

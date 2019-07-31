@@ -113,6 +113,8 @@ struct Proto_LinkRequest {
 
   var desiredDisplayName: String = String()
 
+  var boxPubKey: Data = SwiftProtobuf.Internal.emptyData
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -472,6 +474,7 @@ extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     1: .standard(proto: "peer_id"),
     2: .standard(proto: "trustee_pub_key"),
     3: .standard(proto: "desired_display_name"),
+    4: .standard(proto: "box_pub_key"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -480,6 +483,7 @@ extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
       case 1: try decoder.decodeSingularStringField(value: &self.peerID)
       case 2: try decoder.decodeSingularBytesField(value: &self.trusteePubKey)
       case 3: try decoder.decodeSingularStringField(value: &self.desiredDisplayName)
+      case 4: try decoder.decodeSingularBytesField(value: &self.boxPubKey)
       default: break
       }
     }
@@ -495,6 +499,9 @@ extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if !self.desiredDisplayName.isEmpty {
       try visitor.visitSingularStringField(value: self.desiredDisplayName, fieldNumber: 3)
     }
+    if !self.boxPubKey.isEmpty {
+      try visitor.visitSingularBytesField(value: self.boxPubKey, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -502,6 +509,7 @@ extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if lhs.peerID != rhs.peerID {return false}
     if lhs.trusteePubKey != rhs.trusteePubKey {return false}
     if lhs.desiredDisplayName != rhs.desiredDisplayName {return false}
+    if lhs.boxPubKey != rhs.boxPubKey {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

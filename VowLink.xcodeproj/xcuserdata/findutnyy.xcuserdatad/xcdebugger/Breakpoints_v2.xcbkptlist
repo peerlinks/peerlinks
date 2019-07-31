@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VowLink/IdentityController.swift"
-            timestampString = "586265378.085596"
+            timestampString = "586310226.329039"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "41"
@@ -25,46 +25,46 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "VowLink/Identity.swift"
-            timestampString = "586265378.085706"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "98"
-            endingLineNumber = "98"
-            landmarkName = "addLink(_:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "VowLink/Peer.swift"
-            timestampString = "586265378.0857691"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "78"
-            endingLineNumber = "78"
-            landmarkName = "send(link:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "VowLink/Link.swift"
-            timestampString = "586265378.085848"
+            timestampString = "586310226.329159"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "28"
-            endingLineNumber = "28"
-            landmarkName = "encrypt(withContext:)"
+            startingLineNumber = "49"
+            endingLineNumber = "49"
+            landmarkName = "encrypt(withContext:andPubKey:)"
             landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "VowLink.Link.encrypt(withContext: VowLink.Context) throws -&gt; VowLink.Proto_EncryptedLink"
+                  moduleName = "VowLink"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/findutnyy/Code/indutny/VowLink/VowLink/Link.swift"
+                  timestampString = "586305345.530212"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "33"
+                  endingLineNumber = "33"
+                  offsetFromSymbolStart = "490">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (inout VowLink.Proto_EncryptedLink) -&gt; () in VowLink.Link.encrypt(withContext: VowLink.Context) throws -&gt; VowLink.Proto_EncryptedLink"
+                  moduleName = "VowLink"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/findutnyy/Code/indutny/VowLink/VowLink/Link.swift"
+                  timestampString = "586305345.532451"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "34"
+                  endingLineNumber = "34"
+                  offsetFromSymbolStart = "103">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

@@ -9,6 +9,10 @@
 import Foundation
 import Sodium
 
+enum LinkError : Error {
+    case decryptError
+}
+
 class Link {
     let proto: Proto_Link
     let trusteePubKey: Bytes
@@ -24,11 +28,23 @@ class Link {
         signature = Bytes(link.signature)
     }
     
-    func encrypt(withContext context: Context) throws -> Proto_EncryptedLink {
+    convenience init(_ encrypted: Proto_EncryptedLink, context: Context, withPublicKey publicKey: Bytes, secretKey: Bytes) throws {
+        guard let data = context.sodium.box.open(anonymousCipherText: Bytes(encrypted.box),
+                                                 recipientPublicKey: publicKey,
+                                                 recipientSecretKey: secretKey) else {
+            throw LinkError.decryptError
+        }
+        
+        let proto = try Proto_Link(serializedData: Data(data))
+        
+        self.init(proto)
+    }
+    
+    func encrypt(withContext context: Context, andPubKey pubKey: Bytes) throws -> Proto_EncryptedLink {
         let data: Data = try proto.serializedData()
         let box = context.sodium.box.seal(
             message: Bytes(data),
-            recipientPublicKey: trusteePubKey)
+            recipientPublicKey: pubKey)
         
         return Proto_EncryptedLink.with({ (encrypted) in
             if let box = box {

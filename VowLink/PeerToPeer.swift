@@ -62,7 +62,9 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     // MARK: Public API
     
-    func send(link: Link, to peerID: String) throws {
+    func send(_ packet: Proto_Packet, to peerID: String) throws {
+        let data = try packet.serializedData()
+
         let realIDs = session.connectedPeers.filter { (peer) -> Bool in
             return peer.displayName == peerID
         }
@@ -74,7 +76,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         }
         
         for peer in peers {
-            if try peer?.send(link: link) == false {
+            if try peer?.send(data) == false {
                 debugPrint("[p2p] failed to send link due to rate limiting")
             }
         }

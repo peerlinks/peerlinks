@@ -11,6 +11,9 @@ import Sodium
 
 class LinkRequestController : UIViewController, LinkNotificationDelegate {
     @IBOutlet weak var imageView: UIImageView!
+    var sodium: Sodium!
+    var boxPublicKey: Bytes?
+    var boxSecretKey: Bytes?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -18,10 +21,19 @@ class LinkRequestController : UIViewController, LinkNotificationDelegate {
         let app = UIApplication.shared.delegate as! AppDelegate
         let identity = app.identity!
         
+        sodium = app.context.sodium
+        
+        let keyPair = sodium.box.keyPair()!
+        
+        boxPublicKey = keyPair.publicKey
+        boxSecretKey = keyPair.secretKey
+        
         let req = Proto_LinkRequest.with { (req) in
             req.peerID = app.p2p.peer.displayName
             req.trusteePubKey = Data(identity.publicKey)
             req.desiredDisplayName = identity.name
+
+            req.boxPubKey = Data(keyPair.publicKey)
         }
         let binary = try! req.serializedData()
         let b64 = app.context.sodium.utils.bin2base64(Bytes(binary))!
@@ -45,6 +57,12 @@ class LinkRequestController : UIViewController, LinkNotificationDelegate {
         imageView.image = UIImage(ciImage: qr)
         
         app.linkDelegate = self
+    }
+    
+    deinit {
+        if var secretKey = boxSecretKey {
+            sodium.utils.zero(&secretKey)
+        }
     }
     
     func link(received link: Link) {
