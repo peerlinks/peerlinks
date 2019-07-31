@@ -11,7 +11,7 @@ import MultipeerConnectivity
 import KeychainAccess
 import Sodium
 
-protocol PeerToPeerDelegate {
+protocol PeerToPeerDelegate: AnyObject {
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer)
 }
 
@@ -21,7 +21,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     let advertiser: MCNearbyServiceAdvertiser
     let browser: MCNearbyServiceBrowser
     let session: MCSession
-    var delegate: PeerToPeerDelegate?
+    weak var delegate: PeerToPeerDelegate?
     var peers = [MCPeerID:Peer]()
     
     init(context: Context, serviceType: String) {

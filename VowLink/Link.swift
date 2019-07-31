@@ -17,11 +17,11 @@ class Link {
     let signature: Bytes
     
     init(_ link: Proto_Link) {
-        self.proto = link
-        self.trusteePubKey = Bytes(link.tbs.trusteePubKey)
-        self.displayName = link.tbs.displayName
-        self.expiration = link.tbs.expiration
-        self.signature = Bytes(link.signature)
+        proto = link
+        trusteePubKey = Bytes(link.tbs.trusteePubKey)
+        displayName = link.tbs.displayName
+        expiration = link.tbs.expiration
+        signature = Bytes(link.signature)
     }
     
     func encrypt(withContext context: Context) throws -> Proto_EncryptedLink {

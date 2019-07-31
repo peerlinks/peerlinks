@@ -100,7 +100,7 @@ Link {
     [ optional trustee_display_name (utf8 string) ]
   }
 
-  [ ed25519_sign(HASH(TBSLink, channel_mac_key), issuer_priv_key) ]
+  [ ed25519_sign(HASH(TBSLink), issuer_priv_key) ]
 }
 ```
 
@@ -123,14 +123,9 @@ LinkRequest {
 Recipient of `LinkRequest` MUST validate that `desired_display_name` is valid
 UTF-8 string. The maximum length of `desired_display_name` is 64 bytes.
 
-_(TODO: does `LinkRequest` have to be signed?)_
-
 Trustee MAY validate that the `Link` contains the desired display name of
 their choice. However, some channels might prefer to issue the display names
 in top-bottom manner.
-
-_(NOTE: because of `channel_mac_key` above. The links are only valid for
-selected channels.)_
 
 ## Trust in Detail
 

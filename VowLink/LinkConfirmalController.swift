@@ -19,7 +19,7 @@ class LinkConfirmalController : UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        app = UIApplication.shared.delegate as! AppDelegate
+        app = (UIApplication.shared.delegate as! AppDelegate)
         let sodium = app.context.sodium
         
         displayName.text = request?.desiredDisplayName

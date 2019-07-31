@@ -9,6 +9,10 @@
 import UIKit
 import CoreData
 
+protocol LinkNotificationDelegate: AnyObject {
+    func link(received link: Link)
+}
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
     let context = Context()
@@ -16,6 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
     var p2p: PeerToPeer!
     var identity: Identity?
     var window: UIWindow?
+    weak var linkDelegate: LinkNotificationDelegate?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         p2p = PeerToPeer(context: context, serviceType: "com-vowlink")
@@ -94,8 +99,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
     }
 
     // MARK: Peer to Peer
+
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer) {
         debugPrint("[app] got packet \(packet) from peer \(peer)")
+        
+        guard let identity = identity else {
+            debugPrint("[app] no identity available, ignoring packets")
+            return
+        }
+        
+        switch packet.content {
+        case .some(.link(let encryptedLink)):
+            do {
+                let link = try identity.addLink(encryptedLink)
+                
+                linkDelegate?.link(received: link)
+            } catch {
+                debugPrint("[app] failed to decrypt link due to error \(error)")
+            }
+            break
+            
+        default:
+            debugPrint("[app] unhandled packet \(packet)")
+            break
+        }
     }
 }
 

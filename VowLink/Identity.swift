@@ -12,6 +12,8 @@ import KeychainAccess
 
 enum IdentityError: Error {
     case signatureError
+    case linkDecryptError
+    case linkPubkeyMismatch
 }
 
 class Identity {
@@ -87,5 +89,24 @@ class Identity {
         })
         
         return Link(proto)
+    }
+    
+    func addLink(_ encrypted: Proto_EncryptedLink) throws -> Link {
+        guard let data = context.sodium.box.open(anonymousCipherText: Bytes(encrypted.box),
+                                                 recipientPublicKey: publicKey,
+                                                 recipientSecretKey: secretKey) else {
+            throw IdentityError.linkDecryptError
+        }
+        
+        let proto = try Proto_Link(serializedData: Data(data))
+        
+        let link = Link(proto)
+        
+        if !link.trusteePubKey.elementsEqual(publicKey) {
+            throw IdentityError.linkPubkeyMismatch
+        }
+        
+        links.append(link)
+        return link
     }
 }

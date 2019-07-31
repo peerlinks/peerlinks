@@ -9,7 +9,7 @@
 import UIKit
 import Sodium
 
-class LinkRequestController : UIViewController {
+class LinkRequestController : UIViewController, LinkNotificationDelegate {
     @IBOutlet weak var imageView: UIImageView!
     
     override func viewDidLoad() {
@@ -43,5 +43,17 @@ class LinkRequestController : UIViewController {
         
         let qr = image.transformed(by: transform)
         imageView.image = UIImage(ciImage: qr)
+        
+        app.linkDelegate = self
+    }
+    
+    func link(received link: Link) {
+        let alert = UIAlertController(title: "Got Link",
+                                      message: "Link received",
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+        present(alert, animated: true) {
+            self.navigationController?.popViewController(animated: true)
+        }
     }
 }
