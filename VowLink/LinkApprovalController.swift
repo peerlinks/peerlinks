@@ -14,6 +14,7 @@ class LinkApprovalController : UIViewController, AVCaptureMetadataOutputObjectsD
     var context: Context!
     var captureSession: AVCaptureSession!
     var previewLayer: AVCaptureVideoPreviewLayer!
+    var request: Proto_LinkRequest?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,6 +76,14 @@ class LinkApprovalController : UIViewController, AVCaptureMetadataOutputObjectsD
         }
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let approval = segue.destination as? LinkConfirmalController {
+            approval.request = request
+        }
+            
+        super.prepare(for: segue, sender: sender)
+    }
+    
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         if metadataObjects.count != 1 {
             return
@@ -105,7 +114,9 @@ class LinkApprovalController : UIViewController, AVCaptureMetadataOutputObjectsD
             return
         }
         
-        print(request)
+        self.request = request
         AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+        
+        performSegue(withIdentifier: "confirmLinkApproval", sender: self)
     }
 }

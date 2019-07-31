@@ -24,6 +24,19 @@ class Link {
         self.signature = Bytes(link.signature)
     }
     
+    func encrypt(withContext context: Context) throws -> Proto_EncryptedLink {
+        let data: Data = try proto.serializedData()
+        let box = context.sodium.box.seal(
+            message: Bytes(data),
+            recipientPublicKey: trusteePubKey)
+        
+        return Proto_EncryptedLink.with({ (encrypted) in
+            if let box = box {
+                encrypted.box = Data(box)
+            }
+        })
+    }
+
     func verify(withContext context: Context, publicKey: Bytes) throws -> Bool {
         return context.sodium.sign.verify(message: Bytes(try self.proto.tbs.serializedData()),
                                           publicKey: publicKey,

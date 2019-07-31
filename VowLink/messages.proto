@@ -56,8 +56,9 @@ message Unsubscribe {
 message Packet {
   oneof content {
     EncryptedMessage msg = 1;
-    Subscribe subscribe = 2;
-    Unsubscribe unsubscribe = 3;
+    EncryptedLink link = 2;
+    Subscribe subscribe = 3;
+    Unsubscribe unsubscribe = 4;
   }
 }
 

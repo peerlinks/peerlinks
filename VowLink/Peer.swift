@@ -73,4 +73,16 @@ class Peer: NSObject {
         try session.send(data, toPeers: [ self.peerID ], with: .reliable)
         return true
     }
+    
+    func send(link: Link) throws -> Bool {
+        let encryptedLink = try link.encrypt(withContext: context)
+        
+        let packet = Proto_Packet.with { (packet) in
+            packet.link = encryptedLink
+        }
+        
+        let data = try packet.serializedData()
+        
+        return try sendPacket(data: data)
+    }
 }

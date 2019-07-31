@@ -187,6 +187,14 @@ struct Proto_Packet {
     set {_uniqueStorage()._content = .msg(newValue)}
   }
 
+  var link: Proto_EncryptedLink {
+    get {
+      if case .link(let v)? = _storage._content {return v}
+      return Proto_EncryptedLink()
+    }
+    set {_uniqueStorage()._content = .link(newValue)}
+  }
+
   var subscribe: Proto_Subscribe {
     get {
       if case .subscribe(let v)? = _storage._content {return v}
@@ -207,6 +215,7 @@ struct Proto_Packet {
 
   enum OneOf_Content: Equatable {
     case msg(Proto_EncryptedMessage)
+    case link(Proto_EncryptedLink)
     case subscribe(Proto_Subscribe)
     case unsubscribe(Proto_Unsubscribe)
 
@@ -214,6 +223,7 @@ struct Proto_Packet {
     static func ==(lhs: Proto_Packet.OneOf_Content, rhs: Proto_Packet.OneOf_Content) -> Bool {
       switch (lhs, rhs) {
       case (.msg(let l), .msg(let r)): return l == r
+      case (.link(let l), .link(let r)): return l == r
       case (.subscribe(let l), .subscribe(let r)): return l == r
       case (.unsubscribe(let l), .unsubscribe(let r)): return l == r
       default: return false
@@ -623,8 +633,9 @@ extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
   static let protoMessageName: String = _protobuf_package + ".Packet"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "msg"),
-    2: .same(proto: "subscribe"),
-    3: .same(proto: "unsubscribe"),
+    2: .same(proto: "link"),
+    3: .same(proto: "subscribe"),
+    4: .same(proto: "unsubscribe"),
   ]
 
   fileprivate class _StorageClass {
@@ -660,6 +671,14 @@ extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
           try decoder.decodeSingularMessageField(value: &v)
           if let v = v {_storage._content = .msg(v)}
         case 2:
+          var v: Proto_EncryptedLink?
+          if let current = _storage._content {
+            try decoder.handleConflictingOneOf()
+            if case .link(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {_storage._content = .link(v)}
+        case 3:
           var v: Proto_Subscribe?
           if let current = _storage._content {
             try decoder.handleConflictingOneOf()
@@ -667,7 +686,7 @@ extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
           }
           try decoder.decodeSingularMessageField(value: &v)
           if let v = v {_storage._content = .subscribe(v)}
-        case 3:
+        case 4:
           var v: Proto_Unsubscribe?
           if let current = _storage._content {
             try decoder.handleConflictingOneOf()
@@ -686,10 +705,12 @@ extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
       switch _storage._content {
       case .msg(let v)?:
         try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-      case .subscribe(let v)?:
+      case .link(let v)?:
         try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
-      case .unsubscribe(let v)?:
+      case .subscribe(let v)?:
         try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      case .unsubscribe(let v)?:
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
       case nil: break
       }
     }
