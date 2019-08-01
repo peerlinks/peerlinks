@@ -16,7 +16,14 @@ enum LinkError : Error {
 class Link {
     var proto: Proto_Link
     let trusteePubKey: Bytes
-    var issuerPubKey: Bytes? = nil
+    var issuerPubKey: Bytes? {
+        get {
+            if proto.issuerPubKey.isEmpty {
+                return nil
+            }
+            return Bytes(proto.issuerPubKey)
+        }
+    }
     let expiration: TimeInterval
     let signature: Bytes
     var label: String? {
@@ -36,9 +43,6 @@ class Link {
         proto = link
         trusteePubKey = Bytes(link.tbs.trusteePubKey)
         expiration = link.tbs.expiration
-        if !link.issuerPubKey.isEmpty {
-            issuerPubKey = Bytes(link.issuerPubKey)
-        }
         signature = Bytes(link.signature)
         
         if !link.label.isEmpty {

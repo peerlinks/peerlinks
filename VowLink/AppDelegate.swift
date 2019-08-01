@@ -110,7 +110,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer) {
         debugPrint("[app] got packet \(packet) from peer \(peer)")
         
-        guard let identity = identity else {
+        guard let _ = identity else {
             debugPrint("[app] no identity available, ignoring packets")
             return
         }

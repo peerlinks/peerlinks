@@ -42,13 +42,21 @@ class SubscriptionList {
         
     }
     
-    // TODO(indutny): prevent duplicates
     func add(publicKey: Bytes) throws {
+        for channel in subscriptions {
+            if channel.publicKey.elementsEqual(publicKey) {
+                debugPrint("[subscriptions] duplicate \(publicKey)")
+                return
+            }
+        }
+
         let channel = Channel(context: context, publicKey: publicKey)
         subscriptions.append(channel)
         proto.subscriptions.append(Proto_Subscription.with({ (sub) in
             sub.publicKey = Data(publicKey)
         }))
+        
+        debugPrint("[subscriptions] added new \(publicKey)")
         
         try save()
     }
