@@ -19,15 +19,20 @@ class Link {
     var issuerPubKey: Bytes? = nil
     let expiration: TimeInterval
     let signature: Bytes
+    var label: String? = nil
     
     init(_ link: Proto_Link) {
         proto = link
         trusteePubKey = Bytes(link.tbs.trusteePubKey)
         expiration = link.tbs.expiration
-        if link.issuerPubKey.count != 0 {
+        if !link.issuerPubKey.isEmpty {
             issuerPubKey = Bytes(link.issuerPubKey)
         }
         signature = Bytes(link.signature)
+        
+        if !link.label.isEmpty {
+            label = link.label
+        }
     }
     
     convenience init(_ encrypted: Proto_EncryptedLink, withContext context: Context, publicKey: Bytes, andSecretKey secretKey: Bytes) throws {

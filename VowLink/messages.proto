@@ -22,8 +22,12 @@ message Link {
   }
 
   TBS tbs = 1;
-  bytes issuer_pub_key = 2;
-  bytes signature = 3;
+  bytes signature = 2;
+
+  // Optional and convenience-only fields, they SHOULD be empty for links in the
+  // chain.
+  bytes issuer_pub_key = 3;
+  string label = 4;
 }
 
 message EncryptedLink {

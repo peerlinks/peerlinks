@@ -62,14 +62,21 @@ struct Proto_Link {
   /// Clears the value of `tbs`. Subsequent reads from it will return its default value.
   mutating func clearTbs() {_uniqueStorage()._tbs = nil}
 
+  var signature: Data {
+    get {return _storage._signature}
+    set {_uniqueStorage()._signature = newValue}
+  }
+
+  /// Optional and convenience-only fields, they SHOULD be empty for links in the
+  /// chain.
   var issuerPubKey: Data {
     get {return _storage._issuerPubKey}
     set {_uniqueStorage()._issuerPubKey = newValue}
   }
 
-  var signature: Data {
-    get {return _storage._signature}
-    set {_uniqueStorage()._signature = newValue}
+  var label: String {
+    get {return _storage._label}
+    set {_uniqueStorage()._label = newValue}
   }
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -358,14 +365,16 @@ extension Proto_Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementatio
   static let protoMessageName: String = _protobuf_package + ".Link"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "tbs"),
-    2: .standard(proto: "issuer_pub_key"),
-    3: .same(proto: "signature"),
+    2: .same(proto: "signature"),
+    3: .standard(proto: "issuer_pub_key"),
+    4: .same(proto: "label"),
   ]
 
   fileprivate class _StorageClass {
     var _tbs: Proto_Link.TBS? = nil
-    var _issuerPubKey: Data = SwiftProtobuf.Internal.emptyData
     var _signature: Data = SwiftProtobuf.Internal.emptyData
+    var _issuerPubKey: Data = SwiftProtobuf.Internal.emptyData
+    var _label: String = String()
 
     static let defaultInstance = _StorageClass()
 
@@ -373,8 +382,9 @@ extension Proto_Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementatio
 
     init(copying source: _StorageClass) {
       _tbs = source._tbs
-      _issuerPubKey = source._issuerPubKey
       _signature = source._signature
+      _issuerPubKey = source._issuerPubKey
+      _label = source._label
     }
   }
 
@@ -391,8 +401,9 @@ extension Proto_Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementatio
       while let fieldNumber = try decoder.nextFieldNumber() {
         switch fieldNumber {
         case 1: try decoder.decodeSingularMessageField(value: &_storage._tbs)
-        case 2: try decoder.decodeSingularBytesField(value: &_storage._issuerPubKey)
-        case 3: try decoder.decodeSingularBytesField(value: &_storage._signature)
+        case 2: try decoder.decodeSingularBytesField(value: &_storage._signature)
+        case 3: try decoder.decodeSingularBytesField(value: &_storage._issuerPubKey)
+        case 4: try decoder.decodeSingularStringField(value: &_storage._label)
         default: break
         }
       }
@@ -404,11 +415,14 @@ extension Proto_Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementatio
       if let v = _storage._tbs {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
       }
-      if !_storage._issuerPubKey.isEmpty {
-        try visitor.visitSingularBytesField(value: _storage._issuerPubKey, fieldNumber: 2)
-      }
       if !_storage._signature.isEmpty {
-        try visitor.visitSingularBytesField(value: _storage._signature, fieldNumber: 3)
+        try visitor.visitSingularBytesField(value: _storage._signature, fieldNumber: 2)
+      }
+      if !_storage._issuerPubKey.isEmpty {
+        try visitor.visitSingularBytesField(value: _storage._issuerPubKey, fieldNumber: 3)
+      }
+      if !_storage._label.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._label, fieldNumber: 4)
       }
     }
     try unknownFields.traverse(visitor: &visitor)
@@ -420,8 +434,9 @@ extension Proto_Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementatio
         let _storage = _args.0
         let rhs_storage = _args.1
         if _storage._tbs != rhs_storage._tbs {return false}
-        if _storage._issuerPubKey != rhs_storage._issuerPubKey {return false}
         if _storage._signature != rhs_storage._signature {return false}
+        if _storage._issuerPubKey != rhs_storage._issuerPubKey {return false}
+        if _storage._label != rhs_storage._label {return false}
         return true
       }
       if !storagesAreEqual {return false}

@@ -14,6 +14,7 @@ class SubscriptionList {
     private var proto: Proto_SubscriptionList
     var subscriptions = [Channel]()
     
+    // TODO(indutny): does it make sense to store this in keychain too?
     init(context: Context) {
         self.context = context
         
