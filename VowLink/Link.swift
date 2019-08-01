@@ -28,7 +28,7 @@ class Link {
         signature = Bytes(link.signature)
     }
     
-    convenience init(_ encrypted: Proto_EncryptedLink, context: Context, withPublicKey publicKey: Bytes, secretKey: Bytes) throws {
+    convenience init(_ encrypted: Proto_EncryptedLink, withContext context: Context, publicKey: Bytes, andSecretKey secretKey: Bytes) throws {
         guard let data = context.sodium.box.open(anonymousCipherText: Bytes(encrypted.box),
                                                  recipientPublicKey: publicKey,
                                                  recipientSecretKey: secretKey) else {

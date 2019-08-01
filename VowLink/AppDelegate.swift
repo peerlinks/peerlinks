@@ -119,9 +119,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
             }
             do {
                 let link = try Link(encryptedLink,
-                                    context: context,
-                                    withPublicKey: linkDelegate.boxPublicKey!,
-                                    secretKey: linkDelegate.boxSecretKey!)
+                                    withContext: context,
+                                    publicKey: linkDelegate.boxPublicKey!,
+                                    andSecretKey: linkDelegate.boxSecretKey!)
 
                 try identity.addLink(link)
                 

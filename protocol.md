@@ -117,6 +117,7 @@ Peer requests `Link` to be issued by sending:
 LinkRequest {
   [ trustee_pub_key ]
   [ optional desired_display_name (utf8 string) ]
+  [ box_pub_key ]
 }
 ```
 
