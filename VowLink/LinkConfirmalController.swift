@@ -44,7 +44,8 @@ class LinkConfirmalController : UITableViewController {
         do {
             let link = try id.issueLink(for: Bytes(request.trusteePubKey))
             
-            let encryptedLink = try link.encrypt(withContext: id.context, andPubKey: Bytes(request.boxPubKey))
+            let encryptedLink = try link.encrypt(withContext: id.context,
+                                                 andPubKey: Bytes(request.boxPubKey))
             
             let packet = Proto_Packet.with { (packet) in
                 packet.link = encryptedLink

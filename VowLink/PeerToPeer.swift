@@ -15,6 +15,11 @@ protocol PeerToPeerDelegate: AnyObject {
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer)
 }
 
+// TODO(indutny): MCSession should be used per peer. Maximum 7 connected peers per session!
+// TODO(indutny): connect randomly to peers. We should support at least a hundred of peers that are nearby.
+// Connecting to all of them is not only unreasonable, but likely is not going to work: 100 * 101 / 2 = 5050 connections!
+// It might be best to select 8 peers either randomly, or using some form of rendezvous hashing and work with them.
+// Maybe even rotate the peers from time to time.
 class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate {
     let context: Context
     let peer: MCPeerID
@@ -26,17 +31,9 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     init(context: Context, serviceType: String) {
         self.context = context
-        
-        let defaults = UserDefaults.standard
-        if let raw_peer = defaults.data(forKey: "peer-id") {
-            peer = try! NSKeyedUnarchiver.unarchivedObject(ofClass: MCPeerID.self, from: raw_peer)!
-        } else {
-            peer = MCPeerID(displayName: NSUUID().uuidString)
-            let data = try! NSKeyedArchiver.archivedData(withRootObject: peer as Any,
-                                                         requiringSecureCoding: true)
-            defaults.set(data, forKey: "peer-id")
-            defaults.synchronize()
-        }
+
+        // NOTE: The string is always random to avoid fingerprinting
+        peer = MCPeerID(displayName: NSUUID().uuidString)
         
         debugPrint("[p2p] start peer.displayName=\(peer.displayName)")
         
@@ -58,6 +55,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     deinit {
         advertiser.stopAdvertisingPeer()
         browser.stopBrowsingForPeers()
+        session.disconnect()
     }
     
     // MARK: Public API
@@ -144,6 +142,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
             delegate?.peerToPeer(self, didReceive: packet, fromPeer: peer)
         } catch  {
             debugPrint("[session] parsing error \(error)")
+            session.disconnect()
         }
     }
     

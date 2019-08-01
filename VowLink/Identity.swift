@@ -83,6 +83,7 @@ class Identity {
         
         let proto = Proto_Link.with({ (link) in
             link.tbs = tbs
+            link.issuerPubKey = Data(self.publicKey)
             link.signature = Data(signature)
         })
         

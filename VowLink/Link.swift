@@ -16,6 +16,7 @@ enum LinkError : Error {
 class Link {
     let proto: Proto_Link
     let trusteePubKey: Bytes
+    var issuerPubKey: Bytes? = nil
     let expiration: TimeInterval
     let signature: Bytes
     
@@ -23,6 +24,9 @@ class Link {
         proto = link
         trusteePubKey = Bytes(link.tbs.trusteePubKey)
         expiration = link.tbs.expiration
+        if link.issuerPubKey.count != 0 {
+            issuerPubKey = Bytes(link.issuerPubKey)
+        }
         signature = Bytes(link.signature)
     }
     
@@ -40,6 +44,7 @@ class Link {
     
     func encrypt(withContext context: Context, andPubKey pubKey: Bytes) throws -> Proto_EncryptedLink {
         let data: Data = try proto.serializedData()
+
         let box = context.sodium.box.seal(
             message: Bytes(data),
             recipientPublicKey: pubKey)

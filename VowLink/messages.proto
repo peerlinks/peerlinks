@@ -7,7 +7,7 @@ package proto;
 
 message Hello {
   int32 version = 1;
-  int32 rate_limit = 3; // maximum number of messages per hour
+  int32 rate_limit = 2; // maximum number of messages per hour
 }
 
 message EncryptedMessage {
@@ -22,7 +22,8 @@ message Link {
   }
 
   TBS tbs = 1;
-  bytes signature = 2;
+  bytes issuer_pub_key = 2;
+  bytes signature = 3;
 }
 
 message EncryptedLink {
@@ -69,4 +70,12 @@ message Identity {
   bytes public_key = 1;
   bytes secret_key = 2;
   repeated Link links = 3;
+}
+
+message Subscription {
+  bytes public_key = 1;
+}
+
+message SubscriptionList {
+  repeated Subscription subscriptions = 1;
 }

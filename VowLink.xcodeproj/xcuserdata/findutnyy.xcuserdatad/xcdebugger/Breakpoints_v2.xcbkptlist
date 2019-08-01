@@ -10,61 +10,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VowLink/IdentityController.swift"
-            timestampString = "586311105.614832"
+            timestampString = "586359960.554581"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "41"
-            endingLineNumber = "41"
+            startingLineNumber = "43"
+            endingLineNumber = "43"
             landmarkName = "viewDidLoad()"
             landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "VowLink/Link.swift"
-            timestampString = "586311105.614969"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "49"
-            endingLineNumber = "49"
-            landmarkName = "encrypt(withContext:andPubKey:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "VowLink.Link.encrypt(withContext: VowLink.Context) throws -&gt; VowLink.Proto_EncryptedLink"
-                  moduleName = "VowLink"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/findutnyy/Code/indutny/VowLink/VowLink/Link.swift"
-                  timestampString = "586305345.530212"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "33"
-                  endingLineNumber = "33"
-                  offsetFromSymbolStart = "490">
-               </Location>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 (inout VowLink.Proto_EncryptedLink) -&gt; () in VowLink.Link.encrypt(withContext: VowLink.Context) throws -&gt; VowLink.Proto_EncryptedLink"
-                  moduleName = "VowLink"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/findutnyy/Code/indutny/VowLink/VowLink/Link.swift"
-                  timestampString = "586305345.532451"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "34"
-                  endingLineNumber = "34"
-                  offsetFromSymbolStart = "103">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

@@ -275,9 +275,10 @@
                                                     <rect key="frame" x="89.5" y="7.5" width="304.5" height="29"/>
                                                     <nil key="textColor"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="24"/>
-                                                    <textInputTraits key="textInputTraits"/>
+                                                    <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="join" smartDashesType="no" smartQuotesType="no" textContentType="username"/>
                                                     <connections>
                                                         <action selector="onNameFieldChange:" destination="lTt-w2-F60" eventType="editingChanged" id="gD4-vW-hAM"/>
+                                                        <action selector="saveClicked:" destination="lTt-w2-F60" eventType="primaryActionTriggered" id="bbI-VA-4WR"/>
                                                     </connections>
                                                 </textField>
                                             </subviews>

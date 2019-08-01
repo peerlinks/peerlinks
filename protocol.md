@@ -40,13 +40,12 @@ participating in the P2P.
 ## P2P
 
 Each peer assingns themselves a random
-binary `peer_id = RANDOM[:32]`. `peer_id` is persisted between restarts of the
-application. The first message that they send is
+binary `peer_id = RANDOM[:32]`. `peer_id` is NOT persisted between restarts of
+the application. The first message that they send is
 
 ```
 Hello {
   [ version (big endian int32) ]
-  [ peer_id ]
   [ maximum number of messages per hour ]
 }
 ```

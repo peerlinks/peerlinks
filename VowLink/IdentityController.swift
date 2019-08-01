@@ -34,7 +34,9 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
         }
         
         selectButton.isEnabled = identities.count != 0
-        app.identity = identities[0]
+        if identities.count > 0 {
+            app.identity = identities[0]
+        }
         
         identityPicker.delegate = self
         identityPicker.dataSource = self
@@ -61,10 +63,18 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
     // MARK: - Identity Manager
     
     func createIdentity(name: String) throws {
+        let app = (UIApplication.shared.delegate as! AppDelegate)
+        ;
         // TODO(indutny): avoid duplicates by throwing
         let id = try Identity(context: context, name: name)
         identities.append(id)
         selectButton.isEnabled = true
         identityPicker.reloadAllComponents()
+        
+        // Picker has been reloaded, so load the selected
+        app.identity = identities[identityPicker.selectedRow(inComponent: 0)]
+
+        // Subscribe to our own channel
+        try app.subscriptions.add(publicKey: id.publicKey)
     }
 }
