@@ -30,7 +30,7 @@ class LinkDetailsController : UIViewController {
         }
         
         do {
-            try app.subscriptions.add(publicKey: publicKey)
+            try app.subscriptions.add(publicKey: publicKey, label: descriptionLabel.text)
             
             let alert = UIAlertController(title: "Subscribed", message: "Successfully subscribed to channel", preferredStyle: .alert)
             

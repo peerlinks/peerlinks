@@ -60,6 +60,10 @@ class LinkApprovalController : UIViewController, AVCaptureMetadataOutputObjectsD
         captureSession.startRunning()
     }
     
+    override func viewLayoutMarginsDidChange() {
+        previewLayer.frame = view.layer.bounds
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -117,6 +121,7 @@ class LinkApprovalController : UIViewController, AVCaptureMetadataOutputObjectsD
         self.request = request
         AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
         
+        captureSession.stopRunning()
         performSegue(withIdentifier: "confirmLinkApproval", sender: self)
     }
 }

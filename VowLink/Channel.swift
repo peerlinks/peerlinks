@@ -11,7 +11,20 @@ import Sodium
 
 class Channel {
     let context: Context
+    var proto: Proto_Subscription
     let publicKey: Bytes
+    var label: String? {
+        get {
+            if proto.label.isEmpty {
+                return nil
+            }
+            return proto.label
+        }
+        
+        set {
+            proto.label = newValue ?? ""
+        }
+    }
     
     private var lazyChannelID: Bytes?
     var channelID: Bytes {
@@ -28,8 +41,9 @@ class Channel {
     
     static let CHANNEL_ID_LENGTH = 32
     
-    init(context: Context, publicKey: Bytes) {
+    init(context: Context, proto: Proto_Subscription) {
         self.context = context
-        self.publicKey = publicKey
+        self.proto = proto
+        self.publicKey = Bytes(proto.publicKey)
     }
 }

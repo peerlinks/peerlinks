@@ -105,16 +105,27 @@
                                     <segue destination="q3U-Oh-8bc" kind="show" id="jeN-kE-vBQ"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Crd-mw-xXb">
+                                <rect key="frame" x="0.0" y="235" width="375" height="41"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <state key="normal" title="Subscriptions"/>
+                                <connections>
+                                    <segue destination="Gd9-ac-Ym5" kind="show" id="UvQ-lx-mxx"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="I0j-6n-nue" firstAttribute="top" secondItem="p6j-tt-kQb" secondAttribute="bottom" constant="8" id="6aW-i8-Bn2"/>
+                            <constraint firstItem="Crd-mw-xXb" firstAttribute="leading" secondItem="UYK-z3-7rn" secondAttribute="leading" id="6zB-3J-lEj"/>
                             <constraint firstItem="ng5-F2-BnE" firstAttribute="trailing" secondItem="UYK-z3-7rn" secondAttribute="trailing" id="7nj-ch-nS6"/>
                             <constraint firstItem="ng5-F2-BnE" firstAttribute="leading" secondItem="UYK-z3-7rn" secondAttribute="leading" id="8tq-jO-zCO"/>
                             <constraint firstItem="p6j-tt-kQb" firstAttribute="top" secondItem="UYK-z3-7rn" secondAttribute="top" id="CNt-5J-hfj"/>
                             <constraint firstItem="I0j-6n-nue" firstAttribute="leading" secondItem="UYK-z3-7rn" secondAttribute="leading" id="PTh-Th-Rrg"/>
                             <constraint firstItem="ng5-F2-BnE" firstAttribute="top" secondItem="I0j-6n-nue" secondAttribute="bottom" constant="8" id="Xej-U2-GFA"/>
+                            <constraint firstItem="Crd-mw-xXb" firstAttribute="trailing" secondItem="UYK-z3-7rn" secondAttribute="trailing" id="buR-CN-lXW"/>
                             <constraint firstItem="UYK-z3-7rn" firstAttribute="trailing" secondItem="p6j-tt-kQb" secondAttribute="trailing" id="jDs-wN-vqa"/>
+                            <constraint firstItem="Crd-mw-xXb" firstAttribute="top" secondItem="ng5-F2-BnE" secondAttribute="bottom" constant="8" id="tC0-4s-zbQ"/>
                             <constraint firstItem="p6j-tt-kQb" firstAttribute="leading" secondItem="UYK-z3-7rn" secondAttribute="leading" id="twm-Bw-FhQ"/>
                             <constraint firstItem="UYK-z3-7rn" firstAttribute="trailing" secondItem="I0j-6n-nue" secondAttribute="trailing" id="uWA-wa-Kz3"/>
                         </constraints>
@@ -266,6 +277,43 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lvq-sP-4t3" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1351" y="1124"/>
+        </scene>
+        <!--Subscriptions-->
+        <scene sceneID="DcQ-4N-SzL">
+            <objects>
+                <tableViewController title="Subscriptions" id="Gd9-ac-Ym5" customClass="SubscriptionListController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="QCw-mg-9vo">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="subscriptionCell" textLabel="G6a-pF-Uxe" style="IBUITableViewCellStyleDefault" id="nkO-2w-VBJ">
+                                <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="nkO-2w-VBJ" id="QqU-AU-pic">
+                                    <rect key="frame" x="0.0" y="0.0" width="341" height="43.666666666666664"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="G6a-pF-Uxe">
+                                            <rect key="frame" x="16" y="0.0" width="324" height="43.666666666666664"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="Gd9-ac-Ym5" id="s8l-vz-yve"/>
+                            <outlet property="delegate" destination="Gd9-ac-Ym5" id="Svu-Z7-oMh"/>
+                        </connections>
+                    </tableView>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="X74-Km-bjQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1350" y="1846"/>
         </scene>
         <!--Link-->
         <scene sceneID="OH3-eJ-Oz2">

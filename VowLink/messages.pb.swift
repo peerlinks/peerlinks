@@ -270,6 +270,8 @@ struct Proto_Subscription {
 
   var publicKey: Data = SwiftProtobuf.Internal.emptyData
 
+  var label: String = String()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -821,12 +823,14 @@ extension Proto_Subscription: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
   static let protoMessageName: String = _protobuf_package + ".Subscription"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "public_key"),
+    2: .same(proto: "label"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
       case 1: try decoder.decodeSingularBytesField(value: &self.publicKey)
+      case 2: try decoder.decodeSingularStringField(value: &self.label)
       default: break
       }
     }
@@ -836,11 +840,15 @@ extension Proto_Subscription: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     if !self.publicKey.isEmpty {
       try visitor.visitSingularBytesField(value: self.publicKey, fieldNumber: 1)
     }
+    if !self.label.isEmpty {
+      try visitor.visitSingularStringField(value: self.label, fieldNumber: 2)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Proto_Subscription, rhs: Proto_Subscription) -> Bool {
     if lhs.publicKey != rhs.publicKey {return false}
+    if lhs.label != rhs.label {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

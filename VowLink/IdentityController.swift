@@ -64,7 +64,7 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
     
     func createIdentity(name: String) throws {
         let app = (UIApplication.shared.delegate as! AppDelegate)
-        ;
+        
         // TODO(indutny): avoid duplicates by throwing
         let id = try Identity(context: context, name: name)
         identities.append(id)
@@ -75,6 +75,6 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
         app.identity = identities[identityPicker.selectedRow(inComponent: 0)]
 
         // Subscribe to our own channel
-        try app.subscriptions.add(publicKey: id.publicKey)
+        try app.subscriptions.add(publicKey: id.publicKey, label: name)
     }
 }

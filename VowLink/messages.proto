@@ -78,6 +78,7 @@ message Identity {
 
 message Subscription {
   bytes public_key = 1;
+  string label = 2;
 }
 
 message SubscriptionList {

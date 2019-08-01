@@ -31,7 +31,7 @@ class SubscriptionList {
             proto = try Proto_SubscriptionList(serializedData: existing)
             
             for subscription in proto.subscriptions {
-                subscriptions.append(Channel(context: context, publicKey: Bytes(subscription.publicKey)))
+                subscriptions.append(Channel(context: context, proto: subscription))
             }
             
             debugPrint("[subscriptions] loaded \(subscriptions.count) subscriptions")
@@ -42,19 +42,22 @@ class SubscriptionList {
         
     }
     
-    func add(publicKey: Bytes) throws {
+    func add(publicKey: Bytes, label: String?) throws {
         for channel in subscriptions {
             if channel.publicKey.elementsEqual(publicKey) {
                 debugPrint("[subscriptions] duplicate \(publicKey)")
                 return
             }
         }
-
-        let channel = Channel(context: context, publicKey: publicKey)
-        subscriptions.append(channel)
-        proto.subscriptions.append(Proto_Subscription.with({ (sub) in
+        
+        let sub = Proto_Subscription.with({ (sub) in
+            sub.label = label ?? ""
             sub.publicKey = Data(publicKey)
-        }))
+        })
+
+        let channel = Channel(context: context, proto: sub)
+        subscriptions.append(channel)
+        proto.subscriptions.append(sub)
         
         debugPrint("[subscriptions] added new \(publicKey)")
         
