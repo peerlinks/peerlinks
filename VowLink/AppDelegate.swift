@@ -126,9 +126,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
                                     publicKey: linkDelegate.boxPublicKey!,
                                     andSecretKey: linkDelegate.boxSecretKey!)
 
-                DispatchQueue.main.async {
-                    self.linkDelegate?.link(received: link)
-                }
+                linkDelegate.link(received: link)
             } catch {
                 debugPrint("[app] failed to decrypt link due to error \(error)")
             }

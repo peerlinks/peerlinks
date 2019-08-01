@@ -139,7 +139,9 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         
             debugPrint("[session] packet \(packet)")
             
-            delegate?.peerToPeer(self, didReceive: packet, fromPeer: peer)
+            DispatchQueue.main.async {
+                self.delegate?.peerToPeer(self, didReceive: packet, fromPeer: peer)
+            }
         } catch  {
             debugPrint("[session] parsing error \(error)")
             session.disconnect()
