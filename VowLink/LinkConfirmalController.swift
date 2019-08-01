@@ -12,7 +12,6 @@ import Sodium
 class LinkConfirmalController : UITableViewController {
     var app: AppDelegate!
     var request: Proto_LinkRequest?
-    @IBOutlet weak var displayName: UILabel!
     @IBOutlet weak var publicKey: UILabel!
     @IBOutlet weak var peerID: UILabel!
     
@@ -22,7 +21,6 @@ class LinkConfirmalController : UITableViewController {
         app = (UIApplication.shared.delegate as! AppDelegate)
         let sodium = app.context.sodium
         
-        displayName.text = request?.desiredDisplayName
         if let pubKey = request?.trusteePubKey {
             publicKey.text = sodium.utils.bin2hex(Bytes(pubKey))
         } else {
@@ -44,8 +42,7 @@ class LinkConfirmalController : UITableViewController {
         }
         
         do {
-            let link = try id.issueLink(for: Bytes(request.trusteePubKey),
-                                        displayName: request.desiredDisplayName)
+            let link = try id.issueLink(for: Bytes(request.trusteePubKey))
             
             let encryptedLink = try link.encrypt(withContext: id.context, andPubKey: Bytes(request.boxPubKey))
             

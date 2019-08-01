@@ -78,8 +78,6 @@ struct Proto_Link {
 
     var expiration: Double = 0
 
-    var displayName: String = String()
-
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
@@ -110,8 +108,6 @@ struct Proto_LinkRequest {
   var peerID: String = String()
 
   var trusteePubKey: Data = SwiftProtobuf.Internal.emptyData
-
-  var desiredDisplayName: String = String()
 
   var boxPubKey: Data = SwiftProtobuf.Internal.emptyData
 
@@ -403,7 +399,6 @@ extension Proto_Link.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "trustee_pub_key"),
     2: .same(proto: "expiration"),
-    3: .standard(proto: "display_name"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -411,7 +406,6 @@ extension Proto_Link.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
       switch fieldNumber {
       case 1: try decoder.decodeSingularBytesField(value: &self.trusteePubKey)
       case 2: try decoder.decodeSingularDoubleField(value: &self.expiration)
-      case 3: try decoder.decodeSingularStringField(value: &self.displayName)
       default: break
       }
     }
@@ -424,16 +418,12 @@ extension Proto_Link.TBS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
     if self.expiration != 0 {
       try visitor.visitSingularDoubleField(value: self.expiration, fieldNumber: 2)
     }
-    if !self.displayName.isEmpty {
-      try visitor.visitSingularStringField(value: self.displayName, fieldNumber: 3)
-    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Proto_Link.TBS, rhs: Proto_Link.TBS) -> Bool {
     if lhs.trusteePubKey != rhs.trusteePubKey {return false}
     if lhs.expiration != rhs.expiration {return false}
-    if lhs.displayName != rhs.displayName {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -473,8 +463,7 @@ extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "peer_id"),
     2: .standard(proto: "trustee_pub_key"),
-    3: .standard(proto: "desired_display_name"),
-    4: .standard(proto: "box_pub_key"),
+    3: .standard(proto: "box_pub_key"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -482,8 +471,7 @@ extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
       switch fieldNumber {
       case 1: try decoder.decodeSingularStringField(value: &self.peerID)
       case 2: try decoder.decodeSingularBytesField(value: &self.trusteePubKey)
-      case 3: try decoder.decodeSingularStringField(value: &self.desiredDisplayName)
-      case 4: try decoder.decodeSingularBytesField(value: &self.boxPubKey)
+      case 3: try decoder.decodeSingularBytesField(value: &self.boxPubKey)
       default: break
       }
     }
@@ -496,11 +484,8 @@ extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if !self.trusteePubKey.isEmpty {
       try visitor.visitSingularBytesField(value: self.trusteePubKey, fieldNumber: 2)
     }
-    if !self.desiredDisplayName.isEmpty {
-      try visitor.visitSingularStringField(value: self.desiredDisplayName, fieldNumber: 3)
-    }
     if !self.boxPubKey.isEmpty {
-      try visitor.visitSingularBytesField(value: self.boxPubKey, fieldNumber: 4)
+      try visitor.visitSingularBytesField(value: self.boxPubKey, fieldNumber: 3)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -508,7 +493,6 @@ extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
   static func ==(lhs: Proto_LinkRequest, rhs: Proto_LinkRequest) -> Bool {
     if lhs.peerID != rhs.peerID {return false}
     if lhs.trusteePubKey != rhs.trusteePubKey {return false}
-    if lhs.desiredDisplayName != rhs.desiredDisplayName {return false}
     if lhs.boxPubKey != rhs.boxPubKey {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

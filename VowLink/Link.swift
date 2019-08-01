@@ -16,14 +16,12 @@ enum LinkError : Error {
 class Link {
     let proto: Proto_Link
     let trusteePubKey: Bytes
-    let displayName: String
     let expiration: TimeInterval
     let signature: Bytes
     
     init(_ link: Proto_Link) {
         proto = link
         trusteePubKey = Bytes(link.tbs.trusteePubKey)
-        displayName = link.tbs.displayName
         expiration = link.tbs.expiration
         signature = Bytes(link.signature)
     }

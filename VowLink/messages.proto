@@ -19,7 +19,6 @@ message Link {
   message TBS {
     bytes trustee_pub_key = 1;
     double expiration = 2;
-    string display_name = 3;
   }
 
   TBS tbs = 1;
@@ -33,8 +32,7 @@ message EncryptedLink {
 message LinkRequest {
   string peer_id = 1;
   bytes trustee_pub_key = 2;
-  string desired_display_name = 3;
-  bytes box_pub_key = 4;
+  bytes box_pub_key = 3;
 }
 
 message SignedMessage {

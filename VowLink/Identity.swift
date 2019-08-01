@@ -70,12 +70,10 @@ class Identity {
     }
     
     func issueLink(for trusteePubKey: Bytes,
-                   withExpiration expiration: TimeInterval = Identity.DEFAULT_EXPIRATION,
-                   displayName: String = "") throws -> Link {
+                   withExpiration expiration: TimeInterval = Identity.DEFAULT_EXPIRATION) throws -> Link {
         let tbs = Proto_Link.TBS.with { (tbs) in
             tbs.trusteePubKey = Data(trusteePubKey)
             tbs.expiration = NSDate().timeIntervalSince1970 + expiration
-            tbs.displayName = displayName
         }
         let tbsData = try tbs.serializedData()
         
