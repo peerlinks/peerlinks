@@ -66,7 +66,7 @@ class LinkRequestController : UIViewController, LinkNotificationDelegate {
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let received = sender as? LinkReceivedController {
+        if let received = segue.destination as? LinkReceivedController {
             received.link = link
         }
         super.prepare(for: segue, sender: sender)

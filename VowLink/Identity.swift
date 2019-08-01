@@ -101,6 +101,8 @@ class Identity {
         
         links.append(link)
         
+        debugPrint("[identity] name=\(name) added link \(String(describing: link.label))")
+        
         try save()
     }
 }
