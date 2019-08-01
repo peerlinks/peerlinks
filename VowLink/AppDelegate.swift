@@ -126,8 +126,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
                                     publicKey: linkDelegate.boxPublicKey!,
                                     andSecretKey: linkDelegate.boxSecretKey!)
 
-                try identity.addLink(link)
-                
                 linkDelegate.link(received: link)
             } catch {
                 debugPrint("[app] failed to decrypt link due to error \(error)")

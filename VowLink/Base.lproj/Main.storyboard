@@ -150,11 +150,64 @@
                     </view>
                     <connections>
                         <outlet property="imageView" destination="54C-bU-bjQ" id="lgF-mj-4Kz"/>
+                        <segue destination="Mcm-qs-d77" kind="show" identifier="toReceivedLink" id="ndm-Xw-syP"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4vt-e3-Abn" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1351" y="-311"/>
+        </scene>
+        <!--Received Link-->
+        <scene sceneID="kCg-VS-Il0">
+            <objects>
+                <viewController title="Received Link" id="Mcm-qs-d77" customClass="LinkReceivedController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Tqv-1b-Hnq">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Enter link description" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8ow-DF-t2M">
+                                <rect key="frame" x="0.0" y="88" width="414" height="29"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Link description" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="rQv-Va-Leh">
+                                <rect key="frame" x="0.0" y="125" width="414" height="33"/>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <textInputTraits key="textInputTraits" returnKeyType="next"/>
+                                <connections>
+                                    <action selector="descriptionChanged:" destination="Mcm-qs-d77" eventType="editingChanged" id="ibK-g5-CNQ"/>
+                                    <action selector="saveClicked:" destination="Mcm-qs-d77" eventType="primaryActionTriggered" id="NCR-r6-HWV"/>
+                                </connections>
+                            </textField>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="8ow-DF-t2M" firstAttribute="top" secondItem="G8d-V6-LhD" secondAttribute="top" id="Ehd-H9-efO"/>
+                            <constraint firstItem="G8d-V6-LhD" firstAttribute="trailing" secondItem="8ow-DF-t2M" secondAttribute="trailing" id="FeN-fg-PhE"/>
+                            <constraint firstItem="G8d-V6-LhD" firstAttribute="trailing" secondItem="rQv-Va-Leh" secondAttribute="trailing" id="dHx-BX-qhH"/>
+                            <constraint firstItem="8ow-DF-t2M" firstAttribute="leading" secondItem="G8d-V6-LhD" secondAttribute="leading" id="ihF-tZ-bKE"/>
+                            <constraint firstItem="rQv-Va-Leh" firstAttribute="leading" secondItem="G8d-V6-LhD" secondAttribute="leading" id="mhD-ug-Plq"/>
+                            <constraint firstItem="rQv-Va-Leh" firstAttribute="top" secondItem="8ow-DF-t2M" secondAttribute="bottom" constant="8" id="neT-cg-UK5"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="G8d-V6-LhD"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="Received Link" id="v0f-bB-dQs">
+                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="Dyi-X0-yjc">
+                            <connections>
+                                <action selector="saveClicked:" destination="Mcm-qs-d77" id="oAh-Ow-Su0"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="descriptionField" destination="rQv-Va-Leh" id="8Zh-Qt-4Ai"/>
+                        <outlet property="saveButton" destination="Dyi-X0-yjc" id="QKC-gc-bqj"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="G8D-q0-YNg" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2144.927536231884" y="-311.38392857142856"/>
         </scene>
         <!--Link Approval-->
         <scene sceneID="NFr-eS-4CU">
@@ -368,7 +421,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rOR-oM-fRh" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="492.75362318840581" y="-311.38392857142856"/>
+            <point key="canvasLocation" x="496" y="-311"/>
         </scene>
     </scenes>
 </document>

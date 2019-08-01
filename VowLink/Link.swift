@@ -14,12 +14,23 @@ enum LinkError : Error {
 }
 
 class Link {
-    let proto: Proto_Link
+    var proto: Proto_Link
     let trusteePubKey: Bytes
     var issuerPubKey: Bytes? = nil
     let expiration: TimeInterval
     let signature: Bytes
-    var label: String? = nil
+    var label: String? {
+        get {
+            if proto.label.isEmpty {
+                return ""
+            }
+            return proto.label
+        }
+        
+        set {
+            proto.label = newValue ?? ""
+        }
+    }
     
     init(_ link: Proto_Link) {
         proto = link

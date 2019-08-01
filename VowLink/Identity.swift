@@ -100,5 +100,7 @@ class Identity {
         }
         
         links.append(link)
+        
+        try save()
     }
 }

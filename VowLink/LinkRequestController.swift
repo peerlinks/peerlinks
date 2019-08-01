@@ -14,6 +14,7 @@ class LinkRequestController : UIViewController, LinkNotificationDelegate {
     var sodium: Sodium!
     var boxPublicKey: Bytes?
     var boxSecretKey: Bytes?
+    var link: Link? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -63,14 +64,16 @@ class LinkRequestController : UIViewController, LinkNotificationDelegate {
             sodium.utils.zero(&secretKey)
         }
     }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let received = sender as? LinkReceivedController {
+            received.link = link
+        }
+        super.prepare(for: segue, sender: sender)
+    }
     
     func link(received link: Link) {
-        let alert = UIAlertController(title: "Got Link",
-                                      message: "Link received",
-                                      preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
-        present(alert, animated: true) {
-            self.navigationController?.popViewController(animated: true)
-        }
+        self.link = link
+        performSegue(withIdentifier: "toReceivedLink", sender: self)
     }
 }
