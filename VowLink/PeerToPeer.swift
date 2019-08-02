@@ -15,7 +15,6 @@ protocol PeerToPeerDelegate: AnyObject {
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer)
 }
 
-// TODO(indutny): MCSession should be used per peer. Maximum 7 connected peers per session!
 // TODO(indutny): connect randomly to peers. We should support at least a hundred of peers that are nearby.
 // Connecting to all of them is not only unreasonable, but likely is not going to work: 100 * 101 / 2 = 5050 connections!
 // It might be best to select 8 peers either randomly, or using some form of rendezvous hashing and work with them.
@@ -27,6 +26,9 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     let browser: MCNearbyServiceBrowser
     weak var delegate: PeerToPeerDelegate?
     var peers = [MCPeerID:Peer]()
+    
+    // TODO(indutny): consider reasonable limit
+    static let MAX_PEERS = 32
     
     init(context: Context, serviceType: String) {
         self.context = context
@@ -89,6 +91,12 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
             return
         }
         
+        if peers.count > PeerToPeer.MAX_PEERS {
+            debugPrint("[advertiser] declining invitation from \(peerID.displayName) due to max peers limit")
+            invitationHandler(false, nil)
+            return
+        }
+        
         debugPrint("[advertiser] accepting invitation from \(peerID.displayName)")
         let peer = Peer(context: self.context, localID: localID, remoteID: peerID)
         peer.delegate = self
@@ -112,6 +120,11 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         debugPrint("[browser] found peer \(peerID.displayName) with info \(String(describing: info))")
         if peers[peerID] != nil || peerID == self.localID {
             debugPrint("[browser] ignoring peer \(peerID.displayName)")
+            return
+        }
+        
+        if peers.count > PeerToPeer.MAX_PEERS {
+            debugPrint("[browser] ignoring peer \(peerID.displayName) due to max peers limit")
             return
         }
         
