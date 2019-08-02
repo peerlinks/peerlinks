@@ -148,6 +148,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     func peerDisconnected(_ peer: Peer) {
         self.peers.removeValue(forKey: peer.remoteID)
+        peer.delegate = nil
     }
     
     func peer(_ peer: Peer, receivedPacket packet: Proto_Packet) {
