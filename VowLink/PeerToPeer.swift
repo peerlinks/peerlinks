@@ -26,6 +26,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     let browser: MCNearbyServiceBrowser
     weak var delegate: PeerToPeerDelegate?
     var peers = [MCPeerID:Peer]()
+    var availablePeers = Set<MCPeerID>()
     
     // TODO(indutny): consider reasonable limit
     static let MAX_PEERS = 32
@@ -109,6 +110,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
         debugPrint("[browser] lost peer \(peerID.displayName)")
+        availablePeers.remove(peerID)
     }
     
     func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error) {
@@ -118,6 +120,8 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
         debugPrint("[browser] found peer \(peerID.displayName) with info \(String(describing: info))")
+        availablePeers.insert(peerID)
+
         if peers[peerID] != nil || peerID == self.localID {
             debugPrint("[browser] ignoring peer \(peerID.displayName)")
             return
