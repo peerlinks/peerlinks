@@ -30,7 +30,7 @@ class LinkRequestController : UIViewController, LinkNotificationDelegate {
         boxSecretKey = keyPair.secretKey
         
         let req = Proto_LinkRequest.with { (req) in
-            req.peerID = app.p2p.peer.displayName
+            req.peerID = app.p2p.localID.displayName
             req.trusteePubKey = Data(identity.publicKey)
 
             req.boxPubKey = Data(keyPair.publicKey)
