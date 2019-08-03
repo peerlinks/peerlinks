@@ -34,7 +34,7 @@ class Identity {
         
         if let data = try keychain.getData("identity/" + name) {
             let id = try Proto_Identity(serializedData: data)
-            debugPrint("[link-storage] loading existing identity \(name)")
+            debugPrint("[identity] loading existing identity \(name)")
             
             secretKey = Bytes(id.secretKey)
             publicKey = Bytes(id.publicKey)
@@ -42,7 +42,7 @@ class Identity {
                 links.append(Link(proto))
             }
         } else {
-            debugPrint("[link-storage] generating new keypair for \(name)")
+            debugPrint("[identity] generating new keypair for \(name)")
             let keyPair = self.context.sodium.sign.keyPair()!
             secretKey = keyPair.secretKey
             publicKey = keyPair.publicKey
@@ -70,10 +70,12 @@ class Identity {
     }
     
     func issueLink(for trusteePubKey: Bytes,
+                   andChannel channel: Channel,
                    withExpiration expiration: TimeInterval = Identity.DEFAULT_EXPIRATION) throws -> Link {
         let tbs = Proto_Link.TBS.with { (tbs) in
             tbs.trusteePubKey = Data(trusteePubKey)
             tbs.expiration = NSDate().timeIntervalSince1970 + expiration
+            tbs.channelID = Data(channel.channelID)
         }
         let tbsData = try tbs.serializedData()
         
@@ -84,6 +86,11 @@ class Identity {
         let proto = Proto_Link.with({ (link) in
             link.tbs = tbs
             link.stored.issuerPubKey = Data(self.publicKey)
+            link.stored.channelPubKey = Data(channel.publicKey)
+            link.stored.label = channel.label ?? ""
+            
+            // TODO(indutny): channel root message
+            
             link.signature = Data(signature)
         })
         

@@ -43,6 +43,16 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
         identityPicker.dataSource = self
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if identities.count == 0 {
+            return
+        }
+        // Picker has been reloaded, so load the selected
+        app.identity = identities[identityPicker.selectedRow(inComponent: 0)]
+    }
+    
+    // MARK: - Picker
+    
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
@@ -54,16 +64,12 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return identities[row].name
     }
-    
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        app.identity = identities[row]
-    }
 
     // MARK: - Miscellaneous
     
     @IBAction func eraseClicked(_ sender: Any) {
         try! context.keychain.removeAll()
-        fatalError("Intentially crashing the app")
+        fatalError("Intentionally crashing the app")
     }
     
     // MARK: - Identity Manager
@@ -74,11 +80,8 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
         identities.append(id)
         selectButton.isEnabled = true
         identityPicker.reloadAllComponents()
-        
-        // Picker has been reloaded, so load the selected
-        app.identity = identities[identityPicker.selectedRow(inComponent: 0)]
 
         // Subscribe to our own channel
-        try app.channels.add(publicKey: id.publicKey, label: name)
+        try app.channelList.add(publicKey: id.publicKey, label: name)
     }
 }

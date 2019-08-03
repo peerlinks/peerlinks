@@ -1,5 +1,5 @@
 //
-//  LinkApprovalController.swift
+//  InviteController.swift
 //  VowLink
 //
 //  Created by Indutnyy, Fedor on 7/31/19.
@@ -10,8 +10,9 @@ import UIKit
 import AVFoundation
 import Sodium
 
-class LinkApprovalController : UIViewController, AVCaptureMetadataOutputObjectsDelegate {
+class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     var context: Context!
+    var channel: Channel!
     var captureSession: AVCaptureSession!
     var previewLayer: AVCaptureVideoPreviewLayer!
     var request: Proto_LinkRequest?
@@ -81,8 +82,9 @@ class LinkApprovalController : UIViewController, AVCaptureMetadataOutputObjectsD
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let approval = segue.destination as? LinkConfirmalController {
-            approval.request = request
+        if let confirm = segue.destination as? InviteConfirmController {
+            confirm.request = request
+            confirm.channel = channel
         }
             
         super.prepare(for: segue, sender: sender)

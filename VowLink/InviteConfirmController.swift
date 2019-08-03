@@ -1,5 +1,5 @@
 //
-//  LinkConfirmalController.swift
+//  InviteConfirmController.swift
 //  VowLink
 //
 //  Created by Indutnyy, Fedor on 7/31/19.
@@ -9,9 +9,11 @@
 import UIKit
 import Sodium
 
-class LinkConfirmalController : UITableViewController {
+class InviteConfirmController : UITableViewController {
     var app: AppDelegate!
     var request: Proto_LinkRequest?
+    var channel: Channel!
+    
     @IBOutlet weak var publicKey: UILabel!
     @IBOutlet weak var peerID: UILabel!
     
@@ -44,7 +46,7 @@ class LinkConfirmalController : UITableViewController {
         // TODO(indutny): wait for peer to connect, or at least say that it is not connected
         
         do {
-            let link = try id.issueLink(for: Bytes(request.trusteePubKey))
+            let link = try id.issueLink(for: Bytes(request.trusteePubKey), andChannel: channel)
             
             let encryptedLink = try link.encrypt(withContext: id.context,
                                                  andPubKey: Bytes(request.boxPubKey))

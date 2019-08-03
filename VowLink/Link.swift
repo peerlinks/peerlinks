@@ -24,6 +24,14 @@ class Link {
             return Bytes(proto.stored.issuerPubKey)
         }
     }
+    var channelPubKey: Bytes? {
+        get {
+            if proto.stored.channelPubKey.isEmpty {
+                return nil
+            }
+            return Bytes(proto.stored.channelPubKey)
+        }
+    }
     let expiration: TimeInterval
     let signature: Bytes
     var label: String? {

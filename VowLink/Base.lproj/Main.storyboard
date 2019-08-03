@@ -86,7 +86,7 @@
         <!--Select Channel-->
         <scene sceneID="sLy-hi-IsI">
             <objects>
-                <viewController title="Select Channel" id="oiL-RO-LRJ" sceneMemberID="viewController">
+                <viewController title="Select Channel" id="oiL-RO-LRJ" customClass="ChannelListController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="jFf-aX-SlV">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -94,10 +94,13 @@
                             <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9Oc-mx-Tg1">
                                 <rect key="frame" x="0.0" y="298" width="375" height="216"/>
                             </pickerView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eQY-ac-9mi">
-                                <rect key="frame" x="0.0" y="522" width="375" height="41"/>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eQY-ac-9mi">
+                                <rect key="frame" x="0.0" y="521" width="375" height="41"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <state key="normal" title="Select Channel"/>
+                                <connections>
+                                    <segue destination="AC4-Jh-zDQ" kind="show" id="Cp5-Nt-ehl"/>
+                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -119,7 +122,8 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <segue destination="AC4-Jh-zDQ" kind="show" identifier="toChannel" id="pAF-eb-AJ4"/>
+                        <outlet property="channelPicker" destination="9Oc-mx-Tg1" id="RBl-wQ-4qD"/>
+                        <outlet property="selectButton" destination="eQY-ac-9mi" id="ytI-uy-8Ox"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Byv-vn-x71" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -129,7 +133,7 @@
         <!--Channel-->
         <scene sceneID="hN4-6E-0dd">
             <objects>
-                <viewController title="Channel" id="AC4-Jh-zDQ" sceneMemberID="viewController">
+                <viewController title="Channel" id="AC4-Jh-zDQ" customClass="ChannelController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="lWM-jV-gQ0">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -183,10 +187,14 @@
                         <viewLayoutGuide key="safeArea" id="oGk-sX-HDX"/>
                     </view>
                     <navigationItem key="navigationItem" title="Channel" id="8KN-8u-A2S">
-                        <barButtonItem key="rightBarButtonItem" systemItem="action" id="yMR-VW-aJg"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="action" id="yMR-VW-aJg">
+                            <connections>
+                                <segue destination="5D6-c5-NkT" kind="show" id="VN9-aL-sBi"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <segue destination="5D6-c5-NkT" kind="show" identifier="toInvite" id="XKL-ob-O1A"/>
+                        <outlet property="navItem" destination="8KN-8u-A2S" id="Y7d-ms-Awh"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="47B-s9-gZ0" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -233,13 +241,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Enter link description" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8ow-DF-t2M">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Edit channel name" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8ow-DF-t2M">
                                 <rect key="frame" x="0.0" y="88" width="375" height="29"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Link description" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="rQv-Va-Leh">
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Channel name" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="rQv-Va-Leh">
                                 <rect key="frame" x="0.0" y="125" width="375" height="33"/>
                                 <nil key="textColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
@@ -280,7 +288,7 @@
         <!--Channel Invite-->
         <scene sceneID="NFr-eS-4CU">
             <objects>
-                <viewController title="Channel Invite" id="5D6-c5-NkT" customClass="LinkApprovalController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Channel Invite" id="5D6-c5-NkT" customClass="InviteController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="SfE-Vg-K8S">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -298,7 +306,7 @@
         <!--Confirm-->
         <scene sceneID="PTq-wq-7EK">
             <objects>
-                <tableViewController id="UDo-9X-9Xl" customClass="LinkConfirmalController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="UDo-9X-9Xl" customClass="InviteConfirmController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="7hI-2T-4jR">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
