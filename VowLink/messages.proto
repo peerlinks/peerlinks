@@ -8,6 +8,7 @@ package proto;
 message Hello {
   int32 version = 1;
   int32 rate_limit = 2; // maximum number of messages per hour
+  bytes nonce = 3; // encryption nonce
 }
 
 message EncryptedMessage {

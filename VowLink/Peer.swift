@@ -8,9 +8,11 @@
 
 import Foundation
 import MultipeerConnectivity
+import Sodium
 
 enum PeerError: Error {
     case invalidVersion(Int32)
+    case invalidNonceLength(Int)
 }
 
 protocol PeerDelegate : AnyObject {
@@ -26,15 +28,18 @@ class Peer: NSObject, MCSessionDelegate {
     let incoming: RateLimiter
     var outgoing: RateLimiter?
     var hello: Proto_Hello?
+    let nonce: Bytes
     
     weak var delegate: PeerDelegate?
 
     static let PROTOCOL_VERSION: Int32 = 1
     static let RATE_LIMIT: Int32 = 1000
+    static let NONCE_LENGTH: Int = 32
     
     init(context: Context, localID: MCPeerID, remoteID: MCPeerID) {
         self.context = context
         self.remoteID = remoteID
+        nonce = self.context.sodium.randomBytes.buf(length: Peer.NONCE_LENGTH)!
         
         incoming = RateLimiter(limit: Peer.RATE_LIMIT)
         
@@ -58,6 +63,10 @@ class Peer: NSObject, MCSessionDelegate {
                 throw PeerError.invalidVersion(hello.version)
             }
             
+            if hello.nonce.count != Peer.NONCE_LENGTH {
+                throw PeerError.invalidNonceLength(hello.nonce.count)
+            }
+            
             debugPrint("[peer] id=\(remoteID.displayName) got hello \(hello)")
             outgoing = RateLimiter(limit: hello.rateLimit)
             self.hello = hello
@@ -75,6 +84,7 @@ class Peer: NSObject, MCSessionDelegate {
         let hello = Proto_Hello.with({ (hello) in
             hello.version = Peer.PROTOCOL_VERSION
             hello.rateLimit = Peer.RATE_LIMIT
+            hello.nonce = Data(self.nonce)
         })
         
         let data = try hello.serializedData()
