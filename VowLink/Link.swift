@@ -18,24 +18,24 @@ class Link {
     let trusteePubKey: Bytes
     var issuerPubKey: Bytes? {
         get {
-            if proto.issuerPubKey.isEmpty {
+            if proto.stored.issuerPubKey.isEmpty {
                 return nil
             }
-            return Bytes(proto.issuerPubKey)
+            return Bytes(proto.stored.issuerPubKey)
         }
     }
     let expiration: TimeInterval
     let signature: Bytes
     var label: String? {
         get {
-            if proto.label.isEmpty {
+            if proto.stored.label.isEmpty {
                 return ""
             }
-            return proto.label
+            return proto.stored.label
         }
         
         set {
-            proto.label = newValue ?? ""
+            proto.stored.label = newValue ?? ""
         }
     }
     
@@ -45,8 +45,8 @@ class Link {
         expiration = link.tbs.expiration
         signature = Bytes(link.signature)
         
-        if !link.label.isEmpty {
-            label = link.label
+        if !link.stored.label.isEmpty {
+            label = link.stored.label
         }
     }
     

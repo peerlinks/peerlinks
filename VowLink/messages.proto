@@ -11,24 +11,37 @@ message Hello {
   bytes nonce = 3; // encryption nonce
 }
 
-message EncryptedMessage {
-  bytes channel_id = 1;
-  bytes encrypted_content = 2;
-}
-
 message Link {
+  message Stored {
+    // Public key of link's issuer. Needed for construction of the chain.
+    bytes issuer_pub_key = 1;
+
+    // Public key of the channel
+    bytes channel_pub_key = 2;
+
+    // Hash of the root message on the channel
+    bytes channel_root = 3;
+
+    // Human-readable name of the link
+    string label = 4;
+  }
+
   message TBS {
     bytes trustee_pub_key = 1;
     double expiration = 2;
+
+    // NOTE: This MUST be filled either by sender/recipient before
+    // generating/verifying the signature below.
+    bytes channel_id = 3;
   }
 
   TBS tbs = 1;
   bytes signature = 2;
 
-  // Optional and convenience-only fields, they SHOULD be empty for links in the
-  // chain.
-  bytes issuer_pub_key = 3;
-  string label = 4;
+  // The field below MUST not be sent when the link is presented as a part of
+  // the chain in the message. However, it SHOULD be used when storing the
+  // link.
+  Stored stored = 3;
 }
 
 message EncryptedLink {
@@ -41,29 +54,60 @@ message LinkRequest {
   bytes box_pub_key = 3;
 }
 
-message SignedMessage {
-  message TBS {
-    repeated Link chain = 1;
-    string content = 2; // JSON
+message ChannelMessage {
+  message Content {
+    message TBS {
+      // Link chain that leads from the channel's public key to the signer of
+      // this message
+      repeated Link chain = 1;
+
+      // Floating point unix time
+      double timestamp = 2;
+
+      // JSON content of the message
+      string json = 3;
+    }
+
+    TBS tbs = 1;
+    bytes signature = 2;
   }
 
-  bytes contents = 1;
+  bytes channel_id = 1;
+
+  // NOTE: can be empty only in the root message
+  repeated bytes parents = 2;
+
+  // 32 random bytes
+  bytes nonce = 3;
+
+  // height = max(p.height for p in parents)
+  uint64 height = 4;
+
+  // NOTE: encryption key = HASH(channel_id ++ parents ++ nonce,
+  //   'vow-link-symmetric')
+  bytes encrypted_content = 5;
 }
 
-message Subscribe {
-  repeated bytes channel_id = 1;
+message Sync {
+  bytes channel_id = 1;
+  uint64 min_height = 2;
+
+  // Optional, used when walking through past messages
+  uint64 max_height = 3;
 }
 
-message Unsubscribe {
-  repeated bytes channel_id = 1;
+message SyncResponse {
+  bytes channel_id = 1;
+  repeated ChannelMessage messages = 2;
 }
 
 message Packet {
   oneof content {
-    EncryptedMessage msg = 1;
-    EncryptedLink link = 2;
-    Subscribe subscribe = 3;
-    Unsubscribe unsubscribe = 4;
+    EncryptedLink link = 1;
+    ChannelMessage message = 2;
+
+    Sync sync = 3;
+    SyncResponse sync_response = 4;
   }
 }
 
