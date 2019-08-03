@@ -160,7 +160,7 @@ struct Proto_ChannelMessage {
   var height: UInt64 = 0
 
   /// NOTE: encryption key = HASH(channel_id ++ parents ++ nonce,
-  ///   'vow-link-symmetric')
+  ///   'vowlink-symmetric')
   var encryptedContent: Data = SwiftProtobuf.Internal.emptyData
 
   var unknownFields = SwiftProtobuf.UnknownStorage()

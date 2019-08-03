@@ -32,6 +32,7 @@
 		4D339E5E22F3300600EABA71 /* LinkReceivedController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E5D22F3300500EABA71 /* LinkReceivedController.swift */; };
 		4D339E6422F63C4F00EABA71 /* ChannelListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E6322F63C4F00EABA71 /* ChannelListController.swift */; };
 		4D339E6622F6402A00EABA71 /* ChannelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E6522F6402A00EABA71 /* ChannelController.swift */; };
+		4D339E6822F6507100EABA71 /* ChannelMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E6722F6507100EABA71 /* ChannelMessage.swift */; };
 		4DF7CB0B22EF409900CD1C33 /* KeychainAccess.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF7CB0622EF409500CD1C33 /* KeychainAccess.framework */; };
 		4DF7CB0C22EF40C600CD1C33 /* KeychainAccess.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF7CB0622EF409500CD1C33 /* KeychainAccess.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4DF7CB0E22EF4C4500CD1C33 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7CB0D22EF4C4500CD1C33 /* Identity.swift */; };
@@ -266,6 +267,7 @@
 		4D339E5D22F3300500EABA71 /* LinkReceivedController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkReceivedController.swift; sourceTree = "<group>"; };
 		4D339E6322F63C4F00EABA71 /* ChannelListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelListController.swift; sourceTree = "<group>"; };
 		4D339E6522F6402A00EABA71 /* ChannelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelController.swift; sourceTree = "<group>"; };
+		4D339E6722F6507100EABA71 /* ChannelMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelMessage.swift; sourceTree = "<group>"; };
 		4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = KeychainAccess.xcodeproj; path = deps/KeychainAccess/Lib/KeychainAccess.xcodeproj; sourceTree = SOURCE_ROOT; };
 		4DF7CB0D22EF4C4500CD1C33 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
 		4DF7CB0F22EFB63F00CD1C33 /* Context.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Context.swift; sourceTree = "<group>"; };
@@ -331,12 +333,13 @@
 				4D339E6522F6402A00EABA71 /* ChannelController.swift */,
 				4D339E5722F31EC800EABA71 /* ChannelList.swift */,
 				4D339E6322F63C4F00EABA71 /* ChannelListController.swift */,
+				4D339E6722F6507100EABA71 /* ChannelMessage.swift */,
 				4DF7CB0F22EFB63F00CD1C33 /* Context.swift */,
 				4DF7CB0D22EF4C4500CD1C33 /* Identity.swift */,
 				4DF7CB1722F0CD6A00CD1C33 /* IdentityController.swift */,
-				4DF7CB1122F05CC800CD1C33 /* Link.swift */,
-				4D339E5322F0F95800EABA71 /* InviteController.swift */,
 				4D339E5522F1938F00EABA71 /* InviteConfirmController.swift */,
+				4D339E5322F0F95800EABA71 /* InviteController.swift */,
+				4DF7CB1122F05CC800CD1C33 /* Link.swift */,
 				4D339E5D22F3300500EABA71 /* LinkReceivedController.swift */,
 				4D339E5122F0EDD500EABA71 /* LinkRequestController.swift */,
 				4D23EE2C22EF1EBC003A9C20 /* messages.pb.swift */,
@@ -707,6 +710,7 @@
 			files = (
 				4D23EE2D22EF1EBC003A9C20 /* messages.pb.swift in Sources */,
 				4DF7CB1822F0CD6A00CD1C33 /* IdentityController.swift in Sources */,
+				4D339E6822F6507100EABA71 /* ChannelMessage.swift in Sources */,
 				4D339E5822F31EC800EABA71 /* ChannelList.swift in Sources */,
 				4D339E6622F6402A00EABA71 /* ChannelController.swift in Sources */,
 				4D23EDD522EECBE4003A9C20 /* ViewController.swift in Sources */,

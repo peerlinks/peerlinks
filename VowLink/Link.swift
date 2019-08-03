@@ -16,8 +16,8 @@ enum LinkError : Error {
 struct LinkDetails {
     var issuerPubKey: Bytes
     var channelPubKey: Bytes
+    var channelRoot: Bytes
     var label: String
-    // TODO(indutny): root message
 }
 
 class Link {
@@ -38,10 +38,11 @@ class Link {
     convenience init(context: Context, link: Proto_Link) {
         var details: LinkDetails? = nil
         
-        if !link.details.issuerPubKey.isEmpty && !link.details.channelPubKey.isEmpty {
-            // TODO(indutny): root message
+        if !link.details.issuerPubKey.isEmpty && !link.details.channelPubKey.isEmpty &&
+            !link.details.channelRoot.isEmpty {
             details = LinkDetails(issuerPubKey: Bytes(link.details.issuerPubKey),
                                   channelPubKey: Bytes(link.details.channelPubKey),
+                                  channelRoot: Bytes(link.details.channelRoot),
                                   label: link.details.label)
         }
         
@@ -96,8 +97,8 @@ class Link {
             link.signature = Data(self.signature)
             if let details = self.details {
                 link.details = Proto_Link.Details.with({ (proto) in
-                    // TODO(indutny): root message
                     proto.channelPubKey = Data(details.channelPubKey)
+                    proto.channelRoot = Data(details.channelRoot)
                     proto.issuerPubKey = Data(details.issuerPubKey)
                     proto.label = details.label
                 })

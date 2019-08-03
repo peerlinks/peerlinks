@@ -84,7 +84,7 @@ message ChannelMessage {
   uint64 height = 4;
 
   // NOTE: encryption key = HASH(channel_id ++ parents ++ nonce,
-  //   'vow-link-symmetric')
+  //   'vowlink-symmetric')
   bytes encrypted_content = 5;
 }
 

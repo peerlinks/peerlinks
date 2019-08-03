@@ -46,7 +46,7 @@ message ChannelMessage {
 ```
 
 Symmetric encryption key is defined as
-`HASH(channel_pub_key + parents + nonce, 'vow-link-symmetric')`. `channel_id` is
+`HASH(channel_pub_key + parents + nonce, 'vowlink-symmetric')`. `channel_id` is
 public, but `channel_pub_key` is only known to subscribers. This way the
 confidentiality is achieved, and yet untrusted peer can help synchronize the
 messages.
@@ -56,7 +56,10 @@ Only the root message signed by the channel's owner is allowed to have empty
 roots for "checkpointing" purposes. All other messages MUST have at least one
 parent, and in all implementations SHOULD include ALL LOCAL leaf messages.
 Thus a new message becomes a leaf, at least locally. The `hash` of the message
-to be used in `parents` is a hash of serialized `ChannelMessage`.
+to be used in `parents` is a keyed hash of serialized `ChannelMessage`:
+```
+HASH(ChannelMessage, 'vowlink-message')
+```
 
 TODO(indutny): Invitation to the channel MUST have signed
 

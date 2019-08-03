@@ -13,19 +13,15 @@ class Channel {
     let context: Context
     let publicKey: Bytes
     var label: String
+    var messages = [ChannelMessage]()
 
-    private var lazyChannelID: Bytes?
-    var channelID: Bytes {
-        get {
-            if let id = lazyChannelID {
-                return id
-            }
-            lazyChannelID = self.context.sodium.genericHash.hash(message: publicKey,
-                                                                 key: "vowlink-channel-id".bytes,
-                                                                 outputLength: Channel.CHANNEL_ID_LENGTH)
-            return lazyChannelID!
-        }
-    }
+    lazy var channelID: Bytes = {
+        return self.context.sodium.genericHash.hash(message: publicKey,
+                                                    key: "vowlink-channel-id".bytes,
+                                                    outputLength: Channel.CHANNEL_ID_LENGTH)!
+    }()
+    
+    var rootMessage: ChannelMessage?
     
     static let CHANNEL_ID_LENGTH = 32
     
@@ -41,6 +37,9 @@ class Channel {
     
     convenience init(_ identity: Identity) {
         self.init(context: identity.context, publicKey: identity.publicKey, label: identity.name)
+        
+        rootMessage = ChannelMessage(context: context, channel: self, nonce: nil, parents: nil)
+        messages.append(rootMessage!)
     }
     
     func toProto() -> Proto_Channel {
