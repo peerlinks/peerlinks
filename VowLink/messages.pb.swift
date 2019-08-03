@@ -329,7 +329,7 @@ struct Proto_Identity {
   init() {}
 }
 
-struct Proto_Subscription {
+struct Proto_Channel {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -343,12 +343,12 @@ struct Proto_Subscription {
   init() {}
 }
 
-struct Proto_SubscriptionList {
+struct Proto_ChannelList {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var subscriptions: [Proto_Subscription] = []
+  var channels: [Proto_Channel] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1018,8 +1018,8 @@ extension Proto_Identity: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
   }
 }
 
-extension Proto_Subscription: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".Subscription"
+extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Channel"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "public_key"),
     2: .same(proto: "label"),
@@ -1045,7 +1045,7 @@ extension Proto_Subscription: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Proto_Subscription, rhs: Proto_Subscription) -> Bool {
+  static func ==(lhs: Proto_Channel, rhs: Proto_Channel) -> Bool {
     if lhs.publicKey != rhs.publicKey {return false}
     if lhs.label != rhs.label {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -1053,30 +1053,30 @@ extension Proto_Subscription: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
   }
 }
 
-extension Proto_SubscriptionList: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".SubscriptionList"
+extension Proto_ChannelList: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".ChannelList"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "subscriptions"),
+    1: .same(proto: "channels"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
-      case 1: try decoder.decodeRepeatedMessageField(value: &self.subscriptions)
+      case 1: try decoder.decodeRepeatedMessageField(value: &self.channels)
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.subscriptions.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.subscriptions, fieldNumber: 1)
+    if !self.channels.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.channels, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Proto_SubscriptionList, rhs: Proto_SubscriptionList) -> Bool {
-    if lhs.subscriptions != rhs.subscriptions {return false}
+  static func ==(lhs: Proto_ChannelList, rhs: Proto_ChannelList) -> Bool {
+    if lhs.channels != rhs.channels {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

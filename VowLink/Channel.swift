@@ -11,7 +11,7 @@ import Sodium
 
 class Channel {
     let context: Context
-    var proto: Proto_Subscription
+    var proto: Proto_Channel
     let publicKey: Bytes
     var label: String? {
         get {
@@ -41,7 +41,7 @@ class Channel {
     
     static let CHANNEL_ID_LENGTH = 32
     
-    init(context: Context, proto: Proto_Subscription) {
+    init(context: Context, proto: Proto_Channel) {
         self.context = context
         self.proto = proto
         self.publicKey = Bytes(proto.publicKey)

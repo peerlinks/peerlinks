@@ -121,11 +121,11 @@ message Identity {
   repeated Link links = 3;
 }
 
-message Subscription {
+message Channel {
   bytes public_key = 1;
   string label = 2;
 }
 
-message SubscriptionList {
-  repeated Subscription subscriptions = 1;
+message ChannelList {
+  repeated Channel channels = 1;
 }

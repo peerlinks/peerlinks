@@ -1,5 +1,5 @@
 //
-//  SubscrtiptionListController.swift
+//  ChannelListController.swift
 //  VowLink
 //
 //  Created by Indutnyy, Fedor on 8/1/19.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SubscriptionListController : UITableViewController {
+class ChannelListController : UITableViewController {
     var app: AppDelegate!
     
     override func viewDidLoad() {
@@ -20,15 +20,15 @@ class SubscriptionListController : UITableViewController {
     }
     
     func channelAt(indexPath: IndexPath) -> Channel? {
-        return app.subscriptions.subscriptions[indexPath.last ?? 0]
+        return app.channels.channels[indexPath.last ?? 0]
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return app.subscriptions.subscriptions.count
+        return app.channels.channels.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = self.tableView.dequeueReusableCell(withIdentifier: "subscriptionCell")!
+        let cell = self.tableView.dequeueReusableCell(withIdentifier: "channelCell")!
         
         let channel = channelAt(indexPath: indexPath)
         

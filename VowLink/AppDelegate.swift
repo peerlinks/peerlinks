@@ -20,7 +20,7 @@ protocol LinkNotificationDelegate: AnyObject {
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
     let context = Context()
-    var subscriptions: SubscriptionList!
+    var channels: ChannelList!
 
     var p2p: PeerToPeer!
     var identity: Identity?
@@ -31,7 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
         p2p = PeerToPeer(context: context, serviceType: "com-vowlink")
         p2p.delegate = self
         
-        subscriptions = SubscriptionList(context: context)
+        channels = ChannelList(context: context)
         
         return true
     }

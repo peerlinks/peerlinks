@@ -75,6 +75,6 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
         app.identity = identities[identityPicker.selectedRow(inComponent: 0)]
 
         // Subscribe to our own channel
-        try app.subscriptions.add(publicKey: id.publicKey, label: name)
+        try app.channels.add(publicKey: id.publicKey, label: name)
     }
 }
