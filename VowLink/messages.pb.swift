@@ -59,18 +59,18 @@ struct Proto_Link {
   /// The field below MUST not be sent when the link is presented as a part of
   /// the chain in the message. However, it SHOULD be used when storing the
   /// link.
-  var stored: Proto_Link.Stored {
-    get {return _storage._stored ?? Proto_Link.Stored()}
-    set {_uniqueStorage()._stored = newValue}
+  var details: Proto_Link.Details {
+    get {return _storage._details ?? Proto_Link.Details()}
+    set {_uniqueStorage()._details = newValue}
   }
-  /// Returns true if `stored` has been explicitly set.
-  var hasStored: Bool {return _storage._stored != nil}
-  /// Clears the value of `stored`. Subsequent reads from it will return its default value.
-  mutating func clearStored() {_uniqueStorage()._stored = nil}
+  /// Returns true if `details` has been explicitly set.
+  var hasDetails: Bool {return _storage._details != nil}
+  /// Clears the value of `details`. Subsequent reads from it will return its default value.
+  mutating func clearDetails() {_uniqueStorage()._details = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  struct Stored {
+  struct Details {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -405,13 +405,13 @@ extension Proto_Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementatio
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "tbs"),
     2: .same(proto: "signature"),
-    3: .same(proto: "stored"),
+    3: .same(proto: "details"),
   ]
 
   fileprivate class _StorageClass {
     var _tbs: Proto_Link.TBS? = nil
     var _signature: Data = SwiftProtobuf.Internal.emptyData
-    var _stored: Proto_Link.Stored? = nil
+    var _details: Proto_Link.Details? = nil
 
     static let defaultInstance = _StorageClass()
 
@@ -420,7 +420,7 @@ extension Proto_Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementatio
     init(copying source: _StorageClass) {
       _tbs = source._tbs
       _signature = source._signature
-      _stored = source._stored
+      _details = source._details
     }
   }
 
@@ -438,7 +438,7 @@ extension Proto_Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementatio
         switch fieldNumber {
         case 1: try decoder.decodeSingularMessageField(value: &_storage._tbs)
         case 2: try decoder.decodeSingularBytesField(value: &_storage._signature)
-        case 3: try decoder.decodeSingularMessageField(value: &_storage._stored)
+        case 3: try decoder.decodeSingularMessageField(value: &_storage._details)
         default: break
         }
       }
@@ -453,7 +453,7 @@ extension Proto_Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementatio
       if !_storage._signature.isEmpty {
         try visitor.visitSingularBytesField(value: _storage._signature, fieldNumber: 2)
       }
-      if let v = _storage._stored {
+      if let v = _storage._details {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
       }
     }
@@ -467,7 +467,7 @@ extension Proto_Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementatio
         let rhs_storage = _args.1
         if _storage._tbs != rhs_storage._tbs {return false}
         if _storage._signature != rhs_storage._signature {return false}
-        if _storage._stored != rhs_storage._stored {return false}
+        if _storage._details != rhs_storage._details {return false}
         return true
       }
       if !storagesAreEqual {return false}
@@ -477,8 +477,8 @@ extension Proto_Link: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementatio
   }
 }
 
-extension Proto_Link.Stored: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Proto_Link.protoMessageName + ".Stored"
+extension Proto_Link.Details: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Proto_Link.protoMessageName + ".Details"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "issuer_pub_key"),
     2: .standard(proto: "channel_pub_key"),
@@ -514,7 +514,7 @@ extension Proto_Link.Stored: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Proto_Link.Stored, rhs: Proto_Link.Stored) -> Bool {
+  static func ==(lhs: Proto_Link.Details, rhs: Proto_Link.Details) -> Bool {
     if lhs.issuerPubKey != rhs.issuerPubKey {return false}
     if lhs.channelPubKey != rhs.channelPubKey {return false}
     if lhs.channelRoot != rhs.channelRoot {return false}

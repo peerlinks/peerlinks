@@ -13,50 +13,45 @@ enum LinkError : Error {
     case decryptError
 }
 
+struct LinkDetails {
+    var issuerPubKey: Bytes
+    var channelPubKey: Bytes
+    var label: String
+    // TODO(indutny): root message
+}
+
 class Link {
-    var proto: Proto_Link
+    let context: Context
     let trusteePubKey: Bytes
-    var issuerPubKey: Bytes? {
-        get {
-            if proto.stored.issuerPubKey.isEmpty {
-                return nil
-            }
-            return Bytes(proto.stored.issuerPubKey)
-        }
-    }
-    var channelPubKey: Bytes? {
-        get {
-            if proto.stored.channelPubKey.isEmpty {
-                return nil
-            }
-            return Bytes(proto.stored.channelPubKey)
-        }
-    }
+    var details: LinkDetails?
     let expiration: TimeInterval
     let signature: Bytes
-    var label: String? {
-        get {
-            if proto.stored.label.isEmpty {
-                return ""
-            }
-            return proto.stored.label
-        }
-        
-        set {
-            proto.stored.label = newValue ?? ""
-        }
+    
+    init(context: Context, trusteePubKey: Bytes, expiration: TimeInterval, signature: Bytes, details: LinkDetails?) {
+        self.context = context
+        self.trusteePubKey = trusteePubKey
+        self.expiration = expiration
+        self.signature = signature
+        self.details = details
     }
     
-    init(_ link: Proto_Link) {
-        proto = link
-        trusteePubKey = Bytes(link.tbs.trusteePubKey)
-        expiration = link.tbs.expiration
-        signature = Bytes(link.signature)
+    convenience init(context: Context, link: Proto_Link) {
+        var details: LinkDetails? = nil
         
-        if !link.stored.label.isEmpty {
-            label = link.stored.label
+        if !link.details.issuerPubKey.isEmpty && !link.details.channelPubKey.isEmpty {
+            // TODO(indutny): root message
+            details = LinkDetails(issuerPubKey: Bytes(link.details.issuerPubKey),
+                                  channelPubKey: Bytes(link.details.channelPubKey),
+                                  label: link.details.label)
         }
+        
+        self.init(context: context,
+                  trusteePubKey: Bytes(link.tbs.trusteePubKey),
+                  expiration: link.tbs.expiration,
+                  signature: Bytes(link.signature),
+                  details: details)
     }
+
     
     convenience init(_ encrypted: Proto_EncryptedLink, withContext context: Context, publicKey: Bytes, andSecretKey secretKey: Bytes) throws {
         guard let data = context.sodium.box.open(anonymousCipherText: Bytes(encrypted.box),
@@ -67,15 +62,15 @@ class Link {
         
         let proto = try Proto_Link(serializedData: Data(data))
         
-        self.init(proto)
+        self.init(context: context, link: proto)
     }
     
-    func encrypt(withContext context: Context, andPubKey pubKey: Bytes) throws -> Proto_EncryptedLink {
-        let data: Data = try proto.serializedData()
+    func encrypt(withPublicKey publicKey: Bytes) throws -> Proto_EncryptedLink {
+        let data: Data = try toProto().serializedData()
 
         let box = context.sodium.box.seal(
             message: Bytes(data),
-            recipientPublicKey: pubKey)
+            recipientPublicKey: publicKey)
         
         return Proto_EncryptedLink.with({ (encrypted) in
             if let box = box {
@@ -84,9 +79,29 @@ class Link {
         })
     }
 
-    func verify(withContext context: Context, publicKey: Bytes) throws -> Bool {
-        return context.sodium.sign.verify(message: Bytes(try self.proto.tbs.serializedData()),
+    func verify(withPublicKey publicKey: Bytes, andChannel channel: Channel) throws -> Bool {
+        var tbs = toProto().tbs
+        tbs.channelID = Data(channel.channelID)
+        return context.sodium.sign.verify(message: Bytes(try tbs.serializedData()),
                                           publicKey: publicKey,
                                           signature: self.signature)
+    }
+    
+    func toProto() -> Proto_Link {
+        return Proto_Link.with({ (link) in
+            link.tbs = Proto_Link.TBS.with({ (tbs) in
+                tbs.trusteePubKey = Data(self.trusteePubKey)
+                tbs.expiration = self.expiration
+            })
+            link.signature = Data(self.signature)
+            if let details = self.details {
+                link.details = Proto_Link.Details.with({ (proto) in
+                    // TODO(indutny): root message
+                    proto.channelPubKey = Data(details.channelPubKey)
+                    proto.issuerPubKey = Data(details.issuerPubKey)
+                    proto.label = details.label
+                })
+            }
+        })
     }
 }

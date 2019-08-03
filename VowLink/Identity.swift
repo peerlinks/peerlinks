@@ -20,7 +20,7 @@ class Identity {
     let context: Context
     
     let name: String
-    var links: [Link] = []
+    var links = [Link]()
     private var secretKey: Bytes
     let publicKey: Bytes
     
@@ -39,7 +39,7 @@ class Identity {
             secretKey = Bytes(id.secretKey)
             publicKey = Bytes(id.publicKey)
             for proto in id.links {
-                links.append(Link(proto))
+                links.append(Link(context: context, link: proto))
             }
         } else {
             debugPrint("[identity] generating new keypair for \(name)")
@@ -62,7 +62,7 @@ class Identity {
             
             var links: [ Proto_Link ] = []
             for l in self.links {
-                links.append(l.proto)
+                links.append(l.toProto())
             }
             id.links = links
         }.serializedData()
@@ -85,16 +85,16 @@ class Identity {
         
         let proto = Proto_Link.with({ (link) in
             link.tbs = tbs
-            link.stored.issuerPubKey = Data(self.publicKey)
-            link.stored.channelPubKey = Data(channel.publicKey)
-            link.stored.label = channel.label
+            link.details.issuerPubKey = Data(self.publicKey)
+            link.details.channelPubKey = Data(channel.publicKey)
+            link.details.label = channel.label
             
             // TODO(indutny): channel root message
             
             link.signature = Data(signature)
         })
         
-        return Link(proto)
+        return Link(context: context, link: proto)
     }
     
     func addLink(_ link: Link) throws {
@@ -108,7 +108,7 @@ class Identity {
         
         links.append(link)
         
-        debugPrint("[identity] name=\(name) added link \(String(describing: link.label))")
+        debugPrint("[identity] name=\(name) added link \(String(describing: link.details?.label))")
         
         try save()
     }

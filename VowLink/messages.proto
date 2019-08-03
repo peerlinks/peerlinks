@@ -12,7 +12,7 @@ message Hello {
 }
 
 message Link {
-  message Stored {
+  message Details {
     // Public key of link's issuer. Needed for construction of the chain.
     bytes issuer_pub_key = 1;
 
@@ -41,7 +41,7 @@ message Link {
   // The field below MUST not be sent when the link is presented as a part of
   // the chain in the message. However, it SHOULD be used when storing the
   // link.
-  Stored stored = 3;
+  Details details = 3;
 }
 
 message EncryptedLink {

@@ -17,7 +17,7 @@ class LinkReceivedController : ViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        descriptionField.text = link.label
+        descriptionField.text = link.details?.label ?? ""
         descriptionChanged(self)
     }
     
@@ -30,13 +30,13 @@ class LinkReceivedController : ViewController {
             return
         }
         
-        link.label = descriptionField.text
+        link.details?.label = descriptionField.text ?? ""
         
         let app = (UIApplication.shared.delegate as! AppDelegate)
         do {
             try app.identity?.addLink(link)
             
-            if let channelPubKey = link.channelPubKey {
+            if let channelPubKey = link.details?.channelPubKey {
                 try app.channelList.add(Channel(context: app.context, publicKey: channelPubKey, label: descriptionField.text!))
             }
             
