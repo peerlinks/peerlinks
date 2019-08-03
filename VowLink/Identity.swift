@@ -87,7 +87,7 @@ class Identity {
             link.tbs = tbs
             link.stored.issuerPubKey = Data(self.publicKey)
             link.stored.channelPubKey = Data(channel.publicKey)
-            link.stored.label = channel.label ?? ""
+            link.stored.label = channel.label
             
             // TODO(indutny): channel root message
             

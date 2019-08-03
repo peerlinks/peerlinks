@@ -11,16 +11,11 @@ import Sodium
 
 class ChannelList {
     let context: Context
-    private var proto: Proto_ChannelList
     var channels = [Channel]()
     
     // TODO(indutny): does it make sense to store this in keychain too?
     init(context: Context) {
         self.context = context
-        
-        proto = Proto_ChannelList.with({ (list) in
-            list.channels = []
-        })
         
         do {
             guard let existing = try context.keychain.getData("channels") else {
@@ -28,7 +23,7 @@ class ChannelList {
                 return
             }
             
-            proto = try Proto_ChannelList(serializedData: existing)
+            let proto = try Proto_ChannelList(serializedData: existing)
             
             for channel in proto.channels {
                 channels.append(Channel(context: context, proto: channel))
@@ -49,15 +44,22 @@ class ChannelList {
         }
 
         channels.append(channel)
-        proto.channels.append(channel.proto)
         
         debugPrint("[channels] added new \(channel.publicKey)")
         
         try save()
     }
     
+    func toProto() -> Proto_ChannelList {
+        return Proto_ChannelList.with({ (channelList) in
+            channelList.channels = self.channels.map({ (channel) -> Proto_Channel in
+                return channel.toProto()
+            })
+        })
+    }
+
     func save() throws {
-        let data = try proto.serializedData()
+        let data = try toProto().serializedData()
         
         try context.keychain.set(Data(data), key: "channels")
     }

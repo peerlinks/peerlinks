@@ -11,21 +11,9 @@ import Sodium
 
 class Channel {
     let context: Context
-    var proto: Proto_Channel
     let publicKey: Bytes
-    var label: String? {
-        get {
-            if proto.label.isEmpty {
-                return nil
-            }
-            return proto.label
-        }
-        
-        set {
-            proto.label = newValue ?? ""
-        }
-    }
-    
+    var label: String
+
     private var lazyChannelID: Bytes?
     var channelID: Bytes {
         get {
@@ -41,20 +29,24 @@ class Channel {
     
     static let CHANNEL_ID_LENGTH = 32
     
-    init(context: Context, proto: Proto_Channel) {
+    init(context: Context, publicKey: Bytes, label: String) {
         self.context = context
-        self.proto = proto
-        self.publicKey = Bytes(proto.publicKey)
+        self.publicKey = publicKey
+        self.label = label
     }
     
-    convenience init(context: Context, publicKey: Bytes, label: String?) {
-        self.init(context: context, proto: Proto_Channel.with({ (sub) in
-            sub.label = label ?? ""
-            sub.publicKey = Data(publicKey)
-        }))
+    convenience init(context: Context, proto: Proto_Channel) {
+        self.init(context: context, publicKey: Bytes(proto.publicKey), label: proto.label)
     }
     
     convenience init(_ identity: Identity) {
         self.init(context: identity.context, publicKey: identity.publicKey, label: identity.name)
+    }
+    
+    func toProto() -> Proto_Channel {
+        return Proto_Channel.with({ (channel) in
+            channel.publicKey = Data(self.publicKey)
+            channel.label = self.label
+        })
     }
 }
