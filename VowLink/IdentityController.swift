@@ -82,6 +82,6 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
         identityPicker.reloadAllComponents()
 
         // Subscribe to our own channel
-        try app.channelList.add(publicKey: id.publicKey, label: name)
+        try app.channelList.add(Channel(id))
     }
 }

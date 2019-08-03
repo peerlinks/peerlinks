@@ -40,24 +40,18 @@ class ChannelList {
         }
     }
     
-    func add(publicKey: Bytes, label: String?) throws {
-        for channel in channels {
-            if channel.publicKey.elementsEqual(publicKey) {
-                debugPrint("[channel] duplicate channel \(publicKey)")
+    func add(_ channel: Channel) throws {
+        for existing in channels {
+            if existing.publicKey.elementsEqual(channel.publicKey) {
+                debugPrint("[channel] duplicate channel \(channel.publicKey)")
                 return
             }
         }
-        
-        let sub = Proto_Channel.with({ (sub) in
-            sub.label = label ?? ""
-            sub.publicKey = Data(publicKey)
-        })
 
-        let channel = Channel(context: context, proto: sub)
         channels.append(channel)
-        proto.channels.append(sub)
+        proto.channels.append(channel.proto)
         
-        debugPrint("[channels] added new \(publicKey)")
+        debugPrint("[channels] added new \(channel.publicKey)")
         
         try save()
     }

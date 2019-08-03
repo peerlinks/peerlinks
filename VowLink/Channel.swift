@@ -46,4 +46,15 @@ class Channel {
         self.proto = proto
         self.publicKey = Bytes(proto.publicKey)
     }
+    
+    convenience init(context: Context, publicKey: Bytes, label: String?) {
+        self.init(context: context, proto: Proto_Channel.with({ (sub) in
+            sub.label = label ?? ""
+            sub.publicKey = Data(publicKey)
+        }))
+    }
+    
+    convenience init(_ identity: Identity) {
+        self.init(context: identity.context, publicKey: identity.publicKey, label: identity.name)
+    }
 }

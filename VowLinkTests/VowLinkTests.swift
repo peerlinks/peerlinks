@@ -25,12 +25,14 @@ class VowLinkTests: XCTestCase {
         let id = try! Identity(context: context, name: "test-identity")
         let trustee = try! Identity(context: context, name: "trustee")
         
+        let channel = Channel(id)
+        
         // Save should work
         try! id.save()
         
-        let link = try! id.issueLink(for: trustee.publicKey, displayName: "hello")
+        let link = try! id.issueLink(for: trustee.publicKey, andChannel: channel)
         
-        XCTAssertEqual(link.displayName, "hello")
+        XCTAssertEqual(link.label, "test-identity")
         XCTAssert(try! link.verify(withContext: context, publicKey: id.publicKey))
         
         let keyPair = context.sodium.box.keyPair()!
@@ -38,6 +40,6 @@ class VowLinkTests: XCTestCase {
         let encrypted = try! link.encrypt(withContext: context, andPubKey: keyPair.publicKey)
         let decrypted = try! Link(encrypted, withContext: context, publicKey: keyPair.publicKey, andSecretKey: keyPair.secretKey)
         
-        XCTAssertEqual(decrypted.displayName, link.displayName)
+        XCTAssertEqual(decrypted.label, link.label)
     }
 }
