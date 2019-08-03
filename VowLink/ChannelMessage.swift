@@ -14,7 +14,7 @@ class ChannelMessage {
     let channel: Channel
     let nonce: Bytes
     let height: UInt64
-    var parents = [ChannelMessage]()
+    let parents: [ChannelMessage]
     
     lazy var hash: Bytes = {
         let message = try! toProto().serializedData()
