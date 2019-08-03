@@ -11,13 +11,14 @@ import UIKit
 class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     @IBOutlet weak var identityPicker: UIPickerView!
     @IBOutlet weak var selectButton: UIButton!
+    var app: AppDelegate!
     var context: Context!
     var identities = [Identity]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let app = (UIApplication.shared.delegate as! AppDelegate)
+        app = (UIApplication.shared.delegate as! AppDelegate)
         context = app.context
         
         let keys = context.keychain.allKeys().filter { (key) -> Bool in
@@ -55,16 +56,19 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        let app = (UIApplication.shared.delegate as! AppDelegate)
         app.identity = identities[row]
     }
 
+    // MARK: - Miscellaneous
+    
+    @IBAction func eraseClicked(_ sender: Any) {
+        try! context.keychain.removeAll()
+        fatalError("Intentially crashing the app")
+    }
     
     // MARK: - Identity Manager
     
     func createIdentity(name: String) throws {
-        let app = (UIApplication.shared.delegate as! AppDelegate)
-        
         // TODO(indutny): avoid duplicates by throwing
         let id = try Identity(context: context, name: name)
         identities.append(id)
