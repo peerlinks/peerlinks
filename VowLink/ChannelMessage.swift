@@ -87,20 +87,23 @@ class ChannelMessage {
             return false
         }
         
-        return context.sodium.sign.verify(message: Bytes(try tbsProto()!.serializedData()),
+        let tbs = try tbsProto()!.serializedData()
+        
+        return context.sodium.sign.verify(message: Bytes(tbs),
                                           publicKey: publicKey,
                                           signature: content.signature)
     }
     
     func encrypted(withChannel channel: Channel) throws -> ChannelMessage {
+        // Already encrypted
+        if case .encrypted(_) = content {
+            return self
+        }
+
         // NOTE: We cache counterpart because `secretBox.seal` generates nonce randomly. Thus the
         // hash of encrypted message would be different every time.
         if let counterpart = counterpart {
             return counterpart
-        }
-        
-        if case .encrypted(_) = content {
-            return self
         }
         
         let content = try contentProto()!.serializedData()
@@ -121,14 +124,15 @@ class ChannelMessage {
     }
     
     func decrypted(withChannel channel: Channel) throws -> ChannelMessage {
-        if let counterpart = counterpart {
-            return counterpart
-        }
-        
         guard case .encrypted(let encrypted) = content else {
+            // Already decrypted
             return self
         }
         
+        if let counterpart = counterpart {
+            return counterpart
+        }
+
         let encryptionKey = try computeEncryptionKey(channel: channel)
         
         guard let decrypted = context.sodium.secretBox.open(nonceAndAuthenticatedCipherText: encrypted,

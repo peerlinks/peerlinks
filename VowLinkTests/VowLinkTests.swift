@@ -130,4 +130,33 @@ class VowLinkTests: XCTestCase {
                                       parents: [])
         XCTAssert(!(try! replay.verify(withChannel: channelA)))
     }
+    
+    func testChannelMessagePostReceive() {
+        let idA = try! Identity(context: context, name: "test:a")
+        let idB = try! Identity(context: context, name: "test:b")
+        
+        let channelA = try! Channel(idA)
+        let chain = Chain(context: context, links: [
+            try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
+        ])
+        
+        let channelCopy = Channel(context: context,
+                                  publicKey: channelA.publicKey,
+                                  name: channelA.name,
+                                  rootHash: channelA.rootHash,
+                                  chain: chain)
+        
+        let encryptedRoot = try! channelA.leafs[0].encrypted(withChannel: channelA)
+        let _ = try! channelCopy.receive(encrypted: encryptedRoot)
+        
+        let encrypted = try! channelCopy.post(message: "{\"hello\": \"world\"}", by: idB)
+        
+        let decrypted = try! channelA.receive(encrypted: encrypted)
+        
+        guard case .decrypted(let decryptedContent) = decrypted.content else {
+            XCTAssert(false, "Message not decrypted")
+            return
+        }
+        XCTAssertEqual(decryptedContent.json, "{\"hello\": \"world\"}")
+    }
 }

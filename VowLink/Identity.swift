@@ -91,7 +91,7 @@ class Identity {
                      json: String,
                      parents: [Bytes],
                      height: UInt64) throws -> ChannelMessage.Content {
-        let tbs = Proto_ChannelMessage.Content.TBS.with { (tbs) in
+        let tbsProto = Proto_ChannelMessage.Content.TBS.with { (tbs) in
             tbs.chain = chain.links.map({ (link) -> Proto_Link in
                 return link.toProto()
             })
@@ -103,9 +103,9 @@ class Identity {
             tbs.height = height
         }
         
-        let data = try tbs.serializedData()
+        let tbs = try tbsProto.serializedData()
         
-        guard let signature = self.context.sodium.sign.signature(message: Bytes(data), secretKey: secretKey) else {
+        guard let signature = self.context.sodium.sign.signature(message: Bytes(tbs), secretKey: secretKey) else {
             throw IdentityError.signatureError
         }
         

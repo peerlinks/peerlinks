@@ -21,19 +21,28 @@ The goals of the protocol defined below are:
 message ChannelMessage {
   message Content {
     message TBS {
-      // Link chain that leads from the channel's public key to the signer of
-      // this message
       repeated Link chain = 1;
-
-      // Floating point unix time
       double timestamp = 2;
-
-      // JSON content of the message
       string json = 3;
+
+      // NOTE: Despite these fields being outside of content they have to be
+      // included here to prevent replay attacks
+      repeated bytes parents = 4;
+      uint64 height = 5;
     }
 
-    TBS tbs = 1;
-    bytes signature = 2;
+    // Link chain that leads from the channel's public key to the signer of
+    // this message
+    repeated Link chain = 1;
+
+    // Floating point unix time
+    double timestamp = 2;
+
+    // JSON content of the message
+    string json = 3;
+
+    // Signature of TBS using the leaf public key of `chain`
+    bytes signature = 4;
   }
 
   bytes channel_id = 1;
@@ -60,8 +69,6 @@ to be used in `parents` is a keyed hash of serialized `ChannelMessage`:
 HASH(ChannelMessage, 'vowlink-message')
 ```
 
-TODO(indutny): Invitation to the channel MUST have signed
-
 `height` of the root is zero. For other messages it MUST be checked by recipient
 to be:
 ```javascript
@@ -78,7 +85,7 @@ one or more disconnected DAGs for the same channel.
 The subscribers of the channel MUST verify the messages against full DAG:
 
 * `height` MUST be checked
-* `parents` MUST lead to the root
+* `parents` MUST lead to the root, and MUST NOT be empty
 * `content.box` MUST be signed
 * `chain` MUST lead to the channel's public key and MUST not be longer than 5
   links
