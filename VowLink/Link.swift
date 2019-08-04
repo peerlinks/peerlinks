@@ -13,21 +13,21 @@ enum LinkError : Error {
     case decryptError
 }
 
-struct LinkDetails {
-    var issuerPubKey: Bytes
-    var channelPubKey: Bytes
-    var channelRoot: Bytes
-    var label: String
-}
-
 class Link {
+    struct Details {
+        var issuerPubKey: Bytes
+        var channelPubKey: Bytes
+        var channelRoot: Bytes
+        var label: String
+    }
+    
     let context: Context
     let trusteePubKey: Bytes
-    var details: LinkDetails?
+    var details: Details?
     let expiration: TimeInterval
     let signature: Bytes
     
-    init(context: Context, trusteePubKey: Bytes, expiration: TimeInterval, signature: Bytes, details: LinkDetails?) {
+    init(context: Context, trusteePubKey: Bytes, expiration: TimeInterval, signature: Bytes, details: Details?) {
         self.context = context
         self.trusteePubKey = trusteePubKey
         self.expiration = expiration
@@ -36,14 +36,14 @@ class Link {
     }
     
     convenience init(context: Context, link: Proto_Link) {
-        var details: LinkDetails? = nil
+        var details: Details? = nil
         
         if !link.details.issuerPubKey.isEmpty && !link.details.channelPubKey.isEmpty &&
             !link.details.channelRoot.isEmpty {
-            details = LinkDetails(issuerPubKey: Bytes(link.details.issuerPubKey),
-                                  channelPubKey: Bytes(link.details.channelPubKey),
-                                  channelRoot: Bytes(link.details.channelRoot),
-                                  label: link.details.label)
+            details = Details(issuerPubKey: Bytes(link.details.issuerPubKey),
+                              channelPubKey: Bytes(link.details.channelPubKey),
+                              channelRoot: Bytes(link.details.channelRoot),
+                              label: link.details.label)
         }
         
         self.init(context: context,
