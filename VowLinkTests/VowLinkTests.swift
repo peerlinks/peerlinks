@@ -93,7 +93,9 @@ class VowLinkTests: XCTestCase {
         
         let content = try! idC.signContent(chain: chain,
                                            timestamp: NSDate().timeIntervalSince1970,
-                                           json: "{\"hello\":\"world\"}",
+                                           body: Proto_ChannelMessage.Body.with({ (body) in
+                                               body.text.text = "okay"
+                                           }),
                                            parents: [ channelA.root.hash! ],
                                            height: 1)
         let msg = try! ChannelMessage(context: context,
@@ -121,7 +123,7 @@ class VowLinkTests: XCTestCase {
             XCTFail("Message not decrypted")
             return
         }
-        XCTAssertEqual(content.json, decryptedContent.json)
+        XCTAssertEqual(content.body, decryptedContent.body)
         
         let replay = try! ChannelMessage(context: context,
                                       channelID: channelA.channelID,
@@ -150,7 +152,9 @@ class VowLinkTests: XCTestCase {
         let encryptedRoot = try! root.encrypted(withChannel: channelA)
         XCTAssertEqual(encryptedRoot.hash, channelA.root.hash)
         
-        let encrypted = try! channelCopy.post(message: "{\"hello\": \"world\"}", by: idB)
+        let encrypted = try! channelCopy.post(message: Proto_ChannelMessage.Body.with({ (body) in
+            body.text.text = "hello"
+        }), by: idB)
         
         let decrypted = try! channelA.receive(encrypted: encrypted)
         
@@ -158,13 +162,15 @@ class VowLinkTests: XCTestCase {
             XCTFail("Message not decrypted")
             return
         }
-        XCTAssertEqual(decryptedContent.json, "{\"hello\": \"world\"}")
+        XCTAssertEqual(decryptedContent.body.text.text, "hello")
         
         // Invalid timestamp
         func message(withTimeDelta delta: TimeInterval) -> ChannelMessage {
             let content = try! idA.signContent(chain: Chain(context: context, links: []),
                                                timestamp: NSDate().timeIntervalSince1970 + delta,
-                                               json: "{}",
+                                               body: Proto_ChannelMessage.Body.with({ (body) in
+                                                   body.text.text = "time delta"
+                                               }),
                                                parents: [ channelA.root.hash! ],
                                                height: 1)
             let decrypted = try! ChannelMessage(context: context,
@@ -197,7 +203,9 @@ class VowLinkTests: XCTestCase {
         
         let invalidRootContent = try! idB.signContent(chain: chain,
                                                       timestamp: NSDate().timeIntervalSince1970,
-                                                      json: "{}",
+                                                      body: Proto_ChannelMessage.Body.with({ (body) in
+                                                        body.root = Proto_ChannelMessage.Root()
+                                                      }),
                                                       parents: [],
                                                       height: 0)
         let decryptedInvalidRoot = try! ChannelMessage(context: context,

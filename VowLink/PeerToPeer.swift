@@ -58,11 +58,11 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     // MARK: Public API
     
-    func send(_ packet: Proto_Packet, to peerID: String) throws {
+    func send(_ packet: Proto_Packet, to peerID: String? = nil) throws {
         let data = try packet.serializedData()
 
         let realIDs = peers.keys.filter { (peer) -> Bool in
-            return peer.displayName == peerID
+            return peerID == nil || peer.displayName == peerID
         }
         
         let peers = realIDs.map({ (id) -> Peer? in

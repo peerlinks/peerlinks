@@ -9,9 +9,10 @@
 import Foundation
 import Sodium
 
-class ChannelList {
+class ChannelList : ChannelDelegate {
     let context: Context
     var channels = [Channel]()
+    weak var channelDelegate: ChannelDelegate?
     
     // TODO(indutny): does it make sense to store this in keychain too?
     init(context: Context) {
@@ -26,7 +27,9 @@ class ChannelList {
             let proto = try Proto_ChannelList(serializedData: existing)
             
             for channel in proto.channels {
-                channels.append(try Channel(context: context, proto: channel))
+                let channel = try Channel(context: context, proto: channel)
+                channel.delegate = self
+                channels.append(channel)
             }
             
             debugPrint("[channels] loaded \(channels.count) channels")
@@ -42,6 +45,8 @@ class ChannelList {
                 return
             }
         }
+        
+        channel.delegate = self
 
         channels.append(channel)
         
@@ -62,5 +67,11 @@ class ChannelList {
         let data = try toProto().serializedData()
         
         try context.keychain.set(Data(data), key: "channels")
+    }
+    
+    // MARK: ChannelDelegate
+    
+    func channel(_ channel: Channel, postedMessage message: ChannelMessage) {
+        channelDelegate?.channel(channel, postedMessage: message)
     }
 }

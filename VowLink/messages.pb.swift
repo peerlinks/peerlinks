@@ -163,6 +163,76 @@ struct Proto_ChannelMessage {
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
+  struct Root {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+  }
+
+  struct Text {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var text: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+  }
+
+  struct Body {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var body: OneOf_Body? {
+      get {return _storage._body}
+      set {_uniqueStorage()._body = newValue}
+    }
+
+    var root: Proto_ChannelMessage.Root {
+      get {
+        if case .root(let v)? = _storage._body {return v}
+        return Proto_ChannelMessage.Root()
+      }
+      set {_uniqueStorage()._body = .root(newValue)}
+    }
+
+    var text: Proto_ChannelMessage.Text {
+      get {
+        if case .text(let v)? = _storage._body {return v}
+        return Proto_ChannelMessage.Text()
+      }
+      set {_uniqueStorage()._body = .text(newValue)}
+    }
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    enum OneOf_Body: Equatable {
+      case root(Proto_ChannelMessage.Root)
+      case text(Proto_ChannelMessage.Text)
+
+    #if !swift(>=4.1)
+      static func ==(lhs: Proto_ChannelMessage.Body.OneOf_Body, rhs: Proto_ChannelMessage.Body.OneOf_Body) -> Bool {
+        switch (lhs, rhs) {
+        case (.root(let l), .root(let r)): return l == r
+        case (.text(let l), .text(let r)): return l == r
+        default: return false
+        }
+      }
+    #endif
+    }
+
+    init() {}
+
+    fileprivate var _storage = _StorageClass.defaultInstance
+  }
+
   struct Content {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -170,15 +240,31 @@ struct Proto_ChannelMessage {
 
     /// Link chain that leads from the channel's public key to the signer of
     /// this message
-    var chain: [Proto_Link] = []
+    var chain: [Proto_Link] {
+      get {return _storage._chain}
+      set {_uniqueStorage()._chain = newValue}
+    }
 
     /// Floating point unix time
-    var timestamp: Double = 0
+    var timestamp: Double {
+      get {return _storage._timestamp}
+      set {_uniqueStorage()._timestamp = newValue}
+    }
 
-    /// JSON content of the message
-    var json: String = String()
+    /// body of the message
+    var body: Proto_ChannelMessage.Body {
+      get {return _storage._body ?? Proto_ChannelMessage.Body()}
+      set {_uniqueStorage()._body = newValue}
+    }
+    /// Returns true if `body` has been explicitly set.
+    var hasBody: Bool {return _storage._body != nil}
+    /// Clears the value of `body`. Subsequent reads from it will return its default value.
+    mutating func clearBody() {_uniqueStorage()._body = nil}
 
-    var signature: Data = SwiftProtobuf.Internal.emptyData
+    var signature: Data {
+      get {return _storage._signature}
+      set {_uniqueStorage()._signature = newValue}
+    }
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -187,24 +273,47 @@ struct Proto_ChannelMessage {
       // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
       // methods supported on all messages.
 
-      var chain: [Proto_Link] = []
+      var chain: [Proto_Link] {
+        get {return _storage._chain}
+        set {_uniqueStorage()._chain = newValue}
+      }
 
-      var timestamp: Double = 0
+      var timestamp: Double {
+        get {return _storage._timestamp}
+        set {_uniqueStorage()._timestamp = newValue}
+      }
 
-      var json: String = String()
+      var body: Proto_ChannelMessage.Body {
+        get {return _storage._body ?? Proto_ChannelMessage.Body()}
+        set {_uniqueStorage()._body = newValue}
+      }
+      /// Returns true if `body` has been explicitly set.
+      var hasBody: Bool {return _storage._body != nil}
+      /// Clears the value of `body`. Subsequent reads from it will return its default value.
+      mutating func clearBody() {_uniqueStorage()._body = nil}
 
       /// NOTE: Despite these fields being outside of content they have to be
       /// included here to prevent replay attacks
-      var parents: [Data] = []
+      var parents: [Data] {
+        get {return _storage._parents}
+        set {_uniqueStorage()._parents = newValue}
+      }
 
-      var height: UInt64 = 0
+      var height: UInt64 {
+        get {return _storage._height}
+        set {_uniqueStorage()._height = newValue}
+      }
 
       var unknownFields = SwiftProtobuf.UnknownStorage()
 
       init() {}
+
+      fileprivate var _storage = _StorageClass.defaultInstance
     }
 
     init() {}
+
+    fileprivate var _storage = _StorageClass.defaultInstance
   }
 
   init() {}
@@ -735,48 +844,215 @@ extension Proto_ChannelMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
   }
 }
 
-extension Proto_ChannelMessage.Content: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Proto_ChannelMessage.protoMessageName + ".Content"
+extension Proto_ChannelMessage.Root: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Proto_ChannelMessage.protoMessageName + ".Root"
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let _ = try decoder.nextFieldNumber() {
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Proto_ChannelMessage.Root, rhs: Proto_ChannelMessage.Root) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Proto_ChannelMessage.Text: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Proto_ChannelMessage.protoMessageName + ".Text"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "chain"),
-    2: .same(proto: "timestamp"),
-    3: .same(proto: "json"),
-    4: .same(proto: "signature"),
+    1: .same(proto: "text"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
-      case 1: try decoder.decodeRepeatedMessageField(value: &self.chain)
-      case 2: try decoder.decodeSingularDoubleField(value: &self.timestamp)
-      case 3: try decoder.decodeSingularStringField(value: &self.json)
-      case 4: try decoder.decodeSingularBytesField(value: &self.signature)
+      case 1: try decoder.decodeSingularStringField(value: &self.text)
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.chain.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.chain, fieldNumber: 1)
+    if !self.text.isEmpty {
+      try visitor.visitSingularStringField(value: self.text, fieldNumber: 1)
     }
-    if self.timestamp != 0 {
-      try visitor.visitSingularDoubleField(value: self.timestamp, fieldNumber: 2)
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Proto_ChannelMessage.Text, rhs: Proto_ChannelMessage.Text) -> Bool {
+    if lhs.text != rhs.text {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Proto_ChannelMessage.Body: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Proto_ChannelMessage.protoMessageName + ".Body"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "root"),
+    2: .same(proto: "text"),
+  ]
+
+  fileprivate class _StorageClass {
+    var _body: Proto_ChannelMessage.Body.OneOf_Body?
+
+    static let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _body = source._body
     }
-    if !self.json.isEmpty {
-      try visitor.visitSingularStringField(value: self.json, fieldNumber: 3)
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
     }
-    if !self.signature.isEmpty {
-      try visitor.visitSingularBytesField(value: self.signature, fieldNumber: 4)
+    return _storage
+  }
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        switch fieldNumber {
+        case 1:
+          var v: Proto_ChannelMessage.Root?
+          if let current = _storage._body {
+            try decoder.handleConflictingOneOf()
+            if case .root(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {_storage._body = .root(v)}
+        case 2:
+          var v: Proto_ChannelMessage.Text?
+          if let current = _storage._body {
+            try decoder.handleConflictingOneOf()
+            if case .text(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {_storage._body = .text(v)}
+        default: break
+        }
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      switch _storage._body {
+      case .root(let v)?:
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+      case .text(let v)?:
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+      case nil: break
+      }
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Proto_ChannelMessage.Body, rhs: Proto_ChannelMessage.Body) -> Bool {
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._body != rhs_storage._body {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Proto_ChannelMessage.Content: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Proto_ChannelMessage.protoMessageName + ".Content"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "chain"),
+    2: .same(proto: "timestamp"),
+    3: .same(proto: "body"),
+    4: .same(proto: "signature"),
+  ]
+
+  fileprivate class _StorageClass {
+    var _chain: [Proto_Link] = []
+    var _timestamp: Double = 0
+    var _body: Proto_ChannelMessage.Body? = nil
+    var _signature: Data = SwiftProtobuf.Internal.emptyData
+
+    static let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _chain = source._chain
+      _timestamp = source._timestamp
+      _body = source._body
+      _signature = source._signature
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        switch fieldNumber {
+        case 1: try decoder.decodeRepeatedMessageField(value: &_storage._chain)
+        case 2: try decoder.decodeSingularDoubleField(value: &_storage._timestamp)
+        case 3: try decoder.decodeSingularMessageField(value: &_storage._body)
+        case 4: try decoder.decodeSingularBytesField(value: &_storage._signature)
+        default: break
+        }
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      if !_storage._chain.isEmpty {
+        try visitor.visitRepeatedMessageField(value: _storage._chain, fieldNumber: 1)
+      }
+      if _storage._timestamp != 0 {
+        try visitor.visitSingularDoubleField(value: _storage._timestamp, fieldNumber: 2)
+      }
+      if let v = _storage._body {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      }
+      if !_storage._signature.isEmpty {
+        try visitor.visitSingularBytesField(value: _storage._signature, fieldNumber: 4)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Proto_ChannelMessage.Content, rhs: Proto_ChannelMessage.Content) -> Bool {
-    if lhs.chain != rhs.chain {return false}
-    if lhs.timestamp != rhs.timestamp {return false}
-    if lhs.json != rhs.json {return false}
-    if lhs.signature != rhs.signature {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._chain != rhs_storage._chain {return false}
+        if _storage._timestamp != rhs_storage._timestamp {return false}
+        if _storage._body != rhs_storage._body {return false}
+        if _storage._signature != rhs_storage._signature {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -787,49 +1063,89 @@ extension Proto_ChannelMessage.Content.TBS: SwiftProtobuf.Message, SwiftProtobuf
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "chain"),
     2: .same(proto: "timestamp"),
-    3: .same(proto: "json"),
+    3: .same(proto: "body"),
     4: .same(proto: "parents"),
     5: .same(proto: "height"),
   ]
 
+  fileprivate class _StorageClass {
+    var _chain: [Proto_Link] = []
+    var _timestamp: Double = 0
+    var _body: Proto_ChannelMessage.Body? = nil
+    var _parents: [Data] = []
+    var _height: UInt64 = 0
+
+    static let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _chain = source._chain
+      _timestamp = source._timestamp
+      _body = source._body
+      _parents = source._parents
+      _height = source._height
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      switch fieldNumber {
-      case 1: try decoder.decodeRepeatedMessageField(value: &self.chain)
-      case 2: try decoder.decodeSingularDoubleField(value: &self.timestamp)
-      case 3: try decoder.decodeSingularStringField(value: &self.json)
-      case 4: try decoder.decodeRepeatedBytesField(value: &self.parents)
-      case 5: try decoder.decodeSingularUInt64Field(value: &self.height)
-      default: break
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        switch fieldNumber {
+        case 1: try decoder.decodeRepeatedMessageField(value: &_storage._chain)
+        case 2: try decoder.decodeSingularDoubleField(value: &_storage._timestamp)
+        case 3: try decoder.decodeSingularMessageField(value: &_storage._body)
+        case 4: try decoder.decodeRepeatedBytesField(value: &_storage._parents)
+        case 5: try decoder.decodeSingularUInt64Field(value: &_storage._height)
+        default: break
+        }
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.chain.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.chain, fieldNumber: 1)
-    }
-    if self.timestamp != 0 {
-      try visitor.visitSingularDoubleField(value: self.timestamp, fieldNumber: 2)
-    }
-    if !self.json.isEmpty {
-      try visitor.visitSingularStringField(value: self.json, fieldNumber: 3)
-    }
-    if !self.parents.isEmpty {
-      try visitor.visitRepeatedBytesField(value: self.parents, fieldNumber: 4)
-    }
-    if self.height != 0 {
-      try visitor.visitSingularUInt64Field(value: self.height, fieldNumber: 5)
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      if !_storage._chain.isEmpty {
+        try visitor.visitRepeatedMessageField(value: _storage._chain, fieldNumber: 1)
+      }
+      if _storage._timestamp != 0 {
+        try visitor.visitSingularDoubleField(value: _storage._timestamp, fieldNumber: 2)
+      }
+      if let v = _storage._body {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      }
+      if !_storage._parents.isEmpty {
+        try visitor.visitRepeatedBytesField(value: _storage._parents, fieldNumber: 4)
+      }
+      if _storage._height != 0 {
+        try visitor.visitSingularUInt64Field(value: _storage._height, fieldNumber: 5)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Proto_ChannelMessage.Content.TBS, rhs: Proto_ChannelMessage.Content.TBS) -> Bool {
-    if lhs.chain != rhs.chain {return false}
-    if lhs.timestamp != rhs.timestamp {return false}
-    if lhs.json != rhs.json {return false}
-    if lhs.parents != rhs.parents {return false}
-    if lhs.height != rhs.height {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._chain != rhs_storage._chain {return false}
+        if _storage._timestamp != rhs_storage._timestamp {return false}
+        if _storage._body != rhs_storage._body {return false}
+        if _storage._parents != rhs_storage._parents {return false}
+        if _storage._height != rhs_storage._height {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -20,7 +20,7 @@ class ChannelMessage {
     struct Content {
         let chain: Chain
         let timestamp: TimeInterval
-        let json: String
+        let body: Proto_ChannelMessage.Body
         var signature: Bytes
     }
     
@@ -143,16 +143,13 @@ class ChannelMessage {
         
         let contentProto = try Proto_ChannelMessage.Content(serializedData: Data(decrypted))
         
-        // Check that JSON can be parsed
-        let _ = try JSONSerialization.jsonObject(with: Data(contentProto.json.bytes),
-                                                 options: JSONSerialization.ReadingOptions(arrayLiteral: []))
         let links = contentProto.chain.map({ (link) -> Link in
             return Link(context: self.context, link: link)
         })
         
         let content = Content(chain: Chain(context: context, links: links),
                               timestamp: contentProto.timestamp,
-                              json: contentProto.json,
+                              body: contentProto.body,
                               signature: Bytes(contentProto.signature))
         
         counterpart = try ChannelMessage(context: context,
@@ -202,7 +199,7 @@ class ChannelMessage {
                 link.toProto()
             })
             proto.timestamp = content.timestamp
-            proto.json = content.json
+            proto.body = content.body
             proto.signature = Data(content.signature)
         })
     }
@@ -217,7 +214,7 @@ class ChannelMessage {
                 link.toProto()
             })
             proto.timestamp = content.timestamp
-            proto.json = content.json
+            proto.body = content.body
             proto.parents = self.parents.map({ (parent) -> Data in
                 return Data(parent)
             })

@@ -10,6 +10,8 @@ import UIKit
 
 class ChannelController : UIViewController {
     @IBOutlet weak var navItem: UINavigationItem!
+    @IBOutlet weak var messagesView: UITableView!
+    @IBOutlet weak var messageText: UITextField!
     
     var channel: Channel!
     
@@ -23,5 +25,8 @@ class ChannelController : UIViewController {
         if let inviteController = segue.destination as? InviteController {
             inviteController.channel = channel
         }
+    }
+    
+    @IBAction func sendClicked(_ sender: Any) {
     }
 }

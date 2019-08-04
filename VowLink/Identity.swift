@@ -88,7 +88,7 @@ class Identity {
     
     func signContent(chain: Chain,
                      timestamp: TimeInterval,
-                     json: String,
+                     body: Proto_ChannelMessage.Body,
                      parents: [Bytes],
                      height: UInt64) throws -> ChannelMessage.Content {
         let tbsProto = Proto_ChannelMessage.Content.TBS.with { (tbs) in
@@ -96,7 +96,7 @@ class Identity {
                 return link.toProto()
             })
             tbs.timestamp = timestamp
-            tbs.json = json
+            tbs.body = body
             tbs.parents = parents.map({ (parent) -> Data in
                 return Data(parent)
             })
@@ -109,6 +109,6 @@ class Identity {
             throw IdentityError.signatureError
         }
 
-        return ChannelMessage.Content(chain: chain, timestamp: timestamp, json: json, signature: signature)
+        return ChannelMessage.Content(chain: chain, timestamp: timestamp, body: body, signature: signature)
     }
 }

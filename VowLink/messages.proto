@@ -44,11 +44,25 @@ message LinkRequest {
 }
 
 message ChannelMessage {
+  message Root {
+  }
+
+  message Text {
+    string text = 1;
+  }
+
+  message Body {
+    oneof body {
+      Root root = 1;
+      Text text = 2;
+    }
+  }
+
   message Content {
     message TBS {
       repeated Link chain = 1;
       double timestamp = 2;
-      string json = 3;
+      Body body = 3;
 
       // NOTE: Despite these fields being outside of content they have to be
       // included here to prevent replay attacks
@@ -63,8 +77,8 @@ message ChannelMessage {
     // Floating point unix time
     double timestamp = 2;
 
-    // JSON content of the message
-    string json = 3;
+    // body of the message
+    Body body = 3;
 
     bytes signature = 4;
   }

@@ -170,6 +170,9 @@
                             <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="arC-bz-8bh">
                                 <rect key="frame" x="323" y="748" width="36" height="30"/>
                                 <state key="normal" title="Send"/>
+                                <connections>
+                                    <action selector="sendClicked:" destination="AC4-Jh-zDQ" eventType="touchUpInside" id="Jck-Hl-1By"/>
+                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -194,6 +197,8 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="messageText" destination="N6r-d9-r7e" id="VFK-DD-WJ4"/>
+                        <outlet property="messagesView" destination="GsW-Oe-CMg" id="YCF-vw-EDG"/>
                         <outlet property="navItem" destination="8KN-8u-A2S" id="Y7d-ms-Awh"/>
                     </connections>
                 </viewController>

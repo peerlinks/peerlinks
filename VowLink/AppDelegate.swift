@@ -18,7 +18,7 @@ protocol ChainNotificationDelegate: AnyObject {
 }
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, ChannelDelegate {
     let context = Context()
     var channelList: ChannelList!
 
@@ -32,6 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
         p2p.delegate = self
         
         channelList = ChannelList(context: context)
+        channelList.channelDelegate = self
         
         return true
     }
@@ -141,7 +142,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
         } catch {
             debugPrint("[app] failed to decrypt invite due to error \(error)")
         }
+    }
+    
+    // MARK: ChannelDelegate
+    func channel(_ channel: Channel, postedMessage message: ChannelMessage) {
+        guard let messageProto = message.toProto() else {
+            debugPrint("[app] invalid message \(message)")
+            return
+        }
 
+        do {
+            try p2p.send(Proto_Packet.with({ (proto) in
+                proto.message = messageProto
+            }))
+        } catch {
+            debugPrint("[app] failed to broadcast message due to error \(error)")
+        }
     }
 }
 

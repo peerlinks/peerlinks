@@ -90,9 +90,13 @@ class Channel {
         // Only a temporary measure, we should be fine
         root = nil
         
+        let rootBody = Proto_ChannelMessage.Body.with { (body) in
+            body.root = Proto_ChannelMessage.Root()
+        }
+        
         let content = try identity.signContent(chain: chain,
                                                timestamp: NSDate().timeIntervalSince1970,
-                                               json: "{\"type\":\"root\"}",
+                                               body: rootBody,
                                                parents: [],
                                                height: 0)
         let unencryptedRoot = try! ChannelMessage(context: context,
@@ -133,7 +137,7 @@ class Channel {
         return nil
     }
 
-    func post(message json: String, by identity: Identity) throws -> ChannelMessage {
+    func post(message body: Proto_ChannelMessage.Body, by identity: Identity) throws -> ChannelMessage {
         let parents = try leafs.map({ (leaf) -> Bytes in
             return try leaf.encrypted(withChannel: self).hash!
         })
@@ -143,7 +147,7 @@ class Channel {
         
         let content = try identity.signContent(chain: chain,
                                                timestamp: NSDate().timeIntervalSince1970,
-                                               json: json,
+                                               body: body,
                                                parents: parents,
                                                height: height)
         

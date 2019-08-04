@@ -19,11 +19,25 @@ The goals of the protocol defined below are:
 
 ```proto
 message ChannelMessage {
+  message Root {
+  }
+
+  message Text {
+    string text = 1;
+  }
+
+  message Body {
+    oneof body {
+      Root root = 1;
+      Text text = 2;
+    }
+  }
+
   message Content {
     message TBS {
       repeated Link chain = 1;
       double timestamp = 2;
-      string json = 3;
+      Body body = 3;
 
       // NOTE: Despite these fields being outside of content they have to be
       // included here to prevent replay attacks
@@ -38,18 +52,22 @@ message ChannelMessage {
     // Floating point unix time
     double timestamp = 2;
 
-    // JSON content of the message
-    string json = 3;
+    // body of the message
+    Body body = 3;
 
-    // Signature of TBS using the leaf public key of `chain`
     bytes signature = 4;
   }
 
   bytes channel_id = 1;
-  repeated bytes parents = 2;
-  uint64 height = 4;
 
-  bytes encrypted_content = 5;
+  // NOTE: can be empty only in the root message
+  repeated bytes parents = 2;
+
+  // height = max(p.height for p in parents)
+  uint64 height = 3;
+
+  // NOTE: encryption key = HASH(channelPubKey, 'vowlink-symmetric')
+  bytes encrypted_content = 4;
 }
 ```
 
