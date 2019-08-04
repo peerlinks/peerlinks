@@ -78,4 +78,47 @@ class VowLinkTests: XCTestCase {
         ]
         XCTAssertEqual(try! Link.verify(chain: longChain, withChannel: channelA, andAgainstTimestamp: now), nil)
     }
+    
+    func testChannelMessage() {
+        let idA = try! Identity(context: context, name: "test:a")
+        let idB = try! Identity(context: context, name: "test:b")
+        let idC = try! Identity(context: context, name: "test:c")
+        let channelA = try! Channel(idA)
+        let channelB = try! Channel(idB)
+        
+        let chain = [
+            try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
+            try! idB.issueLink(for: idC.publicKey, andChannel: channelA),
+        ]
+        
+        let content = try! idC.signContent(chain: chain,
+                                           timestamp: NSDate().timeIntervalSince1970,
+                                           json: "{\"hello\":\"world\"}")
+        let msg = try! ChannelMessage(context: context,
+                                 channelID: channelA.channelID,
+                                 content: .decrypted(content),
+                                 height: 1,
+                                 parents: [ channelA.rootHash ])
+        
+        XCTAssert(try! msg.verify(withChannel: channelA))
+        XCTAssert(!(try! msg.verify(withChannel: channelB)))
+        
+        let encrypted = try! msg.encrypted(withChannel: channelA)
+        let proto = encrypted.toProto()!
+        
+        XCTAssert(!(try! encrypted.verify(withChannel: channelA)))
+        XCTAssert(!(try! encrypted.verify(withChannel: channelB)))
+        
+        let copy = try! ChannelMessage(context: context, proto: proto)
+        let decrypted = try! copy.decrypted(withChannel: channelA)
+        
+        XCTAssert(try! decrypted.verify(withChannel: channelA))
+        XCTAssert(!(try! decrypted.verify(withChannel: channelB)))
+        
+        guard case .decrypted(let decryptedContent) = decrypted.content else {
+            XCTAssert(false, "Message not decrypted")
+            return
+        }
+        XCTAssertEqual(content.json, decryptedContent.json)
+    }
 }

@@ -113,14 +113,14 @@ class Link {
         return last
     }
     
-    func toProto() -> Proto_Link {
+    func toProto(shallow: Bool = false) -> Proto_Link {
         return Proto_Link.with({ (link) in
             link.tbs = Proto_Link.TBS.with({ (tbs) in
                 tbs.trusteePubKey = Data(self.trusteePubKey)
                 tbs.expiration = self.expiration
             })
             link.signature = Data(self.signature)
-            if let details = self.details {
+            if !shallow, let details = self.details {
                 link.details = Proto_Link.Details.with({ (proto) in
                     proto.channelPubKey = Data(details.channelPubKey)
                     proto.channelRootHash = Data(details.channelRootHash)

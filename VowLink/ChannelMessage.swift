@@ -194,7 +194,7 @@ class ChannelMessage {
         
         return Proto_ChannelMessage.Content.with({ (proto) in
             proto.tbs.chain = content.chain.map({ (link) -> Proto_Link in
-                link.toProto()
+                link.toProto(shallow: true)
             })
             proto.tbs.timestamp = content.timestamp
             proto.tbs.json = content.json

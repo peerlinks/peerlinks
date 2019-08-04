@@ -111,4 +111,22 @@ class Identity {
         
         try save()
     }
+    
+    func signContent(chain: [Link], timestamp: TimeInterval, json: String) throws -> ChannelMessage.Content {
+        let tbs = Proto_ChannelMessage.Content.TBS.with { (tbs) in
+            tbs.chain = chain.map({ (link) -> Proto_Link in
+                return link.toProto(shallow: true)
+            })
+            tbs.timestamp = timestamp
+            tbs.json = json
+        }
+        
+        let data = try tbs.serializedData()
+        
+        guard let signature = self.context.sodium.sign.signature(message: Bytes(data), secretKey: secretKey) else {
+            throw IdentityError.signatureError
+        }
+        
+        return ChannelMessage.Content(chain: chain, timestamp: timestamp, json: json, signature: signature)
+    }
 }
