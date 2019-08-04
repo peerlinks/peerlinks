@@ -81,6 +81,9 @@ class Channel {
                 let encrypted = try! message.encrypted(withChannel: self)
                 return encrypted.toProto()!
             })
+            channel.chain = chain.links.map({ (link) -> Proto_Link in
+                return link.toProto()
+            })
         })
     }
     
