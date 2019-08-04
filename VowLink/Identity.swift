@@ -108,7 +108,7 @@ class Identity {
         guard let signature = self.context.sodium.sign.signature(message: Bytes(tbs), secretKey: secretKey) else {
             throw IdentityError.signatureError
         }
-        
+
         return ChannelMessage.Content(chain: chain, timestamp: timestamp, json: json, signature: signature)
     }
 }

@@ -146,7 +146,10 @@ class VowLinkTests: XCTestCase {
                                   rootHash: channelA.rootHash,
                                   chain: chain)
         
-        let encryptedRoot = try! channelA.leafs[0].encrypted(withChannel: channelA)
+        let root = channelA.leafs[0]
+        let encryptedRoot = try! root.encrypted(withChannel: channelA)
+        XCTAssertEqual(encryptedRoot.hash, channelA.rootHash)
+        
         let _ = try! channelCopy.receive(encrypted: encryptedRoot)
         
         let encrypted = try! channelCopy.post(message: "{\"hello\": \"world\"}", by: idB)

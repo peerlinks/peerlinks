@@ -26,6 +26,8 @@ class Channel {
     let context: Context
     let publicKey: Bytes
     var name: String
+    
+    // TODO(indutny): sort in a CRDT way
     var messages = [ChannelMessage]()
     var leafs = [ChannelMessage]()
     var chain: Chain
@@ -136,9 +138,10 @@ class Channel {
                                                height: height)
         
         let decrypted = try ChannelMessage(context: context,
-                                         channelID: channelID,
-                                         content: .decrypted(content),
-                                         height: height)
+                                           channelID: channelID,
+                                           content: .decrypted(content),
+                                           height: height,
+                                           parents: parents)
         
         let encrypted = try decrypted.encrypted(withChannel: self)
         
@@ -150,6 +153,7 @@ class Channel {
         return encrypted
     }
     
+    // NOTE: It is important to receive encrypted message, so that its hash won't change
     func receive(encrypted: ChannelMessage) throws -> ChannelMessage {
         if !encrypted.isEncrypted {
             throw ChannelError.incomingMessageNotEncrypted

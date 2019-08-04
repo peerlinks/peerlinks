@@ -110,6 +110,7 @@ class ChannelMessage {
         
         let encryptionKey = try computeEncryptionKey(channel: channel)
         
+        // XXX(indutny): use `nonce` when https://github.com/jedisct1/swift-sodium/pull/188 lands
         guard let box: Bytes = context.sodium.secretBox.seal(message: Bytes(content), secretKey: encryptionKey) else {
             throw ChannelMessageError.encryptionFailed
         }
@@ -119,7 +120,7 @@ class ChannelMessage {
                                          content: .encrypted(box),
                                          height: height,
                                          parents: parents)
-        
+        counterpart?.counterpart = self
         return counterpart!
     }
     
@@ -159,6 +160,7 @@ class ChannelMessage {
                                          content: .decrypted(content),
                                          height: height,
                                          parents: parents)
+        counterpart?.counterpart = self
         return counterpart!
     }
     
