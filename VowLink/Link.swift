@@ -88,6 +88,19 @@ class Link {
                                           signature: self.signature)
     }
     
+    static func verify(chain: [Link], withChannel channel: Channel) throws -> Bytes? {
+        var last = channel.publicKey
+        
+        for link in chain {
+            if !(try link.verify(withPublicKey: last, andChannel: channel)) {
+                return nil
+            }
+            last = link.trusteePubKey
+        }
+        
+        return last
+    }
+    
     func toProto() -> Proto_Link {
         return Proto_Link.with({ (link) in
             link.tbs = Proto_Link.TBS.with({ (tbs) in

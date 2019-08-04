@@ -9,9 +9,12 @@
 import Foundation
 import Sodium
 
-// TODO(indutny): implement EncryptedChannelMessage for the memory pools of non-subscribers
 class ChannelMessage {
     struct Content {
+        let chain: [Link]
+        let timestamp: TimeInterval
+        let json: String
+        var signature: Bytes
     }
 
     let context: Context
@@ -20,7 +23,8 @@ class ChannelMessage {
     let height: UInt64
     let parents: [ChannelMessage]
     var content: Content
-    
+
+    // TODO(indutny): this should be a method of EncryptedMessage?
     lazy var hash: Bytes = {
         let message = try! toProto().serializedData()
         return self.context.sodium.genericHash.hash(message: Bytes(message),
@@ -42,14 +46,25 @@ class ChannelMessage {
         self.content = content
     }
     
-    func toProto() -> Proto_ChannelMessage {
-        return Proto_ChannelMessage.with({ (proto) in
-            proto.channelID = Data(self.channel.channelID)
-            proto.nonce = Data(self.nonce)
-            proto.height = height
-            proto.parents = self.parents.map({ (parent) -> Data in
-                return Data(parent.hash)
+    func verify() throws -> Bool {
+        guard let publicKey = try Link.verify(chain: content.chain, withChannel: channel) else {
+            debugPrint("[channel-message] invalid chain for message \(hash)")
+            return false
+        }
+        
+        return context.sodium.sign.verify(message: Bytes(try toProto().tbs.serializedData()),
+                                          publicKey: publicKey,
+                                          signature: content.signature)
+    }
+    
+    func toProto() -> Proto_ChannelMessage.Content {
+        return Proto_ChannelMessage.Content.with({ (content) in
+            content.tbs.chain = self.content.chain.map({ (link) -> Proto_Link in
+                link.toProto()
             })
+            content.tbs.timestamp = self.content.timestamp
+            content.tbs.json = self.content.json
+            content.signature = Data(self.content.signature)
         })
     }
 }

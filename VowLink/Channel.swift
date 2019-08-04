@@ -38,7 +38,11 @@ class Channel {
     convenience init(_ identity: Identity) {
         self.init(context: identity.context, publicKey: identity.publicKey, label: identity.name)
         
-        rootMessage = ChannelMessage(context: context, channel: self, content: ChannelMessage.Content())
+        rootMessage = ChannelMessage(context: context, channel: self,
+                                     content: ChannelMessage.Content(chain: [],
+                                                                     timestamp: NSDate().timeIntervalSince1970,
+                                                                     json: "{}",
+                                                                     signature: []))
         messages.append(rootMessage!)
     }
     

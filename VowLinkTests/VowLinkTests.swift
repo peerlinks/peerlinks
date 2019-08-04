@@ -22,8 +22,8 @@ class VowLinkTests: XCTestCase {
     }
 
     func testIdentity() {
-        let id = try! Identity(context: context, name: "test-identity")
-        let trustee = try! Identity(context: context, name: "trustee")
+        let id = try! Identity(context: context, name: "test:identity")
+        let trustee = try! Identity(context: context, name: "test:trustee")
         
         let channel = Channel(id)
         
@@ -32,7 +32,7 @@ class VowLinkTests: XCTestCase {
         
         let link = try! id.issueLink(for: trustee.publicKey, andChannel: channel)
         
-        XCTAssertEqual(link.details?.label, "test-identity")
+        XCTAssertEqual(link.details?.label, "test:identity")
         XCTAssert(try! link.verify(withPublicKey: id.publicKey, andChannel: channel))
         
         let keyPair = context.sodium.box.keyPair()!
@@ -41,5 +41,27 @@ class VowLinkTests: XCTestCase {
         let decrypted = try! Link(encrypted, withContext: context, publicKey: keyPair.publicKey, andSecretKey: keyPair.secretKey)
         
         XCTAssertEqual(decrypted.details?.label, link.details?.label)
+    }
+    
+    func testVerifyChain() {
+        let idA = try! Identity(context: context, name: "test:a")
+        let idB = try! Identity(context: context, name: "test:b")
+        let idC = try! Identity(context: context, name: "test:c")
+        
+        let channelA = Channel(idA)
+        let channelB = Channel(idB)
+        
+        let chain = [
+            try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
+            try! idB.issueLink(for: idC.publicKey, andChannel: channelA),
+        ]
+        
+        XCTAssertEqual(try! Link.verify(chain: chain, withChannel: channelA), idC.publicKey)
+        XCTAssertEqual(try! Link.verify(chain: chain, withChannel: channelB), nil)
+        
+        let badChain = [
+            try! idB.issueLink(for: idC.publicKey, andChannel: channelA),
+        ]
+        XCTAssertEqual(try! Link.verify(chain: badChain, withChannel: channelA), nil)
     }
 }
