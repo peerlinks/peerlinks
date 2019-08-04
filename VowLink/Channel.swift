@@ -37,6 +37,11 @@ class Channel {
                   publicKey: Bytes(proto.publicKey),
                   label: proto.label,
                   rootHash: Bytes(proto.rootHash))
+        
+        for protoMessage in proto.messages {
+            let message = try ChannelMessage(context: context, proto: protoMessage)
+            messages.append(try! message.decrypted(withChannel: self))
+        }
     }
     
     init(_ identity: Identity) throws {
@@ -49,7 +54,7 @@ class Channel {
         
         let content = ChannelMessage.Content(chain: [],
                                              timestamp: NSDate().timeIntervalSince1970,
-                                             json: "{}",
+                                             json: "{\"type\":\"root\"}",
                                              signature: [])
         let unencryptedRoot = try! ChannelMessage(context: context, channelID: channelID, content: .decrypted(content), height: 0)
         let encryptedRoot = try unencryptedRoot.encrypted(withChannel: self)
@@ -63,10 +68,21 @@ class Channel {
             channel.publicKey = Data(self.publicKey)
             channel.label = self.label
             channel.rootHash = Data(self.rootHash)
+            channel.messages = self.messages.map({ (message) -> Proto_ChannelMessage in
+                let encrypted = try! message.encrypted(withChannel: self)
+                return encrypted.toProto()!
+            })
         })
     }
     
     func messageByHash(hash: Bytes) -> ChannelMessage? {
+        for message in messages {
+            let encrypted = try! message.encrypted(withChannel: self)
+            if context.sodium.utils.equals(hash, encrypted.hash!) {
+                return message
+            }
+        }
+        
         return nil
     }
 }

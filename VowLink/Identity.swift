@@ -21,6 +21,7 @@ class Identity {
     
     let name: String
     var links = [Link]()
+    var linkByIssuer = [String:Link]()
     private var secretKey: Bytes
     let publicKey: Bytes
     

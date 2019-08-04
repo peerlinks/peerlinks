@@ -14,11 +14,11 @@ class VowLinkTests: XCTestCase {
     let context = Context()
 
     override func setUp() {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        try! context.keychain.removeAll()
     }
 
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        try! context.keychain.removeAll()
     }
 
     func testIdentity() {
@@ -79,7 +79,7 @@ class VowLinkTests: XCTestCase {
         XCTAssertEqual(try! Link.verify(chain: longChain, withChannel: channelA, andAgainstTimestamp: now), nil)
     }
     
-    func testChannelMessage() {
+    func testChannelMessageEncryptDecrypt() {
         let idA = try! Identity(context: context, name: "test:a")
         let idB = try! Identity(context: context, name: "test:b")
         let idC = try! Identity(context: context, name: "test:c")

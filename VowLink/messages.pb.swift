@@ -336,6 +336,10 @@ struct Proto_Channel {
 
   var rootHash: Data = SwiftProtobuf.Internal.emptyData
 
+  /// XXX(indutny): this is a temporary solution. Use Core Data like a real iOS
+  /// developer.
+  var messages: [Proto_ChannelMessage] = []
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1016,6 +1020,7 @@ extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
     1: .standard(proto: "public_key"),
     2: .same(proto: "label"),
     3: .standard(proto: "root_hash"),
+    4: .same(proto: "messages"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1024,6 +1029,7 @@ extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
       case 1: try decoder.decodeSingularBytesField(value: &self.publicKey)
       case 2: try decoder.decodeSingularStringField(value: &self.label)
       case 3: try decoder.decodeSingularBytesField(value: &self.rootHash)
+      case 4: try decoder.decodeRepeatedMessageField(value: &self.messages)
       default: break
       }
     }
@@ -1039,6 +1045,9 @@ extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
     if !self.rootHash.isEmpty {
       try visitor.visitSingularBytesField(value: self.rootHash, fieldNumber: 3)
     }
+    if !self.messages.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.messages, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1046,6 +1055,7 @@ extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
     if lhs.publicKey != rhs.publicKey {return false}
     if lhs.label != rhs.label {return false}
     if lhs.rootHash != rhs.rootHash {return false}
+    if lhs.messages != rhs.messages {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -121,6 +121,10 @@ message Channel {
   bytes public_key = 1;
   string label = 2;
   bytes root_hash = 3;
+
+  // XXX(indutny): this is a temporary solution. Use Core Data like a real iOS
+  // developer.
+  repeated ChannelMessage messages = 4;
 }
 
 message ChannelList {
