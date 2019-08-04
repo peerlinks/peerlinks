@@ -94,13 +94,13 @@ class VowLinkTests: XCTestCase {
         let content = try! idC.signContent(chain: chain,
                                            timestamp: NSDate().timeIntervalSince1970,
                                            json: "{\"hello\":\"world\"}",
-                                           parents: [ channelA.rootHash ],
+                                           parents: [ channelA.root.hash! ],
                                            height: 1)
         let msg = try! ChannelMessage(context: context,
                                       channelID: channelA.channelID,
                                       content: .decrypted(content),
                                       height: 1,
-                                      parents: [ channelA.rootHash ])
+                                      parents: [ channelA.root.hash! ])
         
         XCTAssert(try! msg.verify(withChannel: channelA))
         XCTAssert(!(try! msg.verify(withChannel: channelB)))
@@ -140,17 +140,15 @@ class VowLinkTests: XCTestCase {
             try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
         ])
         
-        let channelCopy = Channel(context: context,
-                                  publicKey: channelA.publicKey,
-                                  name: channelA.name,
-                                  rootHash: channelA.rootHash,
-                                  chain: chain)
+        let channelCopy = try! Channel(context: context,
+                                       publicKey: channelA.publicKey,
+                                       name: channelA.name,
+                                       root: channelA.root,
+                                       chain: chain)
         
         let root = channelA.leafs[0]
         let encryptedRoot = try! root.encrypted(withChannel: channelA)
-        XCTAssertEqual(encryptedRoot.hash, channelA.rootHash)
-        
-        let _ = try! channelCopy.receive(encrypted: encryptedRoot)
+        XCTAssertEqual(encryptedRoot.hash, channelA.root.hash)
         
         let encrypted = try! channelCopy.post(message: "{\"hello\": \"world\"}", by: idB)
         
@@ -167,13 +165,13 @@ class VowLinkTests: XCTestCase {
             let content = try! idA.signContent(chain: Chain(context: context, links: []),
                                                timestamp: NSDate().timeIntervalSince1970 + delta,
                                                json: "{}",
-                                               parents: [ channelA.rootHash ],
+                                               parents: [ channelA.root.hash! ],
                                                height: 1)
             let decrypted = try! ChannelMessage(context: context,
                                                 channelID: channelA.channelID,
                                                 content: .decrypted(content),
                                                 height: 1,
-                                                parents: [ channelA.rootHash ])
+                                                parents: [ channelA.root.hash! ])
             let encrypted = try! decrypted.encrypted(withChannel: channelA)
             
             return encrypted

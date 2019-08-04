@@ -14,6 +14,7 @@ protocol ChannelDelegate : AnyObject {
 }
 
 enum ChannelError : Error {
+    case rootMustBeEncrypted
     case incomingMessageNotEncrypted
     case invalidSignature
     case invalidParentCount
@@ -40,28 +41,37 @@ class Channel {
                                                     outputLength: Channel.CHANNEL_ID_LENGTH)!
     }()
     
-    var rootHash: Bytes!
+    var root: ChannelMessage!
     
     static let CHANNEL_ID_LENGTH = 32
     static let FUTURE: TimeInterval = 10.0 // seconds
     
-    init(context: Context, publicKey: Bytes, name: String, rootHash: Bytes, chain: Chain) {
+    init(context: Context, publicKey: Bytes, name: String, root: ChannelMessage, chain: Chain) throws {
+        // NOTE: Makes using `channel.root.hash!` very easy to use
+        if !root.isEncrypted {
+            throw ChannelError.rootMustBeEncrypted
+        }
+
         self.context = context
         self.publicKey = publicKey
         self.name = name
-        self.rootHash = rootHash
+        self.root = root
         self.chain = chain
+        
+        let decryptedRoot = try root.decrypted(withChannel: self)
+        self.messages = [ decryptedRoot ]
+        self.leafs = [ decryptedRoot ]
     }
     
     convenience init(context: Context, proto: Proto_Channel) throws {
         let links = proto.chain.map { (link) -> Link in
             return Link(context: context, link: link)
         }
-        self.init(context: context,
-                  publicKey: Bytes(proto.publicKey),
-                  name: proto.name,
-                  rootHash: Bytes(proto.rootHash),
-                  chain: Chain(context: context, links: links))
+        try self.init(context: context,
+                      publicKey: Bytes(proto.publicKey),
+                      name: proto.name,
+                      root: try ChannelMessage(context: context, proto: proto.root),
+                      chain: Chain(context: context, links: links))
         
         for protoMessage in proto.messages {
             let message = try ChannelMessage(context: context, proto: protoMessage)
@@ -78,7 +88,7 @@ class Channel {
         self.chain = Chain(context: identity.context, links: [])
         
         // Only a temporary measure, we should be fine
-        rootHash = nil
+        root = nil
         
         let content = try identity.signContent(chain: chain,
                                                timestamp: NSDate().timeIntervalSince1970,
@@ -91,7 +101,7 @@ class Channel {
                                                   height: 0)
         let encryptedRoot = try unencryptedRoot.encrypted(withChannel: self)
         
-        rootHash = encryptedRoot.hash!
+        root = encryptedRoot
         messages.append(unencryptedRoot)
         
         leafs = try computeLeafs()
@@ -101,7 +111,7 @@ class Channel {
         return Proto_Channel.with({ (channel) in
             channel.publicKey = Data(self.publicKey)
             channel.name = self.name
-            channel.rootHash = Data(self.rootHash)
+            channel.root = self.root.toProto()!
             channel.messages = self.messages.map({ (message) -> Proto_ChannelMessage in
                 let encrypted = try! message.encrypted(withChannel: self)
                 return encrypted.toProto()!
@@ -170,8 +180,8 @@ class Channel {
             fatalError("Unexpected content")
         }
         
-        // Only root can sign root message
-        if decrypted.parents.count == 0 && content.chain.links.count != 0 {
+        // Only one root is allowed at the moment
+        if decrypted.parents.count == 0 {
             throw ChannelError.invalidParentCount
         }
         

@@ -40,17 +40,17 @@ class ChainReceivedController : ViewController {
                 throw ChainReceivedError.invalidInvite
             }
             
-            guard let rootHash = chain.channelRootHash else {
+            guard let root = chain.channelRoot else {
                 throw ChainReceivedError.invalidInvite
             }
             
             let name = descriptionField.text!
             
-            let channel = Channel(context: app.context,
-                                  publicKey: publicKey,
-                                  name: name,
-                                  rootHash: rootHash,
-                                  chain: chain)
+            let channel = try Channel(context: app.context,
+                                      publicKey: publicKey,
+                                      name: name,
+                                      root: root,
+                                      chain: chain)
             try app.channelList.add(channel)
         } catch {
             // TODO(indutny): display

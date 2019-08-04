@@ -17,7 +17,7 @@ enum ChainError : Error {
 class Chain {
     let context: Context
     let channelPubKey: Bytes?
-    let channelRootHash: Bytes?
+    let channelRoot: ChannelMessage?
     let channelName: String?
     let links: [Link]
     
@@ -42,7 +42,7 @@ class Chain {
         self.links = links
         
         self.channelPubKey = Bytes(proto.channelPubKey)
-        self.channelRootHash = Bytes(proto.channelRootHash)
+        self.channelRoot = try ChannelMessage(context: context, proto: proto.channelRoot)
         self.channelName = proto.channelName
     }
     
@@ -50,7 +50,7 @@ class Chain {
         self.context = context
         self.links = links
         self.channelPubKey = nil
-        self.channelRootHash = nil
+        self.channelRoot = nil
         self.channelName = nil
     }
     
@@ -60,7 +60,7 @@ class Chain {
                 return link.toProto()
             })
             proto.channelPubKey = Data(channel.publicKey)
-            proto.channelRootHash = Data(channel.rootHash)
+            proto.channelRoot = channel.root.toProto()!
             proto.channelName = channel.name
         })
     }
