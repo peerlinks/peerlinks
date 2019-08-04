@@ -25,7 +25,7 @@ class VowLinkTests: XCTestCase {
         let id = try! Identity(context: context, name: "test:identity")
         let trustee = try! Identity(context: context, name: "test:trustee")
         
-        let channel = Channel(id)
+        let channel = try! Channel(id)
         
         // Save should work
         try! id.save()
@@ -48,8 +48,8 @@ class VowLinkTests: XCTestCase {
         let idB = try! Identity(context: context, name: "test:b")
         let idC = try! Identity(context: context, name: "test:c")
         
-        let channelA = Channel(idA)
-        let channelB = Channel(idB)
+        let channelA = try! Channel(idA)
+        let channelB = try! Channel(idB)
         
         let chain = [
             try! idA.issueLink(for: idB.publicKey, andChannel: channelA),

@@ -82,7 +82,7 @@ struct Proto_Link {
     var channelPubKey: Data = SwiftProtobuf.Internal.emptyData
 
     /// Hash of the root message on the channel
-    var channelRoot: Data = SwiftProtobuf.Internal.emptyData
+    var channelRootHash: Data = SwiftProtobuf.Internal.emptyData
 
     /// Human-readable name of the link
     var label: String = String()
@@ -334,6 +334,8 @@ struct Proto_Channel {
 
   var label: String = String()
 
+  var rootHash: Data = SwiftProtobuf.Internal.emptyData
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -478,7 +480,7 @@ extension Proto_Link.Details: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "issuer_pub_key"),
     2: .standard(proto: "channel_pub_key"),
-    3: .standard(proto: "channel_root"),
+    3: .standard(proto: "channel_root_hash"),
     4: .same(proto: "label"),
   ]
 
@@ -487,7 +489,7 @@ extension Proto_Link.Details: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
       switch fieldNumber {
       case 1: try decoder.decodeSingularBytesField(value: &self.issuerPubKey)
       case 2: try decoder.decodeSingularBytesField(value: &self.channelPubKey)
-      case 3: try decoder.decodeSingularBytesField(value: &self.channelRoot)
+      case 3: try decoder.decodeSingularBytesField(value: &self.channelRootHash)
       case 4: try decoder.decodeSingularStringField(value: &self.label)
       default: break
       }
@@ -501,8 +503,8 @@ extension Proto_Link.Details: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     if !self.channelPubKey.isEmpty {
       try visitor.visitSingularBytesField(value: self.channelPubKey, fieldNumber: 2)
     }
-    if !self.channelRoot.isEmpty {
-      try visitor.visitSingularBytesField(value: self.channelRoot, fieldNumber: 3)
+    if !self.channelRootHash.isEmpty {
+      try visitor.visitSingularBytesField(value: self.channelRootHash, fieldNumber: 3)
     }
     if !self.label.isEmpty {
       try visitor.visitSingularStringField(value: self.label, fieldNumber: 4)
@@ -513,7 +515,7 @@ extension Proto_Link.Details: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
   static func ==(lhs: Proto_Link.Details, rhs: Proto_Link.Details) -> Bool {
     if lhs.issuerPubKey != rhs.issuerPubKey {return false}
     if lhs.channelPubKey != rhs.channelPubKey {return false}
-    if lhs.channelRoot != rhs.channelRoot {return false}
+    if lhs.channelRootHash != rhs.channelRootHash {return false}
     if lhs.label != rhs.label {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1013,6 +1015,7 @@ extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "public_key"),
     2: .same(proto: "label"),
+    3: .standard(proto: "root_hash"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1020,6 +1023,7 @@ extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
       switch fieldNumber {
       case 1: try decoder.decodeSingularBytesField(value: &self.publicKey)
       case 2: try decoder.decodeSingularStringField(value: &self.label)
+      case 3: try decoder.decodeSingularBytesField(value: &self.rootHash)
       default: break
       }
     }
@@ -1032,12 +1036,16 @@ extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
     if !self.label.isEmpty {
       try visitor.visitSingularStringField(value: self.label, fieldNumber: 2)
     }
+    if !self.rootHash.isEmpty {
+      try visitor.visitSingularBytesField(value: self.rootHash, fieldNumber: 3)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Proto_Channel, rhs: Proto_Channel) -> Bool {
     if lhs.publicKey != rhs.publicKey {return false}
     if lhs.label != rhs.label {return false}
+    if lhs.rootHash != rhs.rootHash {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

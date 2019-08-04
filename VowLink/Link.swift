@@ -17,7 +17,7 @@ class Link {
     struct Details {
         var issuerPubKey: Bytes
         var channelPubKey: Bytes
-        var channelRoot: Bytes
+        var channelRootHash: Bytes
         var label: String
     }
     
@@ -41,10 +41,10 @@ class Link {
         var details: Details? = nil
         
         if !link.details.issuerPubKey.isEmpty && !link.details.channelPubKey.isEmpty &&
-            !link.details.channelRoot.isEmpty {
+            !link.details.channelRootHash.isEmpty {
             details = Details(issuerPubKey: Bytes(link.details.issuerPubKey),
                               channelPubKey: Bytes(link.details.channelPubKey),
-                              channelRoot: Bytes(link.details.channelRoot),
+                              channelRootHash: Bytes(link.details.channelRootHash),
                               label: link.details.label)
         }
         
@@ -123,7 +123,7 @@ class Link {
             if let details = self.details {
                 link.details = Proto_Link.Details.with({ (proto) in
                     proto.channelPubKey = Data(details.channelPubKey)
-                    proto.channelRoot = Data(details.channelRoot)
+                    proto.channelRootHash = Data(details.channelRootHash)
                     proto.issuerPubKey = Data(details.issuerPubKey)
                     proto.label = details.label
                 })

@@ -87,9 +87,7 @@ class Identity {
             link.tbs = tbs
             link.details.issuerPubKey = Data(self.publicKey)
             link.details.channelPubKey = Data(channel.publicKey)
-            if let root = channel.rootMessage {
-                link.details.channelRoot = Data(root.hash!)
-            }
+            link.details.channelRootHash = Data(channel.rootHash)
             link.details.label = channel.label
             
             link.signature = Data(signature)

@@ -21,35 +21,48 @@ class Channel {
                                                     outputLength: Channel.CHANNEL_ID_LENGTH)!
     }()
     
-    var rootMessage: ChannelMessage?
+    var rootHash: Bytes!
     
     static let CHANNEL_ID_LENGTH = 32
     
-    init(context: Context, publicKey: Bytes, label: String) {
+    init(context: Context, publicKey: Bytes, label: String, rootHash: Bytes) {
         self.context = context
         self.publicKey = publicKey
         self.label = label
+        self.rootHash = rootHash
     }
     
-    convenience init(context: Context, proto: Proto_Channel) {
-        self.init(context: context, publicKey: Bytes(proto.publicKey), label: proto.label)
+    convenience init(context: Context, proto: Proto_Channel) throws {
+        self.init(context: context,
+                  publicKey: Bytes(proto.publicKey),
+                  label: proto.label,
+                  rootHash: Bytes(proto.rootHash))
     }
     
-    convenience init(_ identity: Identity) {
-        self.init(context: identity.context, publicKey: identity.publicKey, label: identity.name)
-    
+    init(_ identity: Identity) throws {
+        self.context = identity.context
+        self.publicKey = identity.publicKey
+        self.label = identity.name
+        
+        // Only a temporary measure, we should be fine
+        rootHash = nil
+        
         let content = ChannelMessage.Content(chain: [],
                                              timestamp: NSDate().timeIntervalSince1970,
                                              json: "{}",
                                              signature: [])
-        rootMessage = try! ChannelMessage(context: context, channelID: self.channelID, content: .decrypted(content), height: 0)
-        messages.append(rootMessage!)
+        let unencryptedRoot = try! ChannelMessage(context: context, channelID: channelID, content: .decrypted(content), height: 0)
+        let encryptedRoot = try unencryptedRoot.encrypted(withChannel: self)
+        
+        rootHash = encryptedRoot.hash!
+        messages.append(unencryptedRoot)
     }
     
     func toProto() -> Proto_Channel {
         return Proto_Channel.with({ (channel) in
             channel.publicKey = Data(self.publicKey)
             channel.label = self.label
+            channel.rootHash = Data(self.rootHash)
         })
     }
     

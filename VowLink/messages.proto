@@ -20,7 +20,7 @@ message Link {
     bytes channel_pub_key = 2;
 
     // Hash of the root message on the channel
-    bytes channel_root = 3;
+    bytes channel_root_hash = 3;
 
     // Human-readable name of the link
     string label = 4;
@@ -120,6 +120,7 @@ message Identity {
 message Channel {
   bytes public_key = 1;
   string label = 2;
+  bytes root_hash = 3;
 }
 
 message ChannelList {

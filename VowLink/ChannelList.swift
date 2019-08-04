@@ -26,12 +26,12 @@ class ChannelList {
             let proto = try Proto_ChannelList(serializedData: existing)
             
             for channel in proto.channels {
-                channels.append(Channel(context: context, proto: channel))
+                channels.append(try Channel(context: context, proto: channel))
             }
             
             debugPrint("[channels] loaded \(channels.count) channels")
         } catch {
-            debugPrint("[channels] failed to parse channel list")
+            debugPrint("[channels] failed to parse channel list \(error)")
         }
     }
     

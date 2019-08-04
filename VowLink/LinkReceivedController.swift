@@ -36,8 +36,12 @@ class LinkReceivedController : ViewController {
         do {
             try app.identity?.addLink(link)
             
-            if let channelPubKey = link.details?.channelPubKey {
-                try app.channelList.add(Channel(context: app.context, publicKey: channelPubKey, label: descriptionField.text!))
+            if let details = link.details {
+                let channel = Channel(context: app.context,
+                                      publicKey: details.channelPubKey,
+                                      label: descriptionField.text!,
+                                      rootHash: details.channelRootHash)
+                try app.channelList.add(channel)
             }
             
         } catch {
