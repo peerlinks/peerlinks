@@ -36,16 +36,8 @@ message ChannelMessage {
     bytes signature = 2;
   }
 
-  message EncryptionKeyInput {
-    bytes channel_id = 1;
-    repeated bytes parents = 2;
-    bytes nonce = 3;
-    uint64 height = 4;
-  }
-
   bytes channel_id = 1;
   repeated bytes parents = 2;
-  bytes nonce = 3;
   uint64 height = 4;
 
   bytes encrypted_content = 5;
@@ -53,7 +45,7 @@ message ChannelMessage {
 ```
 
 Symmetric encryption key is defined as
-`HASH(channel_pub_key + parents + nonce, 'vowlink-symmetric')`. `channel_id` is
+`HASH(channelPubKey, 'vowlink-symmetric')`. `channel_id` is
 public, but `channel_pub_key` is only known to subscribers. This way the
 confidentiality is achieved, and yet untrusted peer can help synchronize the
 messages.

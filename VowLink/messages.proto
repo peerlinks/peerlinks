@@ -72,27 +72,16 @@ message ChannelMessage {
     bytes signature = 2;
   }
 
-  message EncryptionKeyInput {
-    bytes channel_id = 1;
-    repeated bytes parents = 2;
-    bytes nonce = 3;
-    uint64 height = 4;
-  }
-
   bytes channel_id = 1;
 
   // NOTE: can be empty only in the root message
   repeated bytes parents = 2;
 
-  // 32 random bytes
-  bytes nonce = 3;
-
   // height = max(p.height for p in parents)
-  uint64 height = 4;
+  uint64 height = 3;
 
-  // NOTE: encryption key = HASH(channel_id ++ parents ++ nonce,
-  //   'vowlink-symmetric')
-  bytes encrypted_content = 5;
+  // NOTE: encryption key = HASH(channelPubKey, 'vowlink-symmetric')
+  bytes encrypted_content = 4;
 }
 
 message Sync {

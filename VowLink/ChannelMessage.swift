@@ -11,6 +11,7 @@ import Sodium
 
 enum ChannelMessageError : Error {
     case failedToComputeEncryptionKey
+    case encryptionFailed
     case decryptionFailed
     case parentNotFound(Bytes)
 }
@@ -29,78 +30,53 @@ class ChannelMessage {
     }
     
     let context: Context
-    let channel: Channel
-    let nonce: Bytes
+    let channelID: Bytes
     let height: UInt64
-    let parents: [ChannelMessage]
-    var content: EitherContent
-
+    let parents: [Bytes]
+    let content: EitherContent
+    
+    var isEncrypted: Bool {
+        get {
+            switch content {
+            case .decrypted(_): return false
+            case .encrypted(_): return true
+            }
+        }
+    }
+    
+    // Decrypted message for Encrypted message, or vice versa
+    private var counterpart: ChannelMessage? = nil
+    
     lazy var hash: Bytes? = {
-        guard let message = try? encrypt()?.serializedData() else {
+        guard let proto = toProto() else {
             return nil
         }
-        return self.context.sodium.genericHash.hash(message: Bytes(message),
+        return self.context.sodium.genericHash.hash(message: Bytes(try! proto.serializedData()),
                                                     key: "vowlink-message".bytes,
                                                     outputLength: ChannelMessage.MESSAGE_HASH_LENGTH)!
     }()
-    
-    private var parentHashes: [Data] {
-        get {
-            return parents.map({ (parent) -> Data in
-                return Data(parent.hash!)
-            })
-        }
-    }
 
     static let MESSAGE_HASH_LENGTH = 32
-    static let NONCE_LENGTH = 32
     
-    init(context: Context, channel: Channel, content: EitherContent, nonce: Bytes? = nil, parents: [ChannelMessage] = []) throws {
+    init(context: Context, channelID: Bytes, content: EitherContent, height: UInt64, parents: [Bytes] = []) throws {
         self.context = context
-        self.channel = channel
-        self.nonce = nonce ?? context.sodium.randomBytes.buf(length: ChannelMessage.NONCE_LENGTH)!
+        self.channelID = channelID
         self.parents = parents
-        self.height = self.parents.reduce(0, { (result, parent) -> UInt64 in
-            max(result, parent.height + 1)
-        })
+        self.height = height
         self.content = content
     }
     
-    convenience init(context: Context, channel: Channel, proto: Proto_ChannelMessage) throws {
-        let parents = try proto.parents.map { (parentHash) -> ChannelMessage in
-            guard let parent = channel.messageByHash(hash: Bytes(parentHash)) else {
-                throw ChannelMessageError.parentNotFound(Bytes(parentHash))
-            }
-            return parent
-        }
+    convenience init(context: Context, proto: Proto_ChannelMessage) throws {
         try self.init(context: context,
-                      channel: channel,
+                      channelID: Bytes(proto.channelID),
                       content: .encrypted(Bytes(proto.encryptedContent)),
-                      nonce: Bytes(proto.nonce),
-                      parents: parents)
-        
-        let encryptionKey = try computeEncryptionKey()
-        
-        guard let decrypted = context.sodium.secretBox.open(nonceAndAuthenticatedCipherText: Bytes(proto.encryptedContent),
-                                                          secretKey: encryptionKey) else {
-            throw ChannelMessageError.decryptionFailed
-        }
-        
-        let content = try Proto_ChannelMessage.Content(serializedData: Data(decrypted))
-
-        // Check that JSON can be parsed
-        let _ = try JSONSerialization.jsonObject(with: Data(content.tbs.json.bytes),
-                                                 options: JSONSerialization.ReadingOptions(arrayLiteral: []))
-        let chain = content.tbs.chain.map({ (link) -> Link in
-            return Link(context: self.context, link: link)
-        })
-        self.content = .decrypted(Content(chain: chain,
-                                          timestamp: content.tbs.timestamp,
-                                          json: content.tbs.json,
-                                          signature: Bytes(content.signature)))
+                      height: proto.height,
+                      parents: proto.parents.map({ (parent) -> Bytes in
+                        return Bytes(parent)
+                      }))
     }
     
-    func verify() throws -> Bool {
+    func verify(withChannel channel: Channel) throws -> Bool {
         guard case .decrypted(let content) = self.content else {
             return false
         }
@@ -112,66 +88,95 @@ class ChannelMessage {
             return false
         }
         
-        return context.sodium.sign.verify(message: Bytes(try toProto()!.tbs.serializedData()),
+        return context.sodium.sign.verify(message: Bytes(try contentProto()!.tbs.serializedData()),
                                           publicKey: publicKey,
                                           signature: content.signature)
     }
     
-    func toProto() -> Proto_ChannelMessage.Content? {
-        guard case .decrypted(let content) = self.content else {
-            return nil
-        }
-
-        return Proto_ChannelMessage.Content.with({ (proto) in
-            proto.tbs.chain = content.chain.map({ (link) -> Proto_Link in
-                link.toProto()
-            })
-            proto.tbs.timestamp = content.timestamp
-            proto.tbs.json = content.json
-            proto.signature = Data(content.signature)
-        })
-    }
-    
-    func encrypt() throws -> Proto_ChannelMessage? {
-        if case .encrypted(let encrypted) = content {
-            return Proto_ChannelMessage.with({ (message) in
-                message.channelID = Data(self.channel.channelID)
-                message.parents = self.parentHashes
-                message.nonce = Data(self.nonce)
-                message.height = self.height
-                
-                message.encryptedContent = Data(encrypted)
-            })
+    func encrypted(withChannel channel: Channel) throws -> ChannelMessage {
+        // NOTE: We cache counterpart because `secretBox.seal` generates nonce randomly. Thus the
+        // hash of encrypted message would be different every time.
+        if let counterpart = counterpart {
+            return counterpart
         }
         
-        let content = try toProto()!.serializedData()
+        if case .encrypted(_) = content {
+            return self
+        }
         
-        let encryptionKey = try computeEncryptionKey()
+        let content = try contentProto()!.serializedData()
+        
+        let encryptionKey = try computeEncryptionKey(channel: channel)
         
         guard let box: Bytes = context.sodium.secretBox.seal(message: Bytes(content), secretKey: encryptionKey) else {
-            debugPrint("failed to encrypt message")
+            throw ChannelMessageError.encryptionFailed
+        }
+        
+        counterpart = try ChannelMessage(context: context,
+                                         channelID: channel.channelID,
+                                         content: .encrypted(box),
+                                         height: height,
+                                         parents: parents)
+        
+        return counterpart!
+    }
+    
+    func decrypted(withChannel channel: Channel) throws -> ChannelMessage {
+        if let counterpart = counterpart {
+            return counterpart
+        }
+        
+        guard case .encrypted(let encrypted) = content else {
+            return self
+        }
+        
+        let encryptionKey = try computeEncryptionKey(channel: channel)
+        
+        guard let decrypted = context.sodium.secretBox.open(nonceAndAuthenticatedCipherText: encrypted,
+                                                            secretKey: encryptionKey) else {
+            throw ChannelMessageError.decryptionFailed
+        }
+        
+        let contentProto = try Proto_ChannelMessage.Content(serializedData: Data(decrypted))
+        
+        // Check that JSON can be parsed
+        let _ = try JSONSerialization.jsonObject(with: Data(contentProto.tbs.json.bytes),
+                                                 options: JSONSerialization.ReadingOptions(arrayLiteral: []))
+        let chain = contentProto.tbs.chain.map({ (link) -> Link in
+            return Link(context: self.context, link: link)
+        })
+        
+        let content = Content(chain: chain,
+                              timestamp: contentProto.tbs.timestamp,
+                              json: contentProto.tbs.json,
+                              signature: Bytes(contentProto.signature))
+        
+        counterpart = try ChannelMessage(context: context,
+                                         channelID: channel.channelID,
+                                         content: .decrypted(content),
+                                         height: height,
+                                         parents: parents)
+        return counterpart!
+    }
+    
+    func toProto() -> Proto_ChannelMessage? {
+        guard case .encrypted(let encrypted) = content else {
             return nil
         }
         
-        return Proto_ChannelMessage.with({ (message) in
-            message.channelID = Data(self.channel.channelID)
-            message.parents = self.parentHashes
-            message.nonce = Data(self.nonce)
-            message.height = self.height
+        return Proto_ChannelMessage.with({ (proto) in
+            proto.channelID = Data(self.channelID)
+            proto.parents = self.parents.map({ (parent) -> Data in
+                return Data(parent)
+            })
+            proto.height = self.height
             
-            message.encryptedContent = Data(box)
+            proto.encryptedContent = Data(encrypted)
         })
     }
     
-    private func computeEncryptionKey() throws -> Bytes {
-        let input = Proto_ChannelMessage.EncryptionKeyInput.with({ (input) in
-            input.channelID = Data(self.channel.channelID)
-            input.parents = self.parentHashes
-            input.nonce = Data(self.nonce)
-            input.height = self.height
-        })
-        
-        let inputData = try input.serializedData()
+    private func computeEncryptionKey(channel: Channel) throws -> Bytes {
+        let inputData = channel.publicKey
     
         let maybeKey = self.context.sodium.genericHash.hash(message: Bytes(inputData),
             key: "vowlink-symmetric".bytes,
@@ -180,5 +185,20 @@ class ChannelMessage {
             throw ChannelMessageError.failedToComputeEncryptionKey
         }
         return key
+    }
+    
+    private func contentProto() -> Proto_ChannelMessage.Content? {
+        guard case .decrypted(let content) = self.content else {
+            return nil
+        }
+        
+        return Proto_ChannelMessage.Content.with({ (proto) in
+            proto.tbs.chain = content.chain.map({ (link) -> Proto_Link in
+                link.toProto()
+            })
+            proto.tbs.timestamp = content.timestamp
+            proto.tbs.json = content.json
+            proto.signature = Data(content.signature)
+        })
     }
 }

@@ -153,14 +153,10 @@ struct Proto_ChannelMessage {
   /// NOTE: can be empty only in the root message
   var parents: [Data] = []
 
-  /// 32 random bytes
-  var nonce: Data = SwiftProtobuf.Internal.emptyData
-
   /// height = max(p.height for p in parents)
   var height: UInt64 = 0
 
-  /// NOTE: encryption key = HASH(channel_id ++ parents ++ nonce,
-  ///   'vowlink-symmetric')
+  /// NOTE: encryption key = HASH(channelPubKey, 'vowlink-symmetric')
   var encryptedContent: Data = SwiftProtobuf.Internal.emptyData
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -209,24 +205,6 @@ struct Proto_ChannelMessage {
     init() {}
 
     fileprivate var _storage = _StorageClass.defaultInstance
-  }
-
-  struct EncryptionKeyInput {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var channelID: Data = SwiftProtobuf.Internal.emptyData
-
-    var parents: [Data] = []
-
-    var nonce: Data = SwiftProtobuf.Internal.emptyData
-
-    var height: UInt64 = 0
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
   }
 
   init() {}
@@ -658,9 +636,8 @@ extension Proto_ChannelMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "channel_id"),
     2: .same(proto: "parents"),
-    3: .same(proto: "nonce"),
-    4: .same(proto: "height"),
-    5: .standard(proto: "encrypted_content"),
+    3: .same(proto: "height"),
+    4: .standard(proto: "encrypted_content"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -668,9 +645,8 @@ extension Proto_ChannelMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
       switch fieldNumber {
       case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
       case 2: try decoder.decodeRepeatedBytesField(value: &self.parents)
-      case 3: try decoder.decodeSingularBytesField(value: &self.nonce)
-      case 4: try decoder.decodeSingularUInt64Field(value: &self.height)
-      case 5: try decoder.decodeSingularBytesField(value: &self.encryptedContent)
+      case 3: try decoder.decodeSingularUInt64Field(value: &self.height)
+      case 4: try decoder.decodeSingularBytesField(value: &self.encryptedContent)
       default: break
       }
     }
@@ -683,14 +659,11 @@ extension Proto_ChannelMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     if !self.parents.isEmpty {
       try visitor.visitRepeatedBytesField(value: self.parents, fieldNumber: 2)
     }
-    if !self.nonce.isEmpty {
-      try visitor.visitSingularBytesField(value: self.nonce, fieldNumber: 3)
-    }
     if self.height != 0 {
-      try visitor.visitSingularUInt64Field(value: self.height, fieldNumber: 4)
+      try visitor.visitSingularUInt64Field(value: self.height, fieldNumber: 3)
     }
     if !self.encryptedContent.isEmpty {
-      try visitor.visitSingularBytesField(value: self.encryptedContent, fieldNumber: 5)
+      try visitor.visitSingularBytesField(value: self.encryptedContent, fieldNumber: 4)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -698,7 +671,6 @@ extension Proto_ChannelMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
   static func ==(lhs: Proto_ChannelMessage, rhs: Proto_ChannelMessage) -> Bool {
     if lhs.channelID != rhs.channelID {return false}
     if lhs.parents != rhs.parents {return false}
-    if lhs.nonce != rhs.nonce {return false}
     if lhs.height != rhs.height {return false}
     if lhs.encryptedContent != rhs.encryptedContent {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -811,53 +783,6 @@ extension Proto_ChannelMessage.Content.TBS: SwiftProtobuf.Message, SwiftProtobuf
     if lhs.chain != rhs.chain {return false}
     if lhs.timestamp != rhs.timestamp {return false}
     if lhs.json != rhs.json {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Proto_ChannelMessage.EncryptionKeyInput: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Proto_ChannelMessage.protoMessageName + ".EncryptionKeyInput"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "channel_id"),
-    2: .same(proto: "parents"),
-    3: .same(proto: "nonce"),
-    4: .same(proto: "height"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      switch fieldNumber {
-      case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
-      case 2: try decoder.decodeRepeatedBytesField(value: &self.parents)
-      case 3: try decoder.decodeSingularBytesField(value: &self.nonce)
-      case 4: try decoder.decodeSingularUInt64Field(value: &self.height)
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.channelID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.channelID, fieldNumber: 1)
-    }
-    if !self.parents.isEmpty {
-      try visitor.visitRepeatedBytesField(value: self.parents, fieldNumber: 2)
-    }
-    if !self.nonce.isEmpty {
-      try visitor.visitSingularBytesField(value: self.nonce, fieldNumber: 3)
-    }
-    if self.height != 0 {
-      try visitor.visitSingularUInt64Field(value: self.height, fieldNumber: 4)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Proto_ChannelMessage.EncryptionKeyInput, rhs: Proto_ChannelMessage.EncryptionKeyInput) -> Bool {
-    if lhs.channelID != rhs.channelID {return false}
-    if lhs.parents != rhs.parents {return false}
-    if lhs.nonce != rhs.nonce {return false}
-    if lhs.height != rhs.height {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
