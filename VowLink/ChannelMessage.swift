@@ -9,6 +9,7 @@
 import Foundation
 import Sodium
 
+// TODO(indutny): implement ForeignChannelMessage for the memory pools of non-subscribers
 class ChannelMessage {
     let context: Context
     let channel: Channel
@@ -20,9 +21,10 @@ class ChannelMessage {
         let message = try! toProto().serializedData()
         return self.context.sodium.genericHash.hash(message: Bytes(message),
                                                     key: "vowlink-message".bytes,
-                                                    outputLength: Channel.CHANNEL_ID_LENGTH)!
+                                                    outputLength: ChannelMessage.MESSAGE_HASH_LENGTH)!
     }()
-    
+
+    static let MESSAGE_HASH_LENGTH = 32
     static let NONCE_LENGTH = 32
     
     init(context: Context, channel: Channel, nonce: Bytes? = nil, parents: [ChannelMessage] = []) {
@@ -31,7 +33,7 @@ class ChannelMessage {
         self.nonce = nonce ?? context.sodium.randomBytes.buf(length: ChannelMessage.NONCE_LENGTH)!
         self.parents = parents
         self.height = self.parents.reduce(0, { (result, parent) -> UInt64 in
-            min(result, parent.height + 1)
+            max(result, parent.height + 1)
         })
     }
     
