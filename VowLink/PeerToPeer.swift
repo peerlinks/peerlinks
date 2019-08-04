@@ -153,6 +153,12 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     func peerDisconnected(_ peer: Peer) {
         self.peers.removeValue(forKey: peer.remoteID)
         peer.delegate = nil
+        
+        // Try to reconnect if the peer is still around
+        // TODO(indutny): delay between reconnects?
+        if availablePeers.contains(peer.remoteID) {
+            browser(browser, foundPeer: peer.remoteID, withDiscoveryInfo: nil)
+        }
     }
     
     func peer(_ peer: Peer, receivedPacket packet: Proto_Packet) {
