@@ -42,7 +42,7 @@ class Channel {
                                              timestamp: NSDate().timeIntervalSince1970,
                                              json: "{}",
                                              signature: [])
-        rootMessage = try! ChannelMessage(context: context, channel: self, content: content)
+        rootMessage = try! ChannelMessage(context: context, channel: self, content: .decrypted(content))
         messages.append(rootMessage!)
     }
     

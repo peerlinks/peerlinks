@@ -10,7 +10,6 @@ import Foundation
 import Sodium
 
 enum ChannelMessageError : Error {
-    case incompleteParent(ChannelMessage)
     case failedToComputeEncryptionKey
     case decryptionFailed
     case parentNotFound(Bytes)
@@ -23,13 +22,18 @@ class ChannelMessage {
         let json: String
         var signature: Bytes
     }
-
+    
+    enum EitherContent {
+        case decrypted(Content)
+        case encrypted(Bytes)
+    }
+    
     let context: Context
     let channel: Channel
     let nonce: Bytes
     let height: UInt64
     let parents: [ChannelMessage]
-    var content: Content?
+    var content: EitherContent
 
     lazy var hash: Bytes? = {
         guard let message = try? encrypt()?.serializedData() else {
@@ -51,12 +55,7 @@ class ChannelMessage {
     static let MESSAGE_HASH_LENGTH = 32
     static let NONCE_LENGTH = 32
     
-    init(context: Context, channel: Channel, content: Content? = nil, nonce: Bytes? = nil, parents: [ChannelMessage] = []) throws {
-        for parent in parents {
-            if parent.content == nil {
-                throw ChannelMessageError.incompleteParent(parent)
-            }
-        }
+    init(context: Context, channel: Channel, content: EitherContent, nonce: Bytes? = nil, parents: [ChannelMessage] = []) throws {
         self.context = context
         self.channel = channel
         self.nonce = nonce ?? context.sodium.randomBytes.buf(length: ChannelMessage.NONCE_LENGTH)!
@@ -74,7 +73,11 @@ class ChannelMessage {
             }
             return parent
         }
-        try self.init(context: context, channel: channel, content: nil, nonce: Bytes(proto.nonce), parents: parents)
+        try self.init(context: context,
+                      channel: channel,
+                      content: .encrypted(Bytes(proto.encryptedContent)),
+                      nonce: Bytes(proto.nonce),
+                      parents: parents)
         
         let encryptionKey = try computeEncryptionKey()
         
@@ -88,14 +91,17 @@ class ChannelMessage {
         // Check that JSON can be parsed
         let _ = try JSONSerialization.jsonObject(with: Data(content.tbs.json.bytes),
                                                  options: JSONSerialization.ReadingOptions(arrayLiteral: []))
-        
-        self.content = Content(chain: content.tbs.chain.map({ (link) -> Link in
+        let chain = content.tbs.chain.map({ (link) -> Link in
             return Link(context: self.context, link: link)
-        }), timestamp: content.tbs.timestamp, json: content.tbs.json, signature: Bytes(content.signature))
+        })
+        self.content = .decrypted(Content(chain: chain,
+                                          timestamp: content.tbs.timestamp,
+                                          json: content.tbs.json,
+                                          signature: Bytes(content.signature)))
     }
     
     func verify() throws -> Bool {
-        guard let content = self.content else {
+        guard case .decrypted(let content) = self.content else {
             return false
         }
         
@@ -112,9 +118,10 @@ class ChannelMessage {
     }
     
     func toProto() -> Proto_ChannelMessage.Content? {
-        guard let content = self.content else {
+        guard case .decrypted(let content) = self.content else {
             return nil
         }
+
         return Proto_ChannelMessage.Content.with({ (proto) in
             proto.tbs.chain = content.chain.map({ (link) -> Proto_Link in
                 link.toProto()
@@ -126,9 +133,18 @@ class ChannelMessage {
     }
     
     func encrypt() throws -> Proto_ChannelMessage? {
-        guard let content = try toProto()?.serializedData() else {
-            return nil
+        if case .encrypted(let encrypted) = content {
+            return Proto_ChannelMessage.with({ (message) in
+                message.channelID = Data(self.channel.channelID)
+                message.parents = self.parentHashes
+                message.nonce = Data(self.nonce)
+                message.height = self.height
+                
+                message.encryptedContent = Data(encrypted)
+            })
         }
+        
+        let content = try toProto()!.serializedData()
         
         let encryptionKey = try computeEncryptionKey()
         
