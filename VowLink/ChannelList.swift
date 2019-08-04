@@ -54,6 +54,15 @@ class ChannelList : ChannelDelegate {
         
         try save()
     }
+
+    func find(byChannelID channelID: Bytes) -> Channel? {
+        for channel in channels {
+            if channel.channelID == channelID {
+                return channel
+            }
+        }
+        return nil
+    }
     
     func toProto() -> Proto_ChannelList {
         return Proto_ChannelList.with({ (channelList) in

@@ -26,6 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
     var identity: Identity?
     var window: UIWindow?
     weak var chainDelegate: ChainNotificationDelegate?
+    weak var channelDelegate: ChannelDelegate?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         p2p = PeerToPeer(context: context, serviceType: "com-vowlink")
@@ -111,14 +112,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer) {
         debugPrint("[app] got packet \(packet) from peer \(peer)")
         
-        guard let _ = identity else {
-            debugPrint("[app] no identity available, ignoring packets")
-            return
-        }
-        
         switch packet.content {
         case .some(.invite(let encryptedInvite)):
+            guard let _ = identity else {
+                debugPrint("[app] no identity available, ignoring packets")
+                return
+            }
+
             receiveInvite(encryptedInvite)
+            break
+            
+        case .some(.message(let message)):
+            receiveMessage(message)
             break
             
         default:
@@ -144,8 +149,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
         }
     }
     
+    func receiveMessage(_ proto: Proto_ChannelMessage) {
+        guard let channel = channelList.find(byChannelID: Bytes(proto.channelID)) else {
+            debugPrint("[app] channel \(proto.channelID) is unknown")
+            return
+        }
+        
+        do {
+            let encrypted = try ChannelMessage(context: context, proto: proto)
+            let _ = try channel.receive(encrypted: encrypted)
+        } catch {
+            debugPrint("[app] failed to create/receive ChannelMessage due to error \(error)")
+            return
+        }
+        
+        debugPrint("[app] received new message from remote peer!")
+    }
+    
     // MARK: ChannelDelegate
+
     func channel(_ channel: Channel, postedMessage message: ChannelMessage) {
+        channelDelegate?.channel(channel, postedMessage: message)
+        
         guard let messageProto = message.toProto() else {
             debugPrint("[app] invalid message \(message)")
             return
@@ -157,6 +182,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
             }))
         } catch {
             debugPrint("[app] failed to broadcast message due to error \(error)")
+        }
+        
+        // TODO(indutny): CoreData
+        do {
+            try channelList.save()
+        } catch {
+            debugPrint("[app] failed to save channels due to \(error)")
         }
     }
 }

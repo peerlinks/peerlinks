@@ -116,7 +116,10 @@ class Channel {
             channel.publicKey = Data(self.publicKey)
             channel.name = self.name
             channel.root = self.root.toProto()!
-            channel.messages = self.messages.map({ (message) -> Proto_ChannelMessage in
+            
+            let nonRoot = self.messages[1...]
+            
+            channel.messages = nonRoot.map({ (message) -> Proto_ChannelMessage in
                 let encrypted = try! message.encrypted(withChannel: self)
                 return encrypted.toProto()!
             })
@@ -211,6 +214,10 @@ class Channel {
         let future = now + Channel.FUTURE
         if content.timestamp >= future || content.timestamp < parentTimestamp {
             throw ChannelError.invalidTimestamp(content.timestamp)
+        }
+        
+        if let _ = message(byHash: encrypted.hash!) {
+            return decrypted
         }
         
         self.messages.append(decrypted)

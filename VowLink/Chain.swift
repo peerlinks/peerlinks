@@ -79,6 +79,12 @@ class Chain {
         })
     }
     
+    func leafKey(withChannel channel: Channel) -> Bytes {
+        return links.reduce(channel.publicKey) { (_, link) -> Bytes in
+            return link.trusteePubKey
+        }
+    }
+    
     func verify(withChannel channel: Channel, andAgainstTimestamp timestamp: TimeInterval) throws -> Bytes? {
         if links.count > Chain.MAX_LENGTH {
             return nil
