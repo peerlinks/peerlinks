@@ -196,5 +196,24 @@ class VowLinkTests: XCTestCase {
             default: XCTFail("Expected message with timestamp in the past to fail")
             }
         }
+        
+        let invalidRootContent = try! idB.signContent(chain: chain,
+                                                      timestamp: NSDate().timeIntervalSince1970,
+                                                      json: "{}",
+                                                      parents: [],
+                                                      height: 0)
+        let decryptedInvalidRoot = try! ChannelMessage(context: context,
+                                                       channelID: channelA.channelID,
+                                                       content: .decrypted(invalidRootContent),
+                                                       height: 0,
+                                                       parents: [])
+        let encryptedInvalidRoot = try! decryptedInvalidRoot.encrypted(withChannel: channelA)
+        
+        XCTAssertThrowsError(try channelCopy.receive(encrypted: encryptedInvalidRoot)) { (error) in
+            switch error {
+            case ChannelError.invalidParentCount: break
+            default: XCTFail("Expected alternative root to fail")
+            }
+        }
     }
 }
