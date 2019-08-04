@@ -97,10 +97,10 @@ class VowLinkTests: XCTestCase {
                                            parents: [ channelA.rootHash ],
                                            height: 1)
         let msg = try! ChannelMessage(context: context,
-                                 channelID: channelA.channelID,
-                                 content: .decrypted(content),
-                                 height: 1,
-                                 parents: [ channelA.rootHash ])
+                                      channelID: channelA.channelID,
+                                      content: .decrypted(content),
+                                      height: 1,
+                                      parents: [ channelA.rootHash ])
         
         XCTAssert(try! msg.verify(withChannel: channelA))
         XCTAssert(!(try! msg.verify(withChannel: channelB)))
@@ -118,7 +118,7 @@ class VowLinkTests: XCTestCase {
         XCTAssert(!(try! decrypted.verify(withChannel: channelB)))
         
         guard case .decrypted(let decryptedContent) = decrypted.content else {
-            XCTAssert(false, "Message not decrypted")
+            XCTFail("Message not decrypted")
             return
         }
         XCTAssertEqual(content.json, decryptedContent.json)
@@ -157,9 +157,44 @@ class VowLinkTests: XCTestCase {
         let decrypted = try! channelA.receive(encrypted: encrypted)
         
         guard case .decrypted(let decryptedContent) = decrypted.content else {
-            XCTAssert(false, "Message not decrypted")
+            XCTFail("Message not decrypted")
             return
         }
         XCTAssertEqual(decryptedContent.json, "{\"hello\": \"world\"}")
+        
+        // Invalid timestamp
+        func message(withTimeDelta delta: TimeInterval) -> ChannelMessage {
+            let content = try! idA.signContent(chain: Chain(context: context, links: []),
+                                               timestamp: NSDate().timeIntervalSince1970 + delta,
+                                               json: "{}",
+                                               parents: [ channelA.rootHash ],
+                                               height: 1)
+            let decrypted = try! ChannelMessage(context: context,
+                                                channelID: channelA.channelID,
+                                                content: .decrypted(content),
+                                                height: 1,
+                                                parents: [ channelA.rootHash ])
+            let encrypted = try! decrypted.encrypted(withChannel: channelA)
+            
+            return encrypted
+        }
+        
+        let futureEncrypted = message(withTimeDelta: +3600.0)
+        
+        XCTAssertThrowsError(try channelCopy.receive(encrypted: futureEncrypted)) { (error) in
+            switch error {
+            case ChannelError.invalidTimestamp(_): break
+            default: XCTFail("Expected message with timestamp in the future to fail")
+            }
+        }
+        
+        let pastEncrypted = message(withTimeDelta: -3600.0)
+        
+        XCTAssertThrowsError(try channelCopy.receive(encrypted: pastEncrypted)) { (error) in
+            switch error {
+            case ChannelError.invalidTimestamp(_): break
+            default: XCTFail("Expected message with timestamp in the past to fail")
+            }
+        }
     }
 }
