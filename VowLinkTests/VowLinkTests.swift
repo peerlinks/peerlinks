@@ -93,7 +93,9 @@ class VowLinkTests: XCTestCase {
         
         let content = try! idC.signContent(chain: chain,
                                            timestamp: NSDate().timeIntervalSince1970,
-                                           json: "{\"hello\":\"world\"}")
+                                           json: "{\"hello\":\"world\"}",
+                                           parents: [ channelA.rootHash ],
+                                           height: 1)
         let msg = try! ChannelMessage(context: context,
                                  channelID: channelA.channelID,
                                  content: .decrypted(content),
@@ -120,5 +122,12 @@ class VowLinkTests: XCTestCase {
             return
         }
         XCTAssertEqual(content.json, decryptedContent.json)
+        
+        let replay = try! ChannelMessage(context: context,
+                                      channelID: channelA.channelID,
+                                      content: .decrypted(content),
+                                      height: 0,
+                                      parents: [])
+        XCTAssert(!(try! replay.verify(withChannel: channelA)))
     }
 }

@@ -25,56 +25,8 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "VowLink/Channel.swift"
-            timestampString = "586635782.019438"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "38"
-            endingLineNumber = "38"
-            landmarkName = "init(context:proto:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "VowLink.Channel.__allocating_init(context: VowLink.Context, proto: VowLink.Proto_Channel) throws -&gt; VowLink.Channel"
-                  moduleName = "VowLink"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/findutnyy/Code/indutny/VowLink/VowLink/Channel.swift"
-                  timestampString = "586635755.783067"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "38"
-                  endingLineNumber = "38"
-                  offsetFromSymbolStart = "85">
-               </Location>
-               <Location
-                  shouldBeEnabled = "No"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 (VowLink.Proto_Link) -&gt; VowLink.Link in VowLink.Channel.init(context: VowLink.Context, proto: VowLink.Proto_Channel) throws -&gt; VowLink.Channel"
-                  moduleName = "VowLink"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/findutnyy/Code/indutny/VowLink/VowLink/Channel.swift"
-                  timestampString = "586635755.784369"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "39"
-                  endingLineNumber = "39"
-                  offsetFromSymbolStart = "54">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "VowLink/InviteConfirmController.swift"
-            timestampString = "586635782.019534"
+            timestampString = "586636790.223217"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "49"
@@ -90,7 +42,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VowLink/ChainReceivedController.swift"
-            timestampString = "586635782.019585"
+            timestampString = "586636790.22333"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "49"

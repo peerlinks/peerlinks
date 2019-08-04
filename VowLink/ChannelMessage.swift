@@ -87,7 +87,7 @@ class ChannelMessage {
             return false
         }
         
-        return context.sodium.sign.verify(message: Bytes(try contentProto()!.tbs.serializedData()),
+        return context.sodium.sign.verify(message: Bytes(try tbsProto()!.serializedData()),
                                           publicKey: publicKey,
                                           signature: content.signature)
     }
@@ -139,15 +139,15 @@ class ChannelMessage {
         let contentProto = try Proto_ChannelMessage.Content(serializedData: Data(decrypted))
         
         // Check that JSON can be parsed
-        let _ = try JSONSerialization.jsonObject(with: Data(contentProto.tbs.json.bytes),
+        let _ = try JSONSerialization.jsonObject(with: Data(contentProto.json.bytes),
                                                  options: JSONSerialization.ReadingOptions(arrayLiteral: []))
-        let links = contentProto.tbs.chain.map({ (link) -> Link in
+        let links = contentProto.chain.map({ (link) -> Link in
             return Link(context: self.context, link: link)
         })
         
         let content = Content(chain: Chain(context: context, links: links),
-                              timestamp: contentProto.tbs.timestamp,
-                              json: contentProto.tbs.json,
+                              timestamp: contentProto.timestamp,
+                              json: contentProto.json,
                               signature: Bytes(contentProto.signature))
         
         counterpart = try ChannelMessage(context: context,
@@ -192,12 +192,30 @@ class ChannelMessage {
         }
         
         return Proto_ChannelMessage.Content.with({ (proto) in
-            proto.tbs.chain = content.chain.links.map({ (link) -> Proto_Link in
+            proto.chain = content.chain.links.map({ (link) -> Proto_Link in
                 link.toProto()
             })
-            proto.tbs.timestamp = content.timestamp
-            proto.tbs.json = content.json
+            proto.timestamp = content.timestamp
+            proto.json = content.json
             proto.signature = Data(content.signature)
+        })
+    }
+    
+    private func tbsProto() -> Proto_ChannelMessage.Content.TBS? {
+        guard case .decrypted(let content) = self.content else {
+            return nil
+        }
+        
+        return Proto_ChannelMessage.Content.TBS.with({ (proto) in
+            proto.chain = content.chain.links.map({ (link) -> Proto_Link in
+                link.toProto()
+            })
+            proto.timestamp = content.timestamp
+            proto.json = content.json
+            proto.parents = self.parents.map({ (parent) -> Data in
+                return Data(parent)
+            })
+            proto.height = self.height
         })
     }
 }

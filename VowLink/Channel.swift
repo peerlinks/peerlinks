@@ -61,7 +61,9 @@ class Channel {
         
         let content = try identity.signContent(chain: chain,
                                                timestamp: NSDate().timeIntervalSince1970,
-                                               json: "{\"type\":\"root\"}")
+                                               json: "{\"type\":\"root\"}",
+                                               parents: [],
+                                               height: 0)
         let unencryptedRoot = try! ChannelMessage(context: context,
                                                   channelID: channelID,
                                                   content: .decrypted(content),
@@ -97,4 +99,5 @@ class Channel {
         
         return nil
     }
+
 }

@@ -86,13 +86,21 @@ class Identity {
         return Link(context: context, link: proto)
     }
     
-    func signContent(chain: Chain, timestamp: TimeInterval, json: String) throws -> ChannelMessage.Content {
+    func signContent(chain: Chain,
+                     timestamp: TimeInterval,
+                     json: String,
+                     parents: [Bytes],
+                     height: UInt64) throws -> ChannelMessage.Content {
         let tbs = Proto_ChannelMessage.Content.TBS.with { (tbs) in
             tbs.chain = chain.links.map({ (link) -> Proto_Link in
                 return link.toProto()
             })
             tbs.timestamp = timestamp
             tbs.json = json
+            tbs.parents = parents.map({ (parent) -> Data in
+                return Data(parent)
+            })
+            tbs.height = height
         }
         
         let data = try tbs.serializedData()
