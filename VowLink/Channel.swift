@@ -38,7 +38,7 @@ class Channel {
     convenience init(_ identity: Identity) {
         self.init(context: identity.context, publicKey: identity.publicKey, label: identity.name)
         
-        rootMessage = ChannelMessage(context: context, channel: self, nonce: nil, parents: nil)
+        rootMessage = ChannelMessage(context: context, channel: self)
         messages.append(rootMessage!)
     }
     

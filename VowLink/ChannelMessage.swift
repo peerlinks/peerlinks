@@ -25,11 +25,11 @@ class ChannelMessage {
     
     static let NONCE_LENGTH = 32
     
-    init(context: Context, channel: Channel, nonce: Bytes?, parents: [ChannelMessage]?) {
+    init(context: Context, channel: Channel, nonce: Bytes? = nil, parents: [ChannelMessage] = []) {
         self.context = context
         self.channel = channel
         self.nonce = nonce ?? context.sodium.randomBytes.buf(length: ChannelMessage.NONCE_LENGTH)!
-        self.parents = parents ?? []
+        self.parents = parents
         self.height = self.parents.reduce(0, { (result, parent) -> UInt64 in
             min(result, parent.height + 1)
         })
