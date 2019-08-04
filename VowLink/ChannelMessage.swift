@@ -47,7 +47,9 @@ class ChannelMessage {
     }
     
     func verify() throws -> Bool {
-        guard let publicKey = try Link.verify(chain: content.chain, withChannel: channel) else {
+        guard let publicKey = try Link.verify(chain: content.chain,
+                                              withChannel: channel,
+                                              andAgainstTimestamp: self.content.timestamp) else {
             debugPrint("[channel-message] invalid chain for message \(hash)")
             return false
         }

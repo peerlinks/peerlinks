@@ -56,12 +56,26 @@ class VowLinkTests: XCTestCase {
             try! idB.issueLink(for: idC.publicKey, andChannel: channelA),
         ]
         
-        XCTAssertEqual(try! Link.verify(chain: chain, withChannel: channelA), idC.publicKey)
-        XCTAssertEqual(try! Link.verify(chain: chain, withChannel: channelB), nil)
+        let now = NSDate().timeIntervalSince1970
+        let YEAR: TimeInterval = 365 * 24 * 3600
+        
+        XCTAssertEqual(try! Link.verify(chain: chain, withChannel: channelA, andAgainstTimestamp: now), idC.publicKey)
+        XCTAssertEqual(try! Link.verify(chain: chain, withChannel: channelA, andAgainstTimestamp: now + YEAR), nil)
+        XCTAssertEqual(try! Link.verify(chain: chain, withChannel: channelB, andAgainstTimestamp: now), nil)
         
         let badChain = [
             try! idB.issueLink(for: idC.publicKey, andChannel: channelA),
         ]
-        XCTAssertEqual(try! Link.verify(chain: badChain, withChannel: channelA), nil)
+        XCTAssertEqual(try! Link.verify(chain: badChain, withChannel: channelA, andAgainstTimestamp: now), nil)
+        
+        let longChain = [
+            try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
+            try! idB.issueLink(for: idC.publicKey, andChannel: channelA),
+            try! idC.issueLink(for: idA.publicKey, andChannel: channelA),
+            try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
+            try! idB.issueLink(for: idC.publicKey, andChannel: channelA),
+            try! idC.issueLink(for: idA.publicKey, andChannel: channelA),
+        ]
+        XCTAssertEqual(try! Link.verify(chain: longChain, withChannel: channelA, andAgainstTimestamp: now), nil)
     }
 }

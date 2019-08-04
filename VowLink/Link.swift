@@ -27,6 +27,8 @@ class Link {
     let expiration: TimeInterval
     let signature: Bytes
     
+    static let MAX_CHAIN_LENGTH = 5
+    
     init(context: Context, trusteePubKey: Bytes, expiration: TimeInterval, signature: Bytes, details: Details?) {
         self.context = context
         self.trusteePubKey = trusteePubKey
@@ -88,14 +90,24 @@ class Link {
                                           signature: self.signature)
     }
     
-    static func verify(chain: [Link], withChannel channel: Channel) throws -> Bytes? {
+    static func verify(chain: [Link], withChannel channel: Channel, andAgainstTimestamp timestamp: TimeInterval) throws -> Bytes? {
+        if chain.count > Link.MAX_CHAIN_LENGTH {
+            return nil
+        }
+
         var last = channel.publicKey
+        var expiration: TimeInterval = TimeInterval.infinity
         
         for link in chain {
             if !(try link.verify(withPublicKey: last, andChannel: channel)) {
                 return nil
             }
             last = link.trusteePubKey
+            expiration = min(expiration, link.expiration)
+        }
+        
+        if expiration < timestamp {
+            return nil
         }
         
         return last
