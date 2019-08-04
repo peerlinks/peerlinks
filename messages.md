@@ -36,6 +36,13 @@ message ChannelMessage {
     bytes signature = 2;
   }
 
+  message EncryptionKeyInput {
+    bytes channel_id = 1;
+    repeated bytes parents = 2;
+    bytes nonce = 3;
+    uint64 height = 4;
+  }
+
   bytes channel_id = 1;
   repeated bytes parents = 2;
   bytes nonce = 3;
