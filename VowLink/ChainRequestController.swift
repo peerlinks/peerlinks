@@ -1,5 +1,5 @@
 //
-//  LinkRequestController.swift
+//  ChainRequestController.swift
 //  VowLink
 //
 //  Created by Indutnyy, Fedor on 7/30/19.
@@ -9,12 +9,12 @@
 import UIKit
 import Sodium
 
-class LinkRequestController : UIViewController, LinkNotificationDelegate {
+class ChainRequestController : UIViewController, ChainNotificationDelegate {
     @IBOutlet weak var imageView: UIImageView!
     var sodium: Sodium!
     var boxPublicKey: Bytes?
     var boxSecretKey: Bytes?
-    var link: Link? = nil
+    var chain: Chain? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,7 +56,7 @@ class LinkRequestController : UIViewController, LinkNotificationDelegate {
         let qr = image.transformed(by: transform)
         imageView.image = UIImage(ciImage: qr)
         
-        app.linkDelegate = self
+        app.chainDelegate = self
     }
     
     deinit {
@@ -66,14 +66,16 @@ class LinkRequestController : UIViewController, LinkNotificationDelegate {
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let received = segue.destination as? LinkReceivedController {
-            received.link = link
+        if let received = segue.destination as? ChainReceivedController {
+            received.chain = chain
         }
         super.prepare(for: segue, sender: sender)
     }
     
-    func link(received link: Link) {
-        self.link = link
+    // MARK: ChainNotificationDelegate
+    
+    func chain(received chain: Chain) {
+        self.chain = chain
         performSegue(withIdentifier: "toReceivedLink", sender: self)
     }
 }

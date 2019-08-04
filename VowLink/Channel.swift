@@ -12,8 +12,9 @@ import Sodium
 class Channel {
     let context: Context
     let publicKey: Bytes
-    var label: String
+    var name: String
     var messages = [ChannelMessage]()
+    var chain: Chain
     
     lazy var channelID: Bytes = {
         return self.context.sodium.genericHash.hash(message: publicKey,
@@ -25,18 +26,23 @@ class Channel {
     
     static let CHANNEL_ID_LENGTH = 32
     
-    init(context: Context, publicKey: Bytes, label: String, rootHash: Bytes) {
+    init(context: Context, publicKey: Bytes, name: String, rootHash: Bytes, chain: Chain) {
         self.context = context
         self.publicKey = publicKey
-        self.label = label
+        self.name = name
         self.rootHash = rootHash
+        self.chain = chain
     }
     
     convenience init(context: Context, proto: Proto_Channel) throws {
+        let links = proto.chain.map { (link) -> Link in
+            return Link(context: context, link: link)
+        }
         self.init(context: context,
                   publicKey: Bytes(proto.publicKey),
-                  label: proto.label,
-                  rootHash: Bytes(proto.rootHash))
+                  name: proto.name,
+                  rootHash: Bytes(proto.rootHash),
+                  chain: Chain(context: context, links: links))
         
         for protoMessage in proto.messages {
             let message = try ChannelMessage(context: context, proto: protoMessage)
@@ -47,16 +53,19 @@ class Channel {
     init(_ identity: Identity) throws {
         self.context = identity.context
         self.publicKey = identity.publicKey
-        self.label = identity.name
+        self.name = identity.name
+        self.chain = Chain(context: identity.context, links: [])
         
         // Only a temporary measure, we should be fine
         rootHash = nil
         
-        let content = ChannelMessage.Content(chain: [],
-                                             timestamp: NSDate().timeIntervalSince1970,
-                                             json: "{\"type\":\"root\"}",
-                                             signature: [])
-        let unencryptedRoot = try! ChannelMessage(context: context, channelID: channelID, content: .decrypted(content), height: 0)
+        let content = try identity.signContent(chain: chain,
+                                               timestamp: NSDate().timeIntervalSince1970,
+                                               json: "{\"type\":\"root\"}")
+        let unencryptedRoot = try! ChannelMessage(context: context,
+                                                  channelID: channelID,
+                                                  content: .decrypted(content),
+                                                  height: 0)
         let encryptedRoot = try unencryptedRoot.encrypted(withChannel: self)
         
         rootHash = encryptedRoot.hash!
@@ -66,7 +75,7 @@ class Channel {
     func toProto() -> Proto_Channel {
         return Proto_Channel.with({ (channel) in
             channel.publicKey = Data(self.publicKey)
-            channel.label = self.label
+            channel.name = self.name
             channel.rootHash = Data(self.rootHash)
             channel.messages = self.messages.map({ (message) -> Proto_ChannelMessage in
                 let encrypted = try! message.encrypted(withChannel: self)

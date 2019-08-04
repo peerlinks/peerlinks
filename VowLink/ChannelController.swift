@@ -16,7 +16,7 @@ class ChannelController : UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navItem.title = channel.label
+        navItem.title = channel.name
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

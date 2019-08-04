@@ -201,10 +201,10 @@
             </objects>
             <point key="canvasLocation" x="2023" y="81"/>
         </scene>
-        <!--Invite Request-->
+        <!--Request Invite-->
         <scene sceneID="SAt-ci-qJq">
             <objects>
-                <viewController title="Invite Request" id="nmG-4B-MbM" customClass="LinkRequestController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Request Invite" id="nmG-4B-MbM" customClass="ChainRequestController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="JvE-kf-Oae">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -236,7 +236,7 @@
         <!--Received Link-->
         <scene sceneID="kCg-VS-Il0">
             <objects>
-                <viewController title="Received Link" id="Mcm-qs-d77" customClass="LinkReceivedController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Received Link" id="Mcm-qs-d77" customClass="ChainReceivedController" customModule="VowLink" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Tqv-1b-Hnq">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

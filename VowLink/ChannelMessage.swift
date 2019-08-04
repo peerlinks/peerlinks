@@ -18,7 +18,7 @@ enum ChannelMessageError : Error {
 
 class ChannelMessage {
     struct Content {
-        let chain: [Link]
+        let chain: Chain
         let timestamp: TimeInterval
         let json: String
         var signature: Bytes
@@ -81,9 +81,8 @@ class ChannelMessage {
             return false
         }
         
-        guard let publicKey = try Link.verify(chain: content.chain,
-                                              withChannel: channel,
-                                              andAgainstTimestamp: content.timestamp) else {
+        guard let publicKey = try content.chain.verify(withChannel: channel,
+                                                       andAgainstTimestamp: content.timestamp) else {
             debugPrint("[channel-message] invalid chain for message \(String(describing: hash))")
             return false
         }
@@ -142,11 +141,11 @@ class ChannelMessage {
         // Check that JSON can be parsed
         let _ = try JSONSerialization.jsonObject(with: Data(contentProto.tbs.json.bytes),
                                                  options: JSONSerialization.ReadingOptions(arrayLiteral: []))
-        let chain = contentProto.tbs.chain.map({ (link) -> Link in
+        let links = contentProto.tbs.chain.map({ (link) -> Link in
             return Link(context: self.context, link: link)
         })
         
-        let content = Content(chain: chain,
+        let content = Content(chain: Chain(context: context, links: links),
                               timestamp: contentProto.tbs.timestamp,
                               json: contentProto.tbs.json,
                               signature: Bytes(contentProto.signature))
@@ -193,8 +192,8 @@ class ChannelMessage {
         }
         
         return Proto_ChannelMessage.Content.with({ (proto) in
-            proto.tbs.chain = content.chain.map({ (link) -> Proto_Link in
-                link.toProto(shallow: true)
+            proto.tbs.chain = content.chain.links.map({ (link) -> Proto_Link in
+                link.toProto()
             })
             proto.tbs.timestamp = content.timestamp
             proto.tbs.json = content.json

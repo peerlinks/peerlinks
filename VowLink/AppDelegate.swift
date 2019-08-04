@@ -10,11 +10,11 @@ import UIKit
 import CoreData
 import Sodium
 
-protocol LinkNotificationDelegate: AnyObject {
+protocol ChainNotificationDelegate: AnyObject {
     var boxPublicKey: Bytes? { get }
     var boxSecretKey: Bytes? { get }
     
-    func link(received link: Link)
+    func chain(received chain: Chain)
 }
 
 @UIApplicationMain
@@ -25,7 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
     var p2p: PeerToPeer!
     var identity: Identity?
     var window: UIWindow?
-    weak var linkDelegate: LinkNotificationDelegate?
+    weak var chainDelegate: ChainNotificationDelegate?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         p2p = PeerToPeer(context: context, serviceType: "com-vowlink")
@@ -116,26 +116,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate {
         }
         
         switch packet.content {
-        case .some(.link(let encryptedLink)):
-            guard let linkDelegate = linkDelegate else {
-                return
-            }
-            do {
-                let link = try Link(encryptedLink,
-                                    withContext: context,
-                                    publicKey: linkDelegate.boxPublicKey!,
-                                    andSecretKey: linkDelegate.boxSecretKey!)
-
-                linkDelegate.link(received: link)
-            } catch {
-                debugPrint("[app] failed to decrypt link due to error \(error)")
-            }
+        case .some(.invite(let encryptedInvite)):
+            receiveInvite(encryptedInvite)
             break
             
         default:
             debugPrint("[app] unhandled packet \(packet)")
             break
         }
+    }
+    
+    func receiveInvite(_ encryptedInvite: Proto_EncryptedInvite) {
+        guard let chainDelegate = chainDelegate else {
+            return
+        }
+        
+        do {
+            let chain = try Chain(encryptedInvite,
+                                  withContext: context,
+                                  publicKey: chainDelegate.boxPublicKey!,
+                                  andSecretKey: chainDelegate.boxSecretKey!)
+            
+            chainDelegate.chain(received: chain)
+        } catch {
+            debugPrint("[app] failed to decrypt invite due to error \(error)")
+        }
+
     }
 }
 

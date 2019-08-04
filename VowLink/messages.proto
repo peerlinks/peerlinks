@@ -12,20 +12,6 @@ message Hello {
 }
 
 message Link {
-  message Details {
-    // Public key of link's issuer. Needed for construction of the chain.
-    bytes issuer_pub_key = 1;
-
-    // Public key of the channel
-    bytes channel_pub_key = 2;
-
-    // Hash of the root message on the channel
-    bytes channel_root_hash = 3;
-
-    // Human-readable name of the link
-    string label = 4;
-  }
-
   message TBS {
     bytes trustee_pub_key = 1;
     double expiration = 2;
@@ -37,14 +23,17 @@ message Link {
 
   TBS tbs = 1;
   bytes signature = 2;
-
-  // The field below MUST not be sent when the link is presented as a part of
-  // the chain in the message. However, it SHOULD be used when storing the
-  // link.
-  Details details = 3;
 }
 
-message EncryptedLink {
+message Invite {
+  bytes channel_pub_key = 1;
+  string channel_name = 2;
+  bytes channel_root_hash = 3;
+
+  repeated Link links = 4;
+}
+
+message EncryptedInvite {
   bytes box = 1;
 }
 
@@ -99,7 +88,7 @@ message SyncResponse {
 
 message Packet {
   oneof content {
-    EncryptedLink link = 1;
+    EncryptedInvite invite = 1;
     ChannelMessage message = 2;
 
     Sync sync = 3;
@@ -114,17 +103,18 @@ message Packet {
 message Identity {
   bytes public_key = 1;
   bytes secret_key = 2;
-  repeated Link links = 3;
 }
 
 message Channel {
   bytes public_key = 1;
-  string label = 2;
+  string name = 2;
   bytes root_hash = 3;
+
+  repeated Link chain = 4;
 
   // XXX(indutny): this is a temporary solution. Use Core Data like a real iOS
   // developer.
-  repeated ChannelMessage messages = 4;
+  repeated ChannelMessage messages = 5;
 }
 
 message ChannelList {

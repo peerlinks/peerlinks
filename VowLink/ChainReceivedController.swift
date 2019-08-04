@@ -1,5 +1,5 @@
 //
-//  ReceivedLinkController.swift
+//  ChainLinkController.swift
 //  VowLink
 //
 //  Created by Indutnyy, Fedor on 8/1/19.
@@ -8,16 +8,20 @@
 
 import UIKit
 
-class LinkReceivedController : ViewController {
+enum ChainReceivedError : Error {
+    case invalidInvite
+}
+
+class ChainReceivedController : ViewController {
     @IBOutlet weak var saveButton: UIBarButtonItem!
     @IBOutlet weak var descriptionField: UITextField!
     
-    var link: Link!
+    var chain: Chain!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        descriptionField.text = link.details?.label ?? ""
+        descriptionField.text = chain.channelName
         descriptionChanged(self)
     }
     
@@ -30,20 +34,24 @@ class LinkReceivedController : ViewController {
             return
         }
         
-        link.details?.label = descriptionField.text ?? ""
-        
         let app = (UIApplication.shared.delegate as! AppDelegate)
         do {
-            try app.identity?.addLink(link)
-            
-            if let details = link.details {
-                let channel = Channel(context: app.context,
-                                      publicKey: details.channelPubKey,
-                                      label: descriptionField.text!,
-                                      rootHash: details.channelRootHash)
-                try app.channelList.add(channel)
+            guard let publicKey = chain.channelPubKey else {
+                throw ChainReceivedError.invalidInvite
             }
             
+            guard let rootHash = chain.channelRootHash else {
+                throw ChainReceivedError.invalidInvite
+            }
+            
+            let name = descriptionField.text!
+            
+            let channel = Channel(context: app.context,
+                                  publicKey: publicKey,
+                                  name: name,
+                                  rootHash: rootHash,
+                                  chain: chain)
+            try app.channelList.add(channel)
         } catch {
             // TODO(indutny): display
             debugPrint("failed to save & subscribe to channel \(error)")

@@ -48,15 +48,17 @@ class InviteConfirmController : UITableViewController {
         do {
             let link = try id.issueLink(for: Bytes(request.trusteePubKey), andChannel: channel)
             
-            let encryptedLink = try link.encrypt(withPublicKey: Bytes(request.boxPubKey))
+            let chain = try channel.chain.appendedLink(link)
+            
+            let encryptedInvite = try chain.encrypt(withPublicKey: Bytes(request.boxPubKey), andChannel: channel)
             
             let packet = Proto_Packet.with { (packet) in
-                packet.link = encryptedLink
+                packet.invite = encryptedInvite
             }
             
             try app.p2p.send(packet, to: request.peerID)
         } catch {
-            fatalError("failed to issue link \(request) due to error \(error)")
+            fatalError("failed to issue invite \(request) due to error \(error)")
         }
     }
 }

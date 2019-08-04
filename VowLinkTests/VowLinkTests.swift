@@ -31,16 +31,16 @@ class VowLinkTests: XCTestCase {
         try! id.save()
         
         let link = try! id.issueLink(for: trustee.publicKey, andChannel: channel)
-        
-        XCTAssertEqual(link.details?.label, "test:identity")
         XCTAssert(try! link.verify(withPublicKey: id.publicKey, andChannel: channel))
         
         let keyPair = context.sodium.box.keyPair()!
+
+        let chain = try! channel.chain.appendedLink(link)
+        let invite = try! chain.encrypt(withPublicKey: Bytes(keyPair.publicKey), andChannel: channel)
         
-        let encrypted = try! link.encrypt(withPublicKey: keyPair.publicKey)
-        let decrypted = try! Link(encrypted, withContext: context, publicKey: keyPair.publicKey, andSecretKey: keyPair.secretKey)
+        let decrypted = try! Chain(invite, withContext: context, publicKey: keyPair.publicKey, andSecretKey: keyPair.secretKey)
         
-        XCTAssertEqual(decrypted.details?.label, link.details?.label)
+        XCTAssertEqual(decrypted.channelName, channel.name)
     }
     
     func testVerifyChain() {
@@ -51,32 +51,32 @@ class VowLinkTests: XCTestCase {
         let channelA = try! Channel(idA)
         let channelB = try! Channel(idB)
         
-        let chain = [
+        let chain = Chain(context: context, links: [
             try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
             try! idB.issueLink(for: idC.publicKey, andChannel: channelA),
-        ]
+        ])
         
         let now = NSDate().timeIntervalSince1970
         let YEAR: TimeInterval = 365 * 24 * 3600
         
-        XCTAssertEqual(try! Link.verify(chain: chain, withChannel: channelA, andAgainstTimestamp: now), idC.publicKey)
-        XCTAssertEqual(try! Link.verify(chain: chain, withChannel: channelA, andAgainstTimestamp: now + YEAR), nil)
-        XCTAssertEqual(try! Link.verify(chain: chain, withChannel: channelB, andAgainstTimestamp: now), nil)
+        XCTAssertEqual(try! chain.verify(withChannel: channelA, andAgainstTimestamp: now), idC.publicKey)
+        XCTAssertEqual(try! chain.verify(withChannel: channelA, andAgainstTimestamp: now + YEAR), nil)
+        XCTAssertEqual(try! chain.verify(withChannel: channelB, andAgainstTimestamp: now), nil)
         
-        let badChain = [
+        let badChain = Chain(context: context, links: [
             try! idB.issueLink(for: idC.publicKey, andChannel: channelA),
-        ]
-        XCTAssertEqual(try! Link.verify(chain: badChain, withChannel: channelA, andAgainstTimestamp: now), nil)
+        ])
+        XCTAssertEqual(try! badChain.verify(withChannel: channelA, andAgainstTimestamp: now), nil)
         
-        let longChain = [
+        let longChain = Chain(context: context, links: [
             try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
             try! idB.issueLink(for: idC.publicKey, andChannel: channelA),
             try! idC.issueLink(for: idA.publicKey, andChannel: channelA),
             try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
             try! idB.issueLink(for: idC.publicKey, andChannel: channelA),
             try! idC.issueLink(for: idA.publicKey, andChannel: channelA),
-        ]
-        XCTAssertEqual(try! Link.verify(chain: longChain, withChannel: channelA, andAgainstTimestamp: now), nil)
+        ])
+        XCTAssertEqual(try! longChain.verify(withChannel: channelA, andAgainstTimestamp: now), nil)
     }
     
     func testChannelMessageEncryptDecrypt() {
@@ -86,10 +86,10 @@ class VowLinkTests: XCTestCase {
         let channelA = try! Channel(idA)
         let channelB = try! Channel(idB)
         
-        let chain = [
+        let chain = Chain(context: context, links: [
             try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
             try! idB.issueLink(for: idC.publicKey, andChannel: channelA),
-        ]
+        ])
         
         let content = try! idC.signContent(chain: chain,
                                            timestamp: NSDate().timeIntervalSince1970,

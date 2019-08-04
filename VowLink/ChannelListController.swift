@@ -40,7 +40,7 @@ class ChannelListController : UIViewController, UIPickerViewDataSource, UIPicker
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return app.channelList.channels[row].label
+        return app.channelList.channels[row].name
     }
     
     func reloadChannels() {

@@ -20,8 +20,6 @@ class Identity {
     let context: Context
     
     let name: String
-    var links = [Link]()
-    var linkByIssuer = [String:Link]()
     private var secretKey: Bytes
     let publicKey: Bytes
     
@@ -39,9 +37,6 @@ class Identity {
             
             secretKey = Bytes(id.secretKey)
             publicKey = Bytes(id.publicKey)
-            for proto in id.links {
-                links.append(Link(context: context, link: proto))
-            }
         } else {
             debugPrint("[identity] generating new keypair for \(name)")
             let keyPair = self.context.sodium.sign.keyPair()!
@@ -56,17 +51,15 @@ class Identity {
         self.context.sodium.utils.zero(&secretKey)
     }
     
-    func save() throws {
-        let data = try Proto_Identity.with { (id) in
+    func toProto() -> Proto_Identity {
+        return Proto_Identity.with { (id) in
             id.secretKey = Data(self.secretKey)
             id.publicKey = Data(self.publicKey)
-            
-            var links: [ Proto_Link ] = []
-            for l in self.links {
-                links.append(l.toProto())
-            }
-            id.links = links
-        }.serializedData()
+        }
+    }
+    
+    func save() throws {
+        let data = try toProto().serializedData()
         try self.context.keychain.set(data, key: "identity/" + name)
     }
     
@@ -86,10 +79,6 @@ class Identity {
         
         let proto = Proto_Link.with({ (link) in
             link.tbs = tbs
-            link.details.issuerPubKey = Data(self.publicKey)
-            link.details.channelPubKey = Data(channel.publicKey)
-            link.details.channelRootHash = Data(channel.rootHash)
-            link.details.label = channel.label
             
             link.signature = Data(signature)
         })
@@ -97,26 +86,10 @@ class Identity {
         return Link(context: context, link: proto)
     }
     
-    func addLink(_ link: Link) throws {
-        if link.expiration <= NSDate().timeIntervalSince1970 {
-            throw IdentityError.linkExpired
-        }
-        
-        if !context.sodium.utils.equals(link.trusteePubKey, publicKey) {
-            throw IdentityError.linkPubkeyMismatch
-        }
-        
-        links.append(link)
-        
-        debugPrint("[identity] name=\(name) added link \(String(describing: link.details?.label))")
-        
-        try save()
-    }
-    
-    func signContent(chain: [Link], timestamp: TimeInterval, json: String) throws -> ChannelMessage.Content {
+    func signContent(chain: Chain, timestamp: TimeInterval, json: String) throws -> ChannelMessage.Content {
         let tbs = Proto_ChannelMessage.Content.TBS.with { (tbs) in
-            tbs.chain = chain.map({ (link) -> Proto_Link in
-                return link.toProto(shallow: true)
+            tbs.chain = chain.links.map({ (link) -> Proto_Link in
+                return link.toProto()
             })
             tbs.timestamp = timestamp
             tbs.json = json
