@@ -99,7 +99,7 @@ message Query {
   bytes channel_id = 1;
   uint64 min_height = 2;
   bytes cursor = 3;
-  uint64 limit = 4;
+  uint32 limit = 4;
 }
 
 message QueryResponse {
@@ -107,6 +107,7 @@ message QueryResponse {
   repeated ChannelMessage messages = 2;
   bytes forward_cursor = 3;
   bytes backward_cursor = 4;
+  uint64 min_leaf_height = 5;
 }
 
 message Error {

@@ -35,6 +35,7 @@ class Channel: RemoteChannel {
         let messages: [ChannelMessage]
         let forwardCursor: Bytes?
         let backwardCursor: Bytes?
+        let minLeafHeight: UInt64?
     }
 
     let context: Context
@@ -52,6 +53,14 @@ class Channel: RemoteChannel {
                                                     key: "vowlink-channel-id".bytes,
                                                     outputLength: Channel.CHANNEL_ID_LENGTH)!
     }()
+    
+    private var minLeafHeight: UInt64 {
+        get {
+            return leafs.reduce(UInt64.max) { (minHeight, leaf) -> UInt64 in
+                return min(minHeight, leaf.height)
+            }
+        }
+    }
     
     var root: ChannelMessage!
     
@@ -235,16 +244,23 @@ class Channel: RemoteChannel {
     // MARK: Sync
     
     func sync(with remote: RemoteChannel) {
-        let minHeight: UInt64 = leafs.reduce(UInt64.max) { (minHeight, leaf) -> UInt64 in
-            return min(minHeight, leaf.height)
-        }
-        remote.query(withMinHeight: minHeight, limit: Channel.SYNC_LIMIT) {
-            (response: QueryResponse) in
-            self.handle(queryResponse: response, from: remote)
+        let requestedHeight = minLeafHeight
+        remote.query(withMinHeight: requestedHeight, limit: Channel.SYNC_LIMIT) {
+            (response) in
+            self.handle(queryResponse: response, from: remote, andRequestedHeight: requestedHeight)
         }
     }
     
-    func handle(queryResponse response: QueryResponse, from remote: RemoteChannel) {
+    func handle(queryResponse response: QueryResponse, from remote: RemoteChannel, andRequestedHeight requestedHeight: UInt64? = nil) {
+        if let suggestedHeight = response.minLeafHeight,
+           let requestedHeight = requestedHeight,
+           suggestedHeight < requestedHeight {
+            remote.query(withMinHeight: suggestedHeight, limit: Channel.SYNC_LIMIT) { (response) in
+                self.handle(queryResponse: response, from: remote)
+            }
+            return
+        }
+        
         if response.messages.count > Channel.SYNC_LIMIT {
             remote.close(withError: "message count overflow")
             return
@@ -279,7 +295,7 @@ class Channel: RemoteChannel {
         
         if let cursor = cursor {
             remote.query(withCursor: cursor, limit: Channel.SYNC_LIMIT) {
-                (response: QueryResponse) in
+                (response) in
                 self.handle(queryResponse: response, from: remote)
             }
             return
@@ -310,7 +326,7 @@ class Channel: RemoteChannel {
             filtered.append(encrypted)
         }
         
-        return QueryResponse(messages: filtered, forwardCursor: forward, backwardCursor: backward)
+        return QueryResponse(messages: filtered, forwardCursor: forward, backwardCursor: backward, minLeafHeight: minLeafHeight)
     }
     
     func query(withCursor cursor: Bytes, andLimit limit: Int) throws -> QueryResponse {
@@ -338,7 +354,7 @@ class Channel: RemoteChannel {
             filtered.append(encrypted)
         }
         
-        return QueryResponse(messages: filtered, forwardCursor: forward, backwardCursor: backward)
+        return QueryResponse(messages: filtered, forwardCursor: forward, backwardCursor: backward, minLeafHeight: nil)
     }
     
     // MARK: Utils

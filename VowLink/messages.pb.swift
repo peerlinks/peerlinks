@@ -330,7 +330,7 @@ struct Proto_Query {
 
   var cursor: Data = SwiftProtobuf.Internal.emptyData
 
-  var limit: UInt64 = 0
+  var limit: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -349,6 +349,8 @@ struct Proto_QueryResponse {
   var forwardCursor: Data = SwiftProtobuf.Internal.emptyData
 
   var backwardCursor: Data = SwiftProtobuf.Internal.emptyData
+
+  var minLeafHeight: UInt64 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1204,7 +1206,7 @@ extension Proto_Query: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
       case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
       case 2: try decoder.decodeSingularUInt64Field(value: &self.minHeight)
       case 3: try decoder.decodeSingularBytesField(value: &self.cursor)
-      case 4: try decoder.decodeSingularUInt64Field(value: &self.limit)
+      case 4: try decoder.decodeSingularUInt32Field(value: &self.limit)
       default: break
       }
     }
@@ -1221,7 +1223,7 @@ extension Proto_Query: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
       try visitor.visitSingularBytesField(value: self.cursor, fieldNumber: 3)
     }
     if self.limit != 0 {
-      try visitor.visitSingularUInt64Field(value: self.limit, fieldNumber: 4)
+      try visitor.visitSingularUInt32Field(value: self.limit, fieldNumber: 4)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1243,6 +1245,7 @@ extension Proto_QueryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     2: .same(proto: "messages"),
     3: .standard(proto: "forward_cursor"),
     4: .standard(proto: "backward_cursor"),
+    5: .standard(proto: "min_leaf_height"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1252,6 +1255,7 @@ extension Proto_QueryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
       case 2: try decoder.decodeRepeatedMessageField(value: &self.messages)
       case 3: try decoder.decodeSingularBytesField(value: &self.forwardCursor)
       case 4: try decoder.decodeSingularBytesField(value: &self.backwardCursor)
+      case 5: try decoder.decodeSingularUInt64Field(value: &self.minLeafHeight)
       default: break
       }
     }
@@ -1270,6 +1274,9 @@ extension Proto_QueryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     if !self.backwardCursor.isEmpty {
       try visitor.visitSingularBytesField(value: self.backwardCursor, fieldNumber: 4)
     }
+    if self.minLeafHeight != 0 {
+      try visitor.visitSingularUInt64Field(value: self.minLeafHeight, fieldNumber: 5)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1278,6 +1285,7 @@ extension Proto_QueryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     if lhs.messages != rhs.messages {return false}
     if lhs.forwardCursor != rhs.forwardCursor {return false}
     if lhs.backwardCursor != rhs.backwardCursor {return false}
+    if lhs.minLeafHeight != rhs.minLeafHeight {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

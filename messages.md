@@ -141,6 +141,7 @@ message QueryResponse {
   repeated ChannelMessage messages = 2;
   bytes forward_cursor = 3;
   bytes backward_cursor = 4;
+  uint64 min_leaf_height = 5;
 }
 ```
 
@@ -149,3 +150,19 @@ disconnected portions of DAG, or that the DAG of sender and recipient has
 diverged at `message.height` less than `sync.height`. The sender SHOULD
 repeatedly re-issue `Query` cursor set either to `forward_cursor` or
 `backward_cursor` until all messages are received.
+
+`min_leaf_height` is a suggestion for a better sync point, in case if there are
+different branches. In the example below top branch represents local messages,
+bottom branch represents remote messages. Requesting `min_height = 2` from
+remote MUST result in query response with `min_leaf_height = 1`:
+
+```
+h=0 | h=1       | h=2
+* - | --- * --- | --- *
+ \  |           |
+  \ |           |
+   \|           |
+    |           |
+    | \         |
+    |  *        |
+```
