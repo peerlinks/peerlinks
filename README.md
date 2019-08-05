@@ -2,6 +2,11 @@
 
 WIP prototype of secure Peer to Peer messenger for iOS.
 
+## Protocol
+
+At this point the most useful starting point would be a [Protocol][] description
+page.
+
 ## Rebuilding protobuf
 
 ```
@@ -33,3 +38,5 @@ NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+[Protocol]: protocol.md

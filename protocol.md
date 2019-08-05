@@ -1,5 +1,7 @@
 # Protocol
 
+** Version 1 **
+
 ## Goals
 
 The goals of this protocol are:
