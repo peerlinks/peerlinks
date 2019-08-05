@@ -22,11 +22,15 @@ Here and below [Sodium][] is used for all cryptography operations.
 
 [Protocol Buffers][] are used for encoding of all messages.
 
-Channel identifier is a
-`channel_id = HASH(channel_pub_key, 'vowlink-channel-id')[:32]`,
+Channel identifier is generated with:
+```
+channel_id = HASH(channel_pub_key, 'vowlink-channel-id')[:32]
+```
 inspired by [DAT][] all channel messages are encrypted with `sodium.secretBox`
-using
-`channel_key = HASH(channel_pub_key, 'vowlink-symmetric')[sodium.secretBox.keySize]`.
+using:
+```
+symmetric_key = HASH(channel_pub_key, 'vowlink-symmetric')[:sodium.secretBox.keySize]
+```
 
 The protocol below is transport-agnostic in a sense that it could be run using
 any available transport: [MultipeerConnectivity][], https, ...
@@ -226,7 +230,7 @@ to the last public key in the chain, or the channel's private key if the chain
 is empty.
 
 `nonce` MUST be a random value used by [Sodium][]'s `secretBox` to encrypt the
-contents of the message with `channel_key`. Note: because `channel_key` is
+contents of the message with `symmetric_key`. Note: because `symmetric_key` is
 known only to those who know the `channel_pub_key`, the messages can be stored
 on untrusted peers without any loss of confidentiality.
 
@@ -271,7 +275,7 @@ message Invite {
 
 The `channel_name` is a suggested name for the channel and MUST have no more
 than `128` UTF-8 characters. `channel_root` MUST be decryptable using
-`channel_key`, MUST have empty `content.chain`, and MUST be signed by
+`symmetric_key`, MUST have empty `content.chain`, and MUST be signed by
 `channel_priv_key`.
 
 The `invite.links` MUST be a chain from `channel_priv_key` to the
