@@ -169,8 +169,11 @@ they are not cycles because of edge directions).
 
 `message.height` is a number of edges between the `message` and the
 `channel.root`. `channel.root` naturally MUST have `height = 0`, and in general
-any message MUST have `height = max(p.height for p in parents) + 1`. `height`
-is an essential property for synchronization (more on it later).
+any message MUST have:
+```
+height = max(p.height for p in parents) + 1
+````
+`height` is an essential property for synchronization (more on it later).
 
 `content.timestamp` MUST be a valid Unix time since Jan 1st 1970 00:00:00 UTC,
 and MUST be greater or equal to the maximum timestamp of the message parents.
