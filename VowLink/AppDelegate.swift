@@ -19,7 +19,7 @@ protocol ChainNotificationDelegate: AnyObject {
 }
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, ChannelDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, ChannelDelegate, ChannelListDelegate {
     let context = Context()
     var channelList: ChannelList!
 
@@ -35,6 +35,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
         p2p.delegate = self
         
         channelList = ChannelList(context: context)
+        channelList.delegate = self
         channelList.channelDelegate = self
         
         return true
@@ -198,10 +199,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
         }
 
         do {
-            // TODO(indutny): send only to subscribers and use DHT otherwise
+            // TODO(indutny): use DHT otherwise
+            let subscribers = p2p.subscribedPeers(to: channel.channelID)
+            
             try p2p.send(Proto_Packet.with({ (proto) in
                 proto.message = messageProto
-            }))
+            }), to: subscribers)
         } catch {
             debugPrint("[app] failed to broadcast message due to error \(error)")
         }
@@ -213,5 +216,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
             debugPrint("[app] failed to save channels due to \(error)")
         }
     }
+    
+    // MARK: ChannelListDelegate
+    
+    func channelList(added channel: Channel) {
+        for peer in p2p.peers.values {
+            do {
+                let _ = try peer.send(subscribeTo: channel.channelID)
+            } catch {
+                debugPrint("[app] failed to send subscribe to new \(channel.channelID) due to error \(error)")
+            }
+        }
+    }
 }
-

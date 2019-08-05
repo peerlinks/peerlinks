@@ -57,24 +57,34 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     // MARK: Public API
     
-    func send(_ packet: Proto_Packet, to peerID: String? = nil) throws {
+    func send(_ packet: Proto_Packet, to peers: [Peer]) throws {
         let data = try packet.serializedData()
 
-        let realIDs = peers.keys.filter { (peer) -> Bool in
-            return peerID == nil || peer.displayName == peerID
-        }
-        
-        let peers = realIDs.map({ (id) -> Peer? in
-            return self.peers[id]
-        }).filter { (peer) -> Bool in
-            return peer != nil
-        }
-        
         for peer in peers {
-            if try peer?.send(data) == false {
+            if try peer.send(data) == false {
                 debugPrint("[p2p] failed to send link due to rate limiting")
             }
         }
+    }
+    
+    func subscribedPeers(to channelID: Bytes) -> [Peer] {
+        return peers.values.filter({ (peer) -> Bool in
+            return peer.subscriptions.contains(channelID)
+        })
+    }
+    
+    func peers(byDisplayName displayName: String) -> [Peer] {
+        let realIDs = peers.keys.filter { (peer) -> Bool in
+            return peer.displayName == displayName
+        }
+        
+        return realIDs.map({ (id) -> Peer? in
+            return self.peers[id]
+        }).filter({ (peer) -> Bool in
+            return peer != nil
+        }).map({ (peer) -> Peer in
+            return peer!
+        })
     }
     
     private func connect(to remoteID: MCPeerID) -> Peer? {

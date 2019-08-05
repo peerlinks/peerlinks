@@ -58,7 +58,7 @@ class InviteConfirmController : UITableViewController {
                 packet.invite = encryptedInvite
             }
             
-            try app.p2p.send(packet, to: request.peerID)
+            try app.p2p.send(packet, to: app.p2p.peers(byDisplayName: request.peerID))
         } catch {
             fatalError("failed to issue invite \(request) due to error \(error)")
         }

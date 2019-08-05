@@ -9,9 +9,15 @@
 import Foundation
 import Sodium
 
+protocol ChannelListDelegate : AnyObject {
+    func channelList(added channel: Channel)
+}
+
 class ChannelList : ChannelDelegate {
     let context: Context
     var channels = [Channel]()
+    
+    weak var delegate: ChannelListDelegate?
     weak var channelDelegate: ChannelDelegate?
     
     // TODO(indutny): does it make sense to store this in keychain too?
@@ -53,6 +59,8 @@ class ChannelList : ChannelDelegate {
         debugPrint("[channels] added new \(channel.publicKey)")
         
         try save()
+        
+        delegate?.channelList(added: channel)
     }
 
     func find(byChannelID channelID: Bytes) -> Channel? {
