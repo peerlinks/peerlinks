@@ -3,7 +3,7 @@ import Sodium
 
 class InviteConfirmController : UITableViewController {
     var app: AppDelegate!
-    var request: Proto_LinkRequest?
+    var request: Proto_InviteRequest?
     var channel: Channel!
     
     @IBOutlet weak var publicKey: UILabel!

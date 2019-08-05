@@ -21,7 +21,7 @@ class ChainRequestController : UIViewController, ChainNotificationDelegate {
         boxPublicKey = keyPair.publicKey
         boxSecretKey = keyPair.secretKey
         
-        let req = Proto_LinkRequest.with { (req) in
+        let req = Proto_InviteRequest.with { (req) in
             req.peerID = app.p2p.localID.displayName
             req.trusteePubKey = Data(identity.publicKey)
 

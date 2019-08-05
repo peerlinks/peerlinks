@@ -138,7 +138,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         
         if hello.version != Peer.PROTOCOL_VERSION {
             debugPrint("[peer] id=\(remoteID.displayName) got hello \(hello)")
-            throw PeerError.invalidVersion(hello.version)
+            return destroy(reason: "Invalid protocol version \(hello.version), expected \(Peer.PROTOCOL_VERSION)")
         }
         
         debugPrint("[peer] id=\(remoteID.displayName) got hello \(hello)")
@@ -161,8 +161,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     private func subscribe(to channelID: Bytes) {
         if channelID.count != Channel.CHANNEL_ID_LENGTH {
             debugPrint("[peer] received invalid channelID length in Subscribe")
-            destroy(reason: "Invalid channelID length in Subscribe")
-            return
+            return destroy(reason: "Invalid channelID length in Subscribe")
         }
         
         // Distribute subscription through peers
@@ -177,8 +176,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     private func handle(queryResponse proto: Proto_QueryResponse) {
         let channelID = Bytes(proto.channelID)
         if channelID.count != Channel.CHANNEL_ID_LENGTH {
-            destroy(reason: "Invalid channel ID size in query response")
-            return
+            return destroy(reason: "Invalid channel ID size in query response")
         }
         
         guard let closure = queryResponses[channelID] else {
@@ -216,7 +214,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
                                               minLeafHeight: minLeafHeight))
             }
         } catch {
-            destroy(reason: "Failed to parse messages due to error \(error)")
+            return destroy(reason: "Failed to parse messages due to error \(error)")
         }
     }
     

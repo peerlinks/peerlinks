@@ -29,7 +29,7 @@ message Invite {
   string channel_name = 2;
   ChannelMessage channel_root = 3;
 
-  repeated Link links = 4;
+  repeated Link chain = 4;
 }
 
 message EncryptedInvite {
@@ -37,7 +37,7 @@ message EncryptedInvite {
 }
 
 // QR Code
-message LinkRequest {
+message InviteRequest {
   string peer_id = 1;
   bytes trustee_pub_key = 2;
   bytes box_pub_key = 3;

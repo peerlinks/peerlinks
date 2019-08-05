@@ -1,64 +1,338 @@
 # Protocol
 
-## Overview
+## Goals
 
-```
-PeerToPeer
-DHT public pool (encrypted using public-key) + subscribed feeds
-Link protocol | Channel protocol
-```
+The goals of this protocol are:
+1. Provide semi-trusted parties with the means of peer-to-peer communication in
+   group chats (channels)
+2. Using untrusted parties that do not participate in the channels as the means
+   of transport of channel messages to interested peers
+3. Efficient synchronization of channel messages between semi-trusted and
+   untrusted peers
+4. Confidentiality of messages. Only semi-trusted peers can read channel
+   messages
+5. Eventual consistency. Messages must be viewable offline. New messages can be
+   posted offline and distributed once remote peers are available.
 
-Here and below `HASH(message, key)` is keyed `BLAKE2b`. Whenever `key` in `HASH`
-is omitted, the `HASH` is assumed to be non-keyed.
+## Notes
 
-The public/private keys are ed25519 keys. The AES key size is 192 bits.
+Here and below [Sodium][] is used for all cryptography operations.
 
-Protocol buffers are used for all messages below.
-
-_(TODO: use `channel_pub_key ++ current_day_ts` for the channel_id?)_
+[Protocol Buffers][] are used for encoding of all messages.
 
 Channel identifier is a
 `channel_id = HASH(channel_pub_key, 'vowlink-channel-id')[:32]`,
-inspired by [DAT][] all channel messages are encrypted with AES using
-`channel_key = HASH(channel_pub_key, 'vowlink-channel-key')[:24]`. The encrypted
-message is authenticated using
-`channel_mac_key = HASH(channel_pub_key, 'vowlink-channel-mac')`:
+inspired by [DAT][] all channel messages are encrypted with `sodium.secretBox`
+using
+`channel_key = HASH(channel_pub_key, 'vowlink-symmetric')[sodium.secretBox.keySize]`.
 
+The protocol below is transport-agnostic in a sense that it could be run using
+any available transport: [MultipeerConnectivity][], https, ...
+
+Everywhere below "TBS" stands for To Be Signed and indicates the data that is
+signed by the `signature`.
+
+## Initialization sequence
+
+The first message over any wire protocol MUST be:
+```proto
+message Hello {
+  int32 version = 1;
+  int32 rate_limit = 2; // maximum number of messages per hour
+}
 ```
-EncryptedMessage {
-  TBSMessage {
-    [ channel_id ] [ channel_key_iv ]
-    [ AES(channel_key, channel_key_iv, message) ]
+
+The `hello.version` specifies the protocol version and MUST be checked by the
+recipient. In case of the mismatch and/or other errors `Error` SHOULD be sent:
+```proto
+message Error {
+  string reason = 1;
+}
+```
+and connection MUST be closed.
+
+Further communication between peers happens using:
+```proto
+message Packet {
+  oneof content {
+    EncryptedInvite invite = 1;
+    ChannelMessage message = 2;
+    Error error = 3;
+    Subscribe subscribe = 4;
+
+    Query query = 5;
+    QueryResponse query_response = 6;
   }
-  [ HASH(TBSMessage, channel_mac_key) ]
+}
+```
+Particular packet sub-types are described below.
+
+Every received packet decreases `remaining = hello.rate_limit` by one and
+starts the timer for one hour. Once one hour passes, the remaining number of
+packets is restored back to `hello.rate_limit`. In case if `remaining == 0` and
+the remote peer sends a packet - the packet MUST be ignored and the connection
+SHOULD be terminated.
+
+Each peer has a list of `Channel`s that they "follow". In order to receive
+channel updates they sent several `Subscribe` packets after `Hello`:
+```proto
+message Subscribe {
+  bytes channel_id = 1;
+}
+```
+The recipient MUST validate the length of `channel_id`.
+
+## Channels, messages, and identities
+
+At this point the peers SHOULD issue synchronization queries, but this section
+is not possible to discuss without discussing what channels and messages are.
+
+Each peer SHOULD have one or more identities. The identity is:
+1. Asymmetric key pair (`sodium.sign.keyPair`)
+2. A set of "chains" for each channel the identity is allowed to post to.
+
+### Message
+
+Each identity comes with their own channel (just as twitter users have their
+own feed). The channel MUST have a root message and MAY have more messages of
+following format:
+```proto
+message ChannelMessage {
+  message Root {
+  }
+
+  message Text {
+    string text = 1;
+  }
+
+  message Body {
+    oneof body {
+      Root root = 1;
+      Text text = 2;
+    }
+  }
+
+  message Content {
+    message TBS {
+      repeated Link chain = 1;
+      double timestamp = 2;
+      Body body = 3;
+
+      // NOTE: Despite these fields being outside of content they have to be
+      // included here to prevent replay attacks
+      repeated bytes parents = 4;
+      uint64 height = 5;
+    }
+
+    // Link chain that leads from the channel's public key to the signer of
+    // this message
+    repeated Link chain = 1;
+
+    // Floating point unix time
+    double timestamp = 2;
+
+    // body of the message
+    Body body = 3;
+
+    bytes signature = 4;
+  }
+
+  bytes channel_id = 1;
+
+  // NOTE: can be empty only in the root message
+  repeated bytes parents = 2;
+
+  // height = max(p.height for p in parents)
+  uint64 height = 3;
+
+  // Encryption nonce for Sodium
+  bytes nonce = 4;
+
+  // NOTE: encryption key = HASH(channelPubKey, 'vowlink-symmetric')
+  bytes encrypted_content = 5;
 }
 ```
 
-In this way data in the public pool cannot be censored by the peers
-participating in the P2P.
+Despite having many fields the aim of `ChannelMessage` is to form a Direct
+Acyclic Graph (DAG) similar to the commit graph in [git][]. In other words,
+each message except for the root MUST have one or more parents.
+`message.parents` contains the hashes of these parents, and the hash of the
+`message` might be used as a parent for some future message. Thus messages form
+a directed graph with no cycles (merges are possible, but just as in [git][]
+they are not cycles because of edge directions).
 
-## P2P
+`message.height` is a number of edges between the `message` and the
+`channel.root`. `channel.root` naturally MUST have `height = 0`, and in general
+any message MUST have `height = max(p.height for p in parents) + 1`. `height`
+is an essential property for synchronization (more on it later).
 
-Each peer assingns themselves a random
-binary `peer_id = RANDOM[:32]`. `peer_id` is NOT persisted between restarts of
-the application. The first message that they send is
+`content.timestamp` MUST be a valid Unix time since Jan 1st 1970 00:00:00 UTC,
+and MUST be greater or equal to the maximum timestamp of the message parents.
+`content.timestamp` MUST NOT be too far in the future. Particular implementation
+SHOULD decide on the value of this leeway (5-10 seconds is recommended).
 
+The subscribers of the channel MUST verify the messages against full DAG:
+
+* `height` MUST be checked
+* `parents` MUST lead to the root, and MUST NOT be empty
+* `content.box` MUST be signed
+* `chain` MUST lead to the channel's public key and MUST not be longer than 5
+  links
+* `signature` MUST come from the last link's public key
+* `timestamp` MUST be greater or equal to the MAXIMUM of `timestamps` of
+  parent messages, and SHOULD not be in the future. It is understood that the
+  clocks are not ideal, so the "SHOULD" in the previous sentence means that
+  small leeway has to be allowed. Several seconds of leniency should be enough
+* `timestamp` MUST be less than the minimum of `expiration` of links in the
+  `chain`.
+
+### Link
+
+The `chain` is a collection of signed links:
+```proto
+message Link {
+  message TBS {
+    bytes trustee_pub_key = 1;
+    double expiration = 2;
+
+    // NOTE: This MUST be filled either by sender/recipient before
+    // generating/verifying the signature below.
+    bytes channel_id = 3;
+  }
+
+  TBS tbs = 1;
+  bytes signature = 2;
+}
 ```
-Hello {
-  [ version (big endian int32) ]
-  [ maximum number of messages per hour ]
+that establish trust in a manner
+similar to [Public Key Infrastructure][] (PKI). Each successive link in a chain
+is signed by the private key of the previous link. The first link is signed by
+the root. The maximum length of the chain is `5`. Peer MUST validate the length
+of the chain against the limit, and MUST NOT accept messages with longer chains.
+(This should encourage peers to form tighter groups, and have more control
+over participants. The number `5` MAY be revised in the future version of the
+protocol.)
+
+The `link.expiration` is a Unix-time from Jan 1st 1970 00:00:00 UTC. The
+expiration date/time of the whole `chain` is the minimum of expirations of
+all links. This mechanism ensures granularity of control over peers' ability
+to write new messages. The expiration of the chain MUST be checked against the
+`content.timestamp` (see constraints on `content.timestamp` above.)
+
+The `message.signature` MUST be generated using the private key that corresponds
+to the last public key in the chain, or the channel's private key if the chain
+is empty.
+
+`nonce` MUST be a random value used by [Sodium][]'s `secretBox` to encrypt the
+contents of the message with `channel_key`. Note: because `channel_key` is
+known only to those who know the `channel_pub_key`, the messages can be stored
+on untrusted peers without any loss of confidentiality.
+
+### Invite
+
+It is easy to see that the write access to the channel MUST be checked by
+validating the `chain`. Peers that do not have valid chain can read the channel,
+but cannot write to it. The members of channel with write access can invite
+other peers to participate in this channel by first requesting from them in a
+form of scanned QR code (or by other means):
+```proto
+message InviteRequest {
+  string peer_id = 1;
+  bytes trustee_pub_key = 2;
+  bytes box_pub_key = 3;
+}
+```
+where `trustee_pub_key` is the invitee's public key. `box_pub_key` is from
+`sodium.box.keyPair()`.
+
+Upon receiving `InviteRequest` the peer having write access to the channel MUST
+consider the invitation carefully and ONLY IN CASE of user confirmation issue
+an `EncryptedInvite`:
+```proto
+message EncryptedInvite {
+  bytes box = 1;
 }
 ```
 
-The peers that violate the rate limit SHOULD have their peer id banned for
-at least 1 hour. The connection to them MUST be closed.
+The `encrypted_invite.box` can be decrypted `box_priv_key` that the issuer of
+`InviteRequest` MUST know from the moment the generated `InviteRequest`. When
+decrypted `encrypted_invite.box` becomes:
+```proto
+message Invite {
+  bytes channel_pub_key = 1;
+  string channel_name = 2;
+  ChannelMessage channel_root = 3;
 
-Peer MUST drop connection if the protocol version does not match.
+  repeated Link chain = 4;
+}
+```
+
+The `channel_name` is a suggested name for the channel and MUST have no more
+than `128` UTF-8 characters. `channel_root` MUST be decryptable using
+`channel_key`, MUST have empty `content.chain`, and MUST be signed by
+`channel_priv_key`.
+
+The `invite.links` MUST be a chain from `channel_priv_key` to the
+`request.trustee_key`.
+
+### Synchronization
+
+This DAG would make little sense without synchronization.
+
+Unencrypted `Query` is sent in order to request the latest messages from the
+channel:
+```proto
+message Query {
+  bytes channel_id = 1;
+  uint64 min_height = 2;
+  bytes cursor = 3;
+  uint64 limit = 4;
+}
+```
+
+It is trivial to filter the messages with `height` greater or equal to
+`sync.min_height`. Peers SHOULD send all messages with the `message.height`
+greater or equal to `sync.min_height`. If `cursor` is present, the query MUST
+continue from it (the definition of cursor is dependent upon implementation
+of the remote peer, and MAY or MAY NOT be a message hash):
+```proto
+message QueryResponse {
+  bytes channel_id = 1;
+  repeated ChannelMessage messages = 2;
+  bytes forward_cursor = 3;
+  bytes backward_cursor = 4;
+  uint64 min_leaf_height = 5;
+}
+```
+
+It might be the case that either the recipient is an untrusted peer and has only
+disconnected portions of DAG, or that the DAG of sender and recipient has
+diverged at `message.height` less than `sync.height`. The sender SHOULD
+repeatedly re-issue `Query` cursor set either to `forward_cursor` or
+`backward_cursor` until all messages are received.
+
+`min_leaf_height` is a suggestion for a better sync point, in case if there are
+different branches. In the example below top branch represents local messages,
+bottom branch represents remote messages. Requesting `min_height = 2` from
+remote MUST result in query response with `min_leaf_height = 1`:
+
+```
+h=0 | h=1       | h=2
+* - | --- * --- | --- *
+ \  |           |
+  \ |           |
+   \|           |
+    |           |
+    | \         |
+    |  *        |
+```
 
 ## DHT
 
+WIP
+
 DHT uses a form of rendezvous hashing.
-`content_hash = HASH(peer_id ++ EncryptedMessage, 'vowlink-dht')`
+`content_hash = HASH(peer_id ++ channel_id, 'vowlink-dht')`
 is computed for each peer and message. `content_hash` is interpreted as a
 network order integer. `DHT_SCALE = 7` peers with lowest `content_hash` receive
 the message. Even if the message is transferred to other peer, the copy of it
@@ -88,91 +362,19 @@ between application restarts. The messages with the highest rank (channel
 messages) MUST not be removed under any circumstances as they provide
 mandatory channel information.
 
-## Trust
-
-Channel and users can issue a trust token (Link) valid for 99 days:
-```
-Link {
-  TBSLink {
-    [ trustee_pub_key ]
-    [ expiration_date (big endian float64 seconds since Jan 1st 1970 00:00:00 UTC) ]
-    [ optional trustee_display_name (utf8 string) ]
-  }
-
-  [ ed25519_sign(HASH(TBSLink), issuer_priv_key) ]
-}
-```
-
-Peer MUST validate that `trustee_display_name` is valid UTF-8 string (no hanging
-UTF pairs). The maximum length of `trustee_display_name` is 64 bytes. The
-issuer SHOULD consider issuing two links, one with the display name present and
-another without it. See chain section below.
-
-Peer MUST NOT check that `expiration_date` is at most 99 days. However, peer
-MUST issue the link that is valid only for 99 days.
-
-Peer requests `Link` to be issued by sending:
-```
-LinkRequest {
-  [ trustee_pub_key ]
-  [ optional desired_display_name (utf8 string) ]
-  [ box_pub_key ]
-}
-```
-
-Recipient of `LinkRequest` MUST validate that `desired_display_name` is valid
-UTF-8 string. The maximum length of `desired_display_name` is 64 bytes.
-
-Trustee MAY validate that the `Link` contains the desired display name of
-their choice. However, some channels might prefer to issue the display names
-in top-bottom manner.
-
-## Trust in Detail
-
-Reading the channel messages is possible using only a public key of the channel.
-Posting the messages to the channel, however, requires establishing a chain of
-`Link` starting with a `channel_pub_key`.
-The validity time of such chain is the minimum of `expiration_date` in all
-links.
-
-The maximum allowed length of any chain is `5`. Chain length is equal to the
-RANK of the message. Channel messages have the HIGHEST rank `0`, `5` - is the
-LOWEST possible rank. All links in the chain but the last one SHOULD not have
-`trustee_display_name` set to save the storage.
-
-Various channel limits SHOULD be applied depending on the RANK of the message.
-Highest-rank and rank-1 messages should not be limited as they belong to the
-channel and its operators.
-
-Since number of links that could be sent is limited to `5`. The peer is
-encouraged by the limits above and their desire to post new messages to seek
-the ways to shorten their chain. This could happen in two ways:
-
-1. Either the peer finds a higher-ranked peer that is willing to issue a
-   a better link for them
-2. One of the issuers in the peer's link chain receives a better link
-
-## Messages
-
-```
-Message {
-  [ issue_date (big endian float64 seconds since Jan 1st 1970 00:00:00 UTC) ]
-}
-```
-
-## Synchronization
-
-Ideas: ranked vector clocks, higher-ranked peers issuing checkpoints. Similar to
-bitcoin pool.
-
 ## Relays
 
-A non-P2P webserver MAY be used as an online relay for the messages. Although
-the servers themselves MAY be untrusted, the protocol ensures that the
-communication is safe.
+HTTPS webserver MAY be used as a remote peer to facilitate synchronization
+between peers that are not in vicinity of each other physically.
 
 # UX
 
+Ideas:
 1. User has to recite channel "vows" before receiving the trust link.
 
 [DAT]: https://docs.datproject.org/
+[Sodium]: https://download.libsodium.org/doc/
+[Protocol Buffers]: https://developers.google.com/protocol-buffers/
+[MultipeerConnectivity]: https://developer.apple.com/documentation/multipeerconnectivity
+[git]: https://git-scm.com/
+[Public Key Infrastructure]: https://en.wikipedia.org/wiki/Public_key_infrastructure

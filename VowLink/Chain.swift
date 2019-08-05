@@ -31,7 +31,7 @@ class Chain {
         self.context = context
     
         var links = [Link]()
-        for protoLink in proto.links {
+        for protoLink in proto.chain {
             let link = try Link(context: context, link: protoLink)
             links.append(link)
         }
@@ -63,7 +63,7 @@ class Chain {
     
     func toInviteProto(withChannel channel: Channel) -> Proto_Invite {
         return Proto_Invite.with({ (proto) in
-            proto.links = self.links.map({ (link) -> Proto_Link in
+            proto.chain = self.links.map({ (link) -> Proto_Link in
                 return link.toProto()
             })
             proto.channelPubKey = Data(channel.publicKey)

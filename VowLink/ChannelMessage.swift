@@ -112,21 +112,26 @@ class ChannelMessage {
                       }))
     }
     
-    func verify(withChannel channel: Channel) throws -> Bool {
+    func verify(withChannel channel: Channel, andPublicKey publicKey: Bytes? = nil) throws -> Bool {
         guard let content = decryptedContent else {
             return false
         }
         
-        guard let publicKey = try content.chain.verify(withChannel: channel,
-                                                       andAgainstTimestamp: content.timestamp) else {
+        guard let leafKey = try content.chain.verify(withChannel: channel,
+                                                     andAgainstTimestamp: content.timestamp) else {
             debugPrint("[channel-message] invalid chain for message \(String(describing: hash))")
+            return false
+        }
+
+        if let publicKey = publicKey, !context.sodium.utils.equals(leafKey, publicKey) {
+            debugPrint("[channel-message] invalid leaf key for message \(String(describing: hash))")
             return false
         }
         
         let tbs = try tbsProto()!.serializedData()
         
         return context.sodium.sign.verify(message: Bytes(tbs),
-                                          publicKey: publicKey,
+                                          publicKey: leafKey,
                                           signature: content.signature)
     }
     

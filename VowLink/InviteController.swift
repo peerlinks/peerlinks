@@ -7,7 +7,7 @@ class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegat
     var channel: Channel!
     var captureSession: AVCaptureSession!
     var previewLayer: AVCaptureVideoPreviewLayer!
-    var request: Proto_LinkRequest?
+    var request: Proto_InviteRequest?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -107,7 +107,7 @@ class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegat
             return
         }
         
-        guard let request = try? Proto_LinkRequest(serializedData: Data(binary)) else {
+        guard let request = try? Proto_InviteRequest(serializedData: Data(binary)) else {
             debugPrint("invalid binary in scanned link request")
             return
         }

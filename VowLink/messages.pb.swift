@@ -102,9 +102,9 @@ struct Proto_Invite {
   /// Clears the value of `channelRoot`. Subsequent reads from it will return its default value.
   mutating func clearChannelRoot() {_uniqueStorage()._channelRoot = nil}
 
-  var links: [Proto_Link] {
-    get {return _storage._links}
-    set {_uniqueStorage()._links = newValue}
+  var chain: [Proto_Link] {
+    get {return _storage._chain}
+    set {_uniqueStorage()._chain = newValue}
   }
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -126,7 +126,8 @@ struct Proto_EncryptedInvite {
   init() {}
 }
 
-struct Proto_LinkRequest {
+/// QR Code
+struct Proto_InviteRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -704,14 +705,14 @@ extension Proto_Invite: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
     1: .standard(proto: "channel_pub_key"),
     2: .standard(proto: "channel_name"),
     3: .standard(proto: "channel_root"),
-    4: .same(proto: "links"),
+    4: .same(proto: "chain"),
   ]
 
   fileprivate class _StorageClass {
     var _channelPubKey: Data = SwiftProtobuf.Internal.emptyData
     var _channelName: String = String()
     var _channelRoot: Proto_ChannelMessage? = nil
-    var _links: [Proto_Link] = []
+    var _chain: [Proto_Link] = []
 
     static let defaultInstance = _StorageClass()
 
@@ -721,7 +722,7 @@ extension Proto_Invite: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
       _channelPubKey = source._channelPubKey
       _channelName = source._channelName
       _channelRoot = source._channelRoot
-      _links = source._links
+      _chain = source._chain
     }
   }
 
@@ -740,7 +741,7 @@ extension Proto_Invite: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
         case 1: try decoder.decodeSingularBytesField(value: &_storage._channelPubKey)
         case 2: try decoder.decodeSingularStringField(value: &_storage._channelName)
         case 3: try decoder.decodeSingularMessageField(value: &_storage._channelRoot)
-        case 4: try decoder.decodeRepeatedMessageField(value: &_storage._links)
+        case 4: try decoder.decodeRepeatedMessageField(value: &_storage._chain)
         default: break
         }
       }
@@ -758,8 +759,8 @@ extension Proto_Invite: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
       if let v = _storage._channelRoot {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
       }
-      if !_storage._links.isEmpty {
-        try visitor.visitRepeatedMessageField(value: _storage._links, fieldNumber: 4)
+      if !_storage._chain.isEmpty {
+        try visitor.visitRepeatedMessageField(value: _storage._chain, fieldNumber: 4)
       }
     }
     try unknownFields.traverse(visitor: &visitor)
@@ -773,7 +774,7 @@ extension Proto_Invite: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
         if _storage._channelPubKey != rhs_storage._channelPubKey {return false}
         if _storage._channelName != rhs_storage._channelName {return false}
         if _storage._channelRoot != rhs_storage._channelRoot {return false}
-        if _storage._links != rhs_storage._links {return false}
+        if _storage._chain != rhs_storage._chain {return false}
         return true
       }
       if !storagesAreEqual {return false}
@@ -812,8 +813,8 @@ extension Proto_EncryptedInvite: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
   }
 }
 
-extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".LinkRequest"
+extension Proto_InviteRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".InviteRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "peer_id"),
     2: .standard(proto: "trustee_pub_key"),
@@ -844,7 +845,7 @@ extension Proto_LinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Proto_LinkRequest, rhs: Proto_LinkRequest) -> Bool {
+  static func ==(lhs: Proto_InviteRequest, rhs: Proto_InviteRequest) -> Bool {
     if lhs.peerID != rhs.peerID {return false}
     if lhs.trusteePubKey != rhs.trusteePubKey {return false}
     if lhs.boxPubKey != rhs.boxPubKey {return false}

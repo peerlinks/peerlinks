@@ -20,6 +20,7 @@ protocol RemoteChannel {
 enum ChannelError : Error {
     case invalidPublicKeySize(Int)
     case invalidChannelNameSize(Int)
+    case invalidRoot
     
     case noChainFound(Identity)
     case rootMustBeEncrypted
@@ -89,6 +90,11 @@ class Channel: RemoteChannel {
         }
         if name.count > Channel.MAX_NAME_LENGTH {
             throw ChannelError.invalidChannelNameSize(name.count)
+        }
+        
+        let isValid = try decryptedRoot.verify(withChannel: self, andPublicKey: publicKey)
+        if !isValid {
+            throw ChannelError.invalidRoot
         }
     }
     
