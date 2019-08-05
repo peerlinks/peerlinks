@@ -14,9 +14,15 @@ protocol ChannelDelegate : AnyObject {
 }
 
 protocol RemoteChannel {
-    func query(withMinHeight minHeight: UInt64, limit: Int, andClosure closure: (Channel.QueryResponse) -> Void)
-    func query(withCursor cursor: Bytes, limit: Int, andClosure closure: (Channel.QueryResponse) -> Void)
-    func close(withError message: String)
+    func query(channelID: Bytes,
+               withMinHeight minHeight: UInt64,
+               limit: Int,
+               andClosure closure: @escaping (Channel.QueryResponse) -> Void)
+    func query(channelID: Bytes,
+               withCursor cursor: Bytes,
+               limit: Int,
+               andClosure closure: @escaping (Channel.QueryResponse) -> Void)
+    func destroy(reason: String)
 }
 
 enum ChannelError : Error {
@@ -245,7 +251,9 @@ class Channel: RemoteChannel {
     
     func sync(with remote: RemoteChannel) {
         let requestedHeight = minLeafHeight
-        remote.query(withMinHeight: requestedHeight, limit: Channel.SYNC_LIMIT) {
+        remote.query(channelID: channelID,
+                     withMinHeight: requestedHeight,
+                     limit: Channel.SYNC_LIMIT) {
             (response) in
             self.handle(queryResponse: response, from: remote, andRequestedHeight: requestedHeight)
         }
@@ -255,14 +263,16 @@ class Channel: RemoteChannel {
         if let suggestedHeight = response.minLeafHeight,
            let requestedHeight = requestedHeight,
            suggestedHeight < requestedHeight {
-            remote.query(withMinHeight: suggestedHeight, limit: Channel.SYNC_LIMIT) { (response) in
+            remote.query(channelID: channelID,
+                         withMinHeight: suggestedHeight,
+                         limit: Channel.SYNC_LIMIT) { (response) in
                 self.handle(queryResponse: response, from: remote)
             }
             return
         }
         
         if response.messages.count > Channel.SYNC_LIMIT {
-            remote.close(withError: "message count overflow")
+            remote.destroy(reason: "message count overflow")
             return
         }
         
@@ -275,7 +285,7 @@ class Channel: RemoteChannel {
             } catch ChannelError.parentNotFound(_) {
                 missing = true
             } catch {
-                remote.close(withError: "invalid message \(encrypted.hash!), error: \(error)")
+                remote.destroy(reason: "invalid message \(encrypted.hash!), error: \(error)")
                 return
             }
         }
@@ -286,7 +296,7 @@ class Channel: RemoteChannel {
             cursor = response.backwardCursor
             
             if cursor == nil {
-                remote.close(withError: "empty backward cursor when messages are missing")
+                remote.destroy(reason: "empty backward cursor when messages are missing")
                 return
             }
         } else {
@@ -294,7 +304,9 @@ class Channel: RemoteChannel {
         }
         
         if let cursor = cursor {
-            remote.query(withCursor: cursor, limit: Channel.SYNC_LIMIT) {
+            remote.query(channelID: channelID,
+                         withCursor: cursor,
+                         limit: Channel.SYNC_LIMIT) {
                 (response) in
                 self.handle(queryResponse: response, from: remote)
             }
@@ -414,17 +426,23 @@ class Channel: RemoteChannel {
     
     // MARK: RemoteChannel (mostly for testing)
     
-    func query(withCursor cursor: Bytes, limit: Int, andClosure closure: (Channel.QueryResponse) -> Void) {
+    func query(channelID: Bytes,
+               withCursor cursor: Bytes,
+               limit: Int,
+               andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
         let response = try! query(withCursor: cursor, andLimit: limit)
         closure(response)
     }
     
-    func query(withMinHeight minHeight: UInt64, limit: Int, andClosure closure: (Channel.QueryResponse) -> Void) {
+    func query(channelID: Bytes,
+               withMinHeight minHeight: UInt64,
+               limit: Int,
+               andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
         let response = try! query(withMinHeight: minHeight, andLimit: limit)
         closure(response)
     }
 
-    func close(withError message: String) {
+    func destroy(reason: String) {
         // no-op
     }
 }

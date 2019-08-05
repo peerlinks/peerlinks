@@ -22,7 +22,7 @@ protocol PeerDelegate : AnyObject {
     func peerDisconnected(_ peer: Peer)
 }
 
-class Peer: NSObject, MCSessionDelegate {
+class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     let context: Context
     let session: MCSession
     let remoteID: MCPeerID
@@ -32,6 +32,7 @@ class Peer: NSObject, MCSessionDelegate {
     let nonce: Bytes
     
     var subscriptions = Set<Bytes>()
+    var queryResponses = [Bytes:(Channel.QueryResponse) -> Void]()
     
     weak var delegate: PeerDelegate?
 
@@ -77,6 +78,9 @@ class Peer: NSObject, MCSessionDelegate {
         case .some(.subscribe(let proto)):
             subscribe(to: Bytes(proto.channelID))
             break
+        case .some(.queryResponse(let proto)):
+            handle(queryResponse: proto)
+            break
         
         default:
             return packet
@@ -98,6 +102,31 @@ class Peer: NSObject, MCSessionDelegate {
     func send(subscribeTo channelID: Bytes) throws -> Bool {
         let proto = Proto_Packet.with { (proto) in
             proto.subscribe.channelID = Data(channelID)
+        }
+        
+        let data = try proto.serializedData()
+        
+        return try send(data)
+    }
+    
+    func send(queryResponse response: Channel.QueryResponse, from channel: Channel) throws -> Bool {
+        let proto = Proto_Packet.with { (proto) in
+            proto.queryResponse = Proto_QueryResponse.with({ (proto) in
+                proto.channelID = Data(channel.channelID)
+                proto.messages = response.messages.map({ (message) -> Proto_ChannelMessage in
+                    return message.toProto()!
+                })
+
+                if let forward = response.forwardCursor {
+                    proto.forwardCursor = Data(forward)
+                }
+                if let backward = response.backwardCursor {
+                    proto.backwardCursor = Data(backward)
+                }
+                if let minHeight = response.minLeafHeight {
+                    proto.minLeafHeight = minHeight
+                }
+            })
         }
         
         let data = try proto.serializedData()
@@ -159,6 +188,42 @@ class Peer: NSObject, MCSessionDelegate {
         
         debugPrint("[peer] adding subscription to \(channelID)")
         subscriptions.insert(channelID)
+    }
+    
+    private func handle(queryResponse proto: Proto_QueryResponse) {
+        let channelID = Bytes(proto.channelID)
+        guard let closure = queryResponses[channelID] else {
+            debugPrint("[peer] unexpected query response, ignoring")
+            return
+        }
+        
+        do {
+            let messages = try proto.messages.map { (proto) -> ChannelMessage in
+                return try ChannelMessage(context: self.context, proto: proto)
+            }
+            
+            var forwardCursor: Bytes?
+            var backwardCursor: Bytes?
+            var minLeafHeight: UInt64?
+            
+            if !proto.forwardCursor.isEmpty {
+                forwardCursor = Bytes(proto.forwardCursor)
+            }
+            if !proto.backwardCursor.isEmpty {
+                backwardCursor = Bytes(proto.backwardCursor)
+            }
+            if proto.minLeafHeight != 0 {
+                minLeafHeight = proto.minLeafHeight
+            }
+            
+            queryResponses.removeValue(forKey: channelID)
+            closure(Channel.QueryResponse(messages: messages,
+                                          forwardCursor: forwardCursor,
+                                          backwardCursor: backwardCursor,
+                                          minLeafHeight: minLeafHeight))
+        } catch {
+            destroy(reason: "Failed to parse messages due to error \(error)")
+        }
     }
     
     // MARK: Session
@@ -228,5 +293,45 @@ class Peer: NSObject, MCSessionDelegate {
     
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {
         debugPrint("[peer] finished receiving from \(peerID.displayName) resource \(resourceName)")
+    }
+    
+    // Mark: RemoteChannel
+    
+    func query(channelID: Bytes, withCursor cursor: Bytes, limit: Int, andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
+        let proto = Proto_Packet.with { (packet) in
+            packet.query = Proto_Query.with({ (query) in
+                query.channelID = Data(channelID)
+                query.cursor = Data(cursor)
+                query.limit = UInt32(limit)
+            })
+        }
+        
+        do {
+            let data = try proto.serializedData()
+            let _ = try send(data)
+            
+            queryResponses[channelID] = closure
+        } catch {
+            debugPrint("[peer] query error \(error)")
+        }
+    }
+    
+    func query(channelID: Bytes, withMinHeight minHeight: UInt64, limit: Int, andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
+        let proto = Proto_Packet.with { (packet) in
+            packet.query = Proto_Query.with({ (query) in
+                query.channelID = Data(channelID)
+                query.minHeight = minHeight
+                query.limit = UInt32(limit)
+            })
+        }
+        
+        do {
+            let data = try proto.serializedData()
+            let _ = try send(data)
+
+            queryResponses[channelID] = closure
+        } catch {
+            debugPrint("[peer] query error \(error)")
+        }
     }
 }

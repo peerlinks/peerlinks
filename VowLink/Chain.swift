@@ -10,6 +10,7 @@ import Foundation
 import Sodium
 
 enum ChainError : Error {
+    case invalidPubKey
     case maximumChainLengthReached
     case invalidChain
 }
@@ -40,6 +41,10 @@ class Chain {
             links.append(link)
         }
         self.links = links
+        
+        if proto.channelPubKey.count != context.sodium.sign.PublicKeyBytes {
+            throw ChainError.invalidPubKey
+        }
         
         self.channelPubKey = Bytes(proto.channelPubKey)
         self.channelRoot = try ChannelMessage(context: context, proto: proto.channelRoot)
@@ -109,6 +114,7 @@ class Chain {
     }
     
     func appendedLink(_ link: Link) throws -> Chain {
+        // TODO(indutny): UX UX UX
         if links.count >= Chain.MAX_LENGTH {
             throw ChainError.maximumChainLengthReached
         }

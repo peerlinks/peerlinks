@@ -117,13 +117,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
     }
     
     func peerToPeer(_ p2p: PeerToPeer, peerReady peer: Peer) {
-        debugPrint("[app] new peer \(peer), sending our subscribes.count=\(channelList.channels.count)")
+        debugPrint("[app] new peer \(peer), syncing and subscribing to channels.count=\(channelList.channels.count)")
         for channel in channelList.channels {
             do {
                 let _ = try peer.send(subscribeTo: channel.channelID)
             } catch {
                 debugPrint("[app] failed to send subscribe to \(channel.channelID) due to error \(error)")
             }
+            
+            channel.sync(with: peer)
         }
     }
     
@@ -138,6 +140,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
                 
             case .some(.message(let message)):
                 self.receive(encryptedMessage: message, from: peer)
+                break
+                
+            case .some(.query(let query)):
+                self.receive(query: query, from: peer)
                 break
                 
             default:
@@ -186,6 +192,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
         }
         
         debugPrint("[app] received new message from remote peer!")
+    }
+    
+    func receive(query proto: Proto_Query, from peer: Peer) {
+        let channelID = Bytes(proto.channelID)
+        guard let channel = channelList.find(byChannelID: channelID) else {
+            debugPrint("[app] channel \(channelID) not found for query")
+            return
+        }
+        
+        do {
+            var response: Channel.QueryResponse?
+            
+            if proto.cursor.isEmpty {
+                response = try channel.query(withMinHeight: proto.minHeight, andLimit: Int(proto.limit))
+            } else {
+                response = try channel.query(withCursor: Bytes(proto.cursor), andLimit: Int(proto.limit))
+            }
+            
+            let _ = try peer.send(queryResponse: response!, from: channel)
+        } catch {
+            debugPrint("[app] channel query failed due to \(error)")
+            return
+        }
     }
     
     // MARK: ChannelDelegate
