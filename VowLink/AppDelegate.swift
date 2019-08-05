@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 import Sodium
+import MultipeerConnectivity
 
 protocol ChainNotificationDelegate: AnyObject {
     var boxPublicKey: Bytes? { get }
@@ -25,6 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
     var p2p: PeerToPeer!
     var identity: Identity?
     var window: UIWindow?
+    
     weak var chainDelegate: ChainNotificationDelegate?
     weak var channelDelegate: ChannelDelegate?
     
@@ -114,16 +116,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
         
         switch packet.content {
         case .some(.invite(let encryptedInvite)):
-            guard let _ = identity else {
-                debugPrint("[app] no identity available, ignoring packets")
-                return
-            }
-
-            receiveInvite(encryptedInvite)
+            receive(encryptedInvite: encryptedInvite)
             break
             
         case .some(.message(let message)):
-            receiveMessage(message)
+            receive(encryptedMessage: message)
             break
             
         default:
@@ -132,13 +129,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
         }
     }
     
-    func receiveInvite(_ encryptedInvite: Proto_EncryptedInvite) {
+    func receive(encryptedInvite proto: Proto_EncryptedInvite) {
+        guard let _ = self.identity else {
+            debugPrint("[app] no identity available, ignoring invite")
+            return
+        }
+        
         guard let chainDelegate = chainDelegate else {
             return
         }
         
         do {
-            let chain = try Chain(encryptedInvite,
+            let chain = try Chain(proto,
                                   withContext: context,
                                   publicKey: chainDelegate.boxPublicKey!,
                                   andSecretKey: chainDelegate.boxSecretKey!)
@@ -149,7 +151,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
         }
     }
     
-    func receiveMessage(_ proto: Proto_ChannelMessage) {
+    func receive(encryptedMessage proto: Proto_ChannelMessage) {
         guard let channel = channelList.find(byChannelID: Bytes(proto.channelID)) else {
             debugPrint("[app] channel \(proto.channelID) is unknown")
             return

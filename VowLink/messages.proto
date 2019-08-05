@@ -114,14 +114,19 @@ message Error {
   string reason = 1;
 }
 
+message Subscribe {
+  bytes channel_id = 1;
+}
+
 message Packet {
   oneof content {
     EncryptedInvite invite = 1;
     ChannelMessage message = 2;
     Error error = 3;
+    Subscribe subscribe = 4;
 
-    Query query = 4;
-    QueryResponse query_response = 5;
+    Query query = 5;
+    QueryResponse query_response = 6;
   }
 }
 

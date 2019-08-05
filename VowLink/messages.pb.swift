@@ -369,6 +369,18 @@ struct Proto_Error {
   init() {}
 }
 
+struct Proto_Subscribe {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var channelID: Data = SwiftProtobuf.Internal.emptyData
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 struct Proto_Packet {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -403,6 +415,14 @@ struct Proto_Packet {
     set {_uniqueStorage()._content = .error(newValue)}
   }
 
+  var subscribe: Proto_Subscribe {
+    get {
+      if case .subscribe(let v)? = _storage._content {return v}
+      return Proto_Subscribe()
+    }
+    set {_uniqueStorage()._content = .subscribe(newValue)}
+  }
+
   var query: Proto_Query {
     get {
       if case .query(let v)? = _storage._content {return v}
@@ -425,6 +445,7 @@ struct Proto_Packet {
     case invite(Proto_EncryptedInvite)
     case message(Proto_ChannelMessage)
     case error(Proto_Error)
+    case subscribe(Proto_Subscribe)
     case query(Proto_Query)
     case queryResponse(Proto_QueryResponse)
 
@@ -434,6 +455,7 @@ struct Proto_Packet {
       case (.invite(let l), .invite(let r)): return l == r
       case (.message(let l), .message(let r)): return l == r
       case (.error(let l), .error(let r)): return l == r
+      case (.subscribe(let l), .subscribe(let r)): return l == r
       case (.query(let l), .query(let r)): return l == r
       case (.queryResponse(let l), .queryResponse(let r)): return l == r
       default: return false
@@ -1320,14 +1342,44 @@ extension Proto_Error: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
   }
 }
 
+extension Proto_Subscribe: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Subscribe"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "channel_id"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.channelID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.channelID, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Proto_Subscribe, rhs: Proto_Subscribe) -> Bool {
+    if lhs.channelID != rhs.channelID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Packet"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "invite"),
     2: .same(proto: "message"),
     3: .same(proto: "error"),
-    4: .same(proto: "query"),
-    5: .standard(proto: "query_response"),
+    4: .same(proto: "subscribe"),
+    5: .same(proto: "query"),
+    6: .standard(proto: "query_response"),
   ]
 
   fileprivate class _StorageClass {
@@ -1379,6 +1431,14 @@ extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
           try decoder.decodeSingularMessageField(value: &v)
           if let v = v {_storage._content = .error(v)}
         case 4:
+          var v: Proto_Subscribe?
+          if let current = _storage._content {
+            try decoder.handleConflictingOneOf()
+            if case .subscribe(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {_storage._content = .subscribe(v)}
+        case 5:
           var v: Proto_Query?
           if let current = _storage._content {
             try decoder.handleConflictingOneOf()
@@ -1386,7 +1446,7 @@ extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
           }
           try decoder.decodeSingularMessageField(value: &v)
           if let v = v {_storage._content = .query(v)}
-        case 5:
+        case 6:
           var v: Proto_QueryResponse?
           if let current = _storage._content {
             try decoder.handleConflictingOneOf()
@@ -1409,10 +1469,12 @@ extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
         try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
       case .error(let v)?:
         try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
-      case .query(let v)?:
+      case .subscribe(let v)?:
         try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
-      case .queryResponse(let v)?:
+      case .query(let v)?:
         try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+      case .queryResponse(let v)?:
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
       case nil: break
       }
     }
