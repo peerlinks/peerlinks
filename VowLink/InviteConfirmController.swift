@@ -34,7 +34,11 @@ class InviteConfirmController : UITableViewController {
     
     @IBAction func doneClicked(_ sender: Any) {
         defer {
-            navigationController?.popViewController(animated: true)
+            if let nav = navigationController {
+                // Pop to the channel view
+                let preLast = nav.viewControllers[nav.viewControllers.endIndex.advanced(by: -3)]
+                nav.popToViewController(preLast, animated: true)
+            }
         }
         guard let request = request else {
             return
