@@ -17,6 +17,7 @@ enum PeerError: Error {
 
 protocol PeerDelegate : AnyObject {
     func peer(_ peer: Peer, receivedPacket packet: Proto_Packet)
+    func peerReady(_ peer: Peer)
     func peerConnected(_ peer: Peer)
     func peerDisconnected(_ peer: Peer)
 }
@@ -59,20 +60,7 @@ class Peer: NSObject, MCSessionDelegate {
     
     func receivePacket(data: Data) throws -> Proto_Packet? {
         if hello == nil {
-            let hello = try Proto_Hello(serializedData: data)
-            
-            if hello.version != Peer.PROTOCOL_VERSION {
-                debugPrint("[peer] id=\(remoteID.displayName) got hello \(hello)")
-                throw PeerError.invalidVersion(hello.version)
-            }
-            
-            if hello.nonce.count != Peer.NONCE_LENGTH {
-                throw PeerError.invalidNonceLength(hello.nonce.count)
-            }
-            
-            debugPrint("[peer] id=\(remoteID.displayName) got hello \(hello)")
-            outgoing = RateLimiter(limit: hello.rateLimit)
-            self.hello = hello
+            try receiveHello(_: data)
             return nil
         }
         
@@ -107,6 +95,16 @@ class Peer: NSObject, MCSessionDelegate {
         return true
     }
     
+    func send(subscribeTo channelID: Bytes) throws -> Bool {
+        let proto = Proto_Packet.with { (proto) in
+            proto.subscribe.channelID = Data(channelID)
+        }
+        
+        let data = try proto.serializedData()
+        
+        return try send(data)
+    }
+    
     func destroy(reason: String) {
         let packet = Proto_Packet.with { (packet) in
             packet.error.reason = reason
@@ -115,6 +113,25 @@ class Peer: NSObject, MCSessionDelegate {
             let _ = try? send(data)
         }
         session.disconnect()
+    }
+    
+    private func receiveHello(_ data: Data) throws {
+        let hello = try Proto_Hello(serializedData: data)
+        
+        if hello.version != Peer.PROTOCOL_VERSION {
+            debugPrint("[peer] id=\(remoteID.displayName) got hello \(hello)")
+            throw PeerError.invalidVersion(hello.version)
+        }
+        
+        if hello.nonce.count != Peer.NONCE_LENGTH {
+            throw PeerError.invalidNonceLength(hello.nonce.count)
+        }
+        
+        debugPrint("[peer] id=\(remoteID.displayName) got hello \(hello)")
+        outgoing = RateLimiter(limit: hello.rateLimit)
+        self.hello = hello
+        
+        delegate?.peerReady(self)
     }
     
     private func sendHello() throws {
@@ -139,6 +156,8 @@ class Peer: NSObject, MCSessionDelegate {
         if subscriptions.count == Peer.MAX_SUBSCRIPTIONS {
             subscriptions.remove(subscriptions.randomElement()!)
         }
+        
+        debugPrint("[peer] adding subscription to \(channelID)")
         subscriptions.insert(channelID)
     }
     
@@ -173,8 +192,6 @@ class Peer: NSObject, MCSessionDelegate {
             return
         case .connected:
             debugPrint("[peer] connected to \(peerID.displayName)")
-            
-            delegate?.peerConnected(self)
             break
         default:
             debugPrint("[peer] unknown state transition for \(peerID.displayName)")
@@ -188,7 +205,10 @@ class Peer: NSObject, MCSessionDelegate {
             session.disconnect()
             
             delegate?.peerDisconnected(self)
+            return
         }
+
+        delegate?.peerConnected(self)
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {

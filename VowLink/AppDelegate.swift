@@ -111,6 +111,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
 
     // MARK: Peer to Peer
 
+    func peerToPeer(_ p2p: PeerToPeer, connectedTo peer: Peer) {
+        // no-op
+    }
+    
+    func peerToPeer(_ p2p: PeerToPeer, peerReady peer: Peer) {
+        debugPrint("[app] new peer \(peer), sending our subscribes.count=\(channelList.channels.count)")
+        for channel in channelList.channels {
+            do {
+                let _ = try peer.send(subscribeTo: channel.channelID)
+            } catch {
+                debugPrint("[app] failed to send subscribe to \(channel.channelID) due to error \(error)")
+            }
+        }
+    }
+    
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer) {
         DispatchQueue.main.async {
             debugPrint("[app] got packet \(packet) from peer \(peer)")

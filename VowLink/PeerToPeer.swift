@@ -12,6 +12,8 @@ import KeychainAccess
 import Sodium
 
 protocol PeerToPeerDelegate: AnyObject {
+    func peerToPeer(_ p2p: PeerToPeer, connectedTo peer: Peer)
+    func peerToPeer(_ p2p: PeerToPeer, peerReady peer: Peer)
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer)
 }
 
@@ -151,7 +153,11 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     // MARK: Peer
     
     func peerConnected(_ peer: Peer) {
-        // no-op
+        self.delegate?.peerToPeer(self, connectedTo: peer)
+    }
+    
+    func peerReady(_ peer: Peer) {
+        self.delegate?.peerToPeer(self, peerReady: peer)
     }
     
     func peerDisconnected(_ peer: Peer) {

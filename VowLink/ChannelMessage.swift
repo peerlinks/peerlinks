@@ -33,6 +33,7 @@ class ChannelMessage {
     let channelID: Bytes
     let height: UInt64
     let parents: [Bytes]
+    let nonce: Bytes
     let content: EitherContent
     
     var isEncrypted: Bool {
@@ -76,12 +77,14 @@ class ChannelMessage {
 
     static let MESSAGE_HASH_LENGTH = 32
     
-    init(context: Context, channelID: Bytes, content: EitherContent, height: UInt64, parents: [Bytes] = []) throws {
+    init(context: Context, channelID: Bytes, content: EitherContent, height: UInt64, nonce: Bytes? = nil, parents: [Bytes] = []) throws {
         self.context = context
         self.channelID = channelID
         self.parents = parents
         self.height = height
         self.content = content
+        
+        self.nonce = nonce ?? context.sodium.secretBox.nonce()
     }
     
     convenience init(context: Context, proto: Proto_ChannelMessage) throws {
@@ -89,6 +92,7 @@ class ChannelMessage {
                       channelID: Bytes(proto.channelID),
                       content: .encrypted(Bytes(proto.encryptedContent)),
                       height: proto.height,
+                      nonce: Bytes(proto.nonce),
                       parents: proto.parents.map({ (parent) -> Bytes in
                         return Bytes(parent)
                       }))
@@ -128,8 +132,9 @@ class ChannelMessage {
         
         let encryptionKey = try computeEncryptionKey(channel: channel)
         
-        // XXX(indutny): use `nonce` when https://github.com/jedisct1/swift-sodium/pull/188 lands
-        guard let box: Bytes = context.sodium.secretBox.seal(message: Bytes(content), secretKey: encryptionKey) else {
+        guard let box: Bytes = context.sodium.secretBox.seal(message: Bytes(content),
+                                                             secretKey: encryptionKey,
+                                                             nonce: nonce) else {
             throw ChannelMessageError.encryptionFailed
         }
         
@@ -137,6 +142,7 @@ class ChannelMessage {
                                          channelID: channel.channelID,
                                          content: .encrypted(box),
                                          height: height,
+                                         nonce: nonce,
                                          parents: parents)
         counterpart?.counterpart = self
         return counterpart!
@@ -154,8 +160,9 @@ class ChannelMessage {
 
         let encryptionKey = try computeEncryptionKey(channel: channel)
         
-        guard let decrypted = context.sodium.secretBox.open(nonceAndAuthenticatedCipherText: encrypted,
-                                                            secretKey: encryptionKey) else {
+        guard let decrypted = context.sodium.secretBox.open(authenticatedCipherText: encrypted,
+                                                            secretKey: encryptionKey,
+                                                            nonce: nonce) else {
             throw ChannelMessageError.decryptionFailed
         }
         
@@ -174,6 +181,7 @@ class ChannelMessage {
                                          channelID: channel.channelID,
                                          content: .decrypted(content),
                                          height: height,
+                                         nonce: nonce,
                                          parents: parents)
         counterpart?.counterpart = self
         return counterpart!
@@ -190,6 +198,7 @@ class ChannelMessage {
                 return Data(parent)
             })
             proto.height = self.height
+            proto.nonce = Data(self.nonce)
             
             proto.encryptedContent = Data(encrypted)
         })

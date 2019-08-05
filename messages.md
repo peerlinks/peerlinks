@@ -66,8 +66,11 @@ message ChannelMessage {
   // height = max(p.height for p in parents)
   uint64 height = 3;
 
+  // Encryption nonce for Sodium
+  bytes nonce = 4;
+
   // NOTE: encryption key = HASH(channelPubKey, 'vowlink-symmetric')
-  bytes encrypted_content = 4;
+  bytes encrypted_content = 5;
 }
 ```
 

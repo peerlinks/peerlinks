@@ -158,6 +158,9 @@ struct Proto_ChannelMessage {
   /// height = max(p.height for p in parents)
   var height: UInt64 = 0
 
+  /// Encryption nonce for Sodium
+  var nonce: Data = SwiftProtobuf.Internal.emptyData
+
   /// NOTE: encryption key = HASH(channelPubKey, 'vowlink-symmetric')
   var encryptedContent: Data = SwiftProtobuf.Internal.emptyData
 
@@ -865,7 +868,8 @@ extension Proto_ChannelMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     1: .standard(proto: "channel_id"),
     2: .same(proto: "parents"),
     3: .same(proto: "height"),
-    4: .standard(proto: "encrypted_content"),
+    4: .same(proto: "nonce"),
+    5: .standard(proto: "encrypted_content"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -874,7 +878,8 @@ extension Proto_ChannelMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
       case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
       case 2: try decoder.decodeRepeatedBytesField(value: &self.parents)
       case 3: try decoder.decodeSingularUInt64Field(value: &self.height)
-      case 4: try decoder.decodeSingularBytesField(value: &self.encryptedContent)
+      case 4: try decoder.decodeSingularBytesField(value: &self.nonce)
+      case 5: try decoder.decodeSingularBytesField(value: &self.encryptedContent)
       default: break
       }
     }
@@ -890,8 +895,11 @@ extension Proto_ChannelMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     if self.height != 0 {
       try visitor.visitSingularUInt64Field(value: self.height, fieldNumber: 3)
     }
+    if !self.nonce.isEmpty {
+      try visitor.visitSingularBytesField(value: self.nonce, fieldNumber: 4)
+    }
     if !self.encryptedContent.isEmpty {
-      try visitor.visitSingularBytesField(value: self.encryptedContent, fieldNumber: 4)
+      try visitor.visitSingularBytesField(value: self.encryptedContent, fieldNumber: 5)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -900,6 +908,7 @@ extension Proto_ChannelMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     if lhs.channelID != rhs.channelID {return false}
     if lhs.parents != rhs.parents {return false}
     if lhs.height != rhs.height {return false}
+    if lhs.nonce != rhs.nonce {return false}
     if lhs.encryptedContent != rhs.encryptedContent {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
