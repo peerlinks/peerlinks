@@ -51,10 +51,14 @@ message ChannelMessage {
     string text = 1;
   }
 
+  message Merge {
+  }
+
   message Body {
     oneof body {
       Root root = 1;
       Text text = 2;
+      Merge merge = 3;
     }
   }
 
@@ -111,9 +115,6 @@ message QueryResponse {
 
 message Error {
   string reason = 1;
-}
-
-message Subscribe {
 }
 
 message Packet {

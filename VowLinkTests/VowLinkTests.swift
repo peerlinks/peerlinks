@@ -254,12 +254,8 @@ class VowLinkTests: XCTestCase {
         let _ = try! channelB.post(message: Channel.text("hello idA"), by: idB)
         let _ = try! channelB.post(message: Channel.text("how are you?"), by: idB)
         
-        channelA.sync(with: channelB)
-        
-        // TODO(indutny): sync without merge
-        let _ = try! channelA.post(message: Channel.text("merge"), by: idA)
-        
-        channelB.sync(with: channelA)
+        channelA.sync(with: channelB, andIdentity: idA)
+        channelB.sync(with: channelA, andIdentity: idB)
         
         XCTAssertEqual(messages(in: channelA), messages(in: channelB))
     }

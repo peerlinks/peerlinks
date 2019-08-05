@@ -239,17 +239,17 @@ class Channel: RemoteChannel {
     
     // MARK: Sync
     
-    func sync(with remote: RemoteChannel) {
+    func sync(with remote: RemoteChannel, andIdentity identity: Identity) {
         let minHeight: UInt64 = leafs.reduce(UInt64.max) { (minHeight, leaf) -> UInt64 in
             return min(minHeight, leaf.height)
         }
         remote.query(withMinHeight: minHeight, limit: Channel.SYNC_LIMIT) {
             (response: QueryResponse) in
-            self.handle(syncResponse: response, for: remote)
+            self.handle(queryResponse: response, from: remote, andIdentity: identity)
         }
     }
     
-    func handle(syncResponse response: QueryResponse, for remote: RemoteChannel) {
+    func handle(queryResponse response: QueryResponse, from remote: RemoteChannel, andIdentity identity: Identity) {
         if response.messages.count > Channel.SYNC_LIMIT {
             remote.close(withError: "message count overflow")
             return
@@ -285,9 +285,19 @@ class Channel: RemoteChannel {
         if let cursor = cursor {
             remote.query(withCursor: cursor, limit: Channel.SYNC_LIMIT) {
                 (response: QueryResponse) in
-                self.handle(syncResponse: response, for: remote)
+                self.handle(queryResponse: response, from: remote, andIdentity: identity)
+            }
+            return
+        } else if leafs.count > 1 {
+            debugPrint("[channel] \(leafs.count) leafs after sync, merging")
+            do {
+                let _ = try post(message: Channel.merge(), by: identity)
+            } catch {
+                debugPrint("[channel] merge failed due to error \(error)")
             }
         }
+        
+        debugPrint("[channel] sync complete")
     }
     
     func query(withMinHeight minHeight: UInt64, andLimit limit: Int) throws -> QueryResponse {
@@ -386,15 +396,21 @@ class Channel: RemoteChannel {
     
     // MARK: Helpers
     
+    static func root() -> Proto_ChannelMessage.Body {
+        return Proto_ChannelMessage.Body.with({ (body) in
+            body.root = Proto_ChannelMessage.Root()
+        })
+    }
+    
     static func text(_ message: String) -> Proto_ChannelMessage.Body {
         return Proto_ChannelMessage.Body.with { (body) in
             body.text.text = message
         }
     }
     
-    static func root() -> Proto_ChannelMessage.Body {
+    static func merge() -> Proto_ChannelMessage.Body {
         return Proto_ChannelMessage.Body.with({ (body) in
-            body.root = Proto_ChannelMessage.Root()
+            body.merge = Proto_ChannelMessage.Merge()
         })
     }
     
