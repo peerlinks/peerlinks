@@ -345,8 +345,10 @@ the messages.
 
 WIP
 
-DHT uses a form of rendezvous hashing.
-`content_hash = HASH(peer_id ++ channel_id, 'vowlink-dht')`
+DHT uses a form of rendezvous hashing:
+```
+content_hash = HASH(peer_id ++ channel_id, 'vowlink-dht')
+```
 is computed for each peer and message. `content_hash` is interpreted as a
 network order integer. `DHT_SCALE = 7` peers with lowest `content_hash` receive
 the message. Even if the message is transferred to other peer, the copy of it
