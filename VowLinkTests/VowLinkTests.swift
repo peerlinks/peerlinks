@@ -119,7 +119,7 @@ class VowLinkTests: XCTestCase {
         XCTAssert(try! decrypted.verify(withChannel: channelA))
         XCTAssert(!(try! decrypted.verify(withChannel: channelB)))
         
-        guard case .decrypted(let decryptedContent) = decrypted.content else {
+        guard let decryptedContent = decrypted.decryptedContent else {
             XCTFail("Message not decrypted")
             return
         }
@@ -158,7 +158,7 @@ class VowLinkTests: XCTestCase {
         
         let decrypted = try! channelA.receive(encrypted: encrypted)
         
-        guard case .decrypted(let decryptedContent) = decrypted.content else {
+        guard let decryptedContent = decrypted.decryptedContent else {
             XCTFail("Message not decrypted")
             return
         }
@@ -221,5 +221,35 @@ class VowLinkTests: XCTestCase {
             default: XCTFail("Expected alternative root to fail")
             }
         }
+    }
+    
+    func testChannelSync() {
+        let idA = try! Identity(context: context, name: "test:a")
+        let idB = try! Identity(context: context, name: "test:b")
+        
+        let channelA = try! Channel(idA)
+        let chain = Chain(context: context, links: [
+            try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
+        ])
+        
+        let channelB = try! Channel(context: context,
+                                    publicKey: channelA.publicKey,
+                                    name: channelA.name,
+                                    root: channelA.root,
+                                    chain: chain)
+        
+        let _ = try! channelA.post(message: Channel.text("hello idB"), by: idA)
+        let _ = try! channelB.post(message: Channel.text("hello idA"), by: idB)
+        let _ = try! channelB.post(message: Channel.text("how are you?"), by: idB)
+        
+        channelA.sync(with: channelB)
+        
+        func messages(channel: Channel) -> [String] {
+            return channel.messages.map({ (message) -> String in
+                return ""
+            })
+        }
+        
+        print("\(channelA.messages)")
     }
 }

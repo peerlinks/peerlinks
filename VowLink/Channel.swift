@@ -14,8 +14,8 @@ protocol ChannelDelegate : AnyObject {
 }
 
 protocol RemoteChannel {
-    func messages(withMinHeight minHeight: UInt64, limit: Int, andClosure: (Channel.QueryResponse) -> Void)
-    func messages(withCursor cursor: Bytes, limit: Int, andClosure: (Channel.QueryResponse) -> Void)
+    func query(withMinHeight minHeight: UInt64, limit: Int, andClosure closure: (Channel.QueryResponse) -> Void)
+    func query(withCursor cursor: Bytes, limit: Int, andClosure closure: (Channel.QueryResponse) -> Void)
     func close(withError message: String)
 }
 
@@ -29,7 +29,7 @@ enum ChannelError : Error {
     case invalidTimestamp(TimeInterval)
 }
 
-class Channel {
+class Channel: RemoteChannel {
     struct QueryResponse {
         let messages: [ChannelMessage]
         let forwardCursor: Bytes?
@@ -103,13 +103,9 @@ class Channel {
         // Only a temporary measure, we should be fine
         root = nil
         
-        let rootBody = Proto_ChannelMessage.Body.with { (body) in
-            body.root = Proto_ChannelMessage.Root()
-        }
-        
         let content = try identity.signContent(chain: chain,
                                                timestamp: NSDate().timeIntervalSince1970,
-                                               body: rootBody,
+                                               body: Channel.root(),
                                                parents: [],
                                                height: 0)
         let unencryptedRoot = try! ChannelMessage(context: context,
@@ -196,7 +192,7 @@ class Channel {
             throw ChannelError.invalidSignature
         }
         
-        guard case .decrypted(let content) = decrypted.content else {
+        guard let content = decrypted.decryptedContent else {
             fatalError("Unexpected content")
         }
         
@@ -212,7 +208,7 @@ class Channel {
                 throw ChannelError.parentNotFound(parentHash)
             }
             
-            guard case .decrypted(let parentContent) = parent.content else {
+            guard let parentContent = parent.decryptedContent else {
                 fatalError("Unexpected parent content")
             }
             
@@ -241,11 +237,13 @@ class Channel {
         return decrypted
     }
     
-    func sync(with remote: RemoteChannel) throws {
+    // MARK: Sync
+    
+    func sync(with remote: RemoteChannel) {
         let minHeight: UInt64 = leafs.reduce(UInt64.max) { (minHeight, leaf) -> UInt64 in
             return min(minHeight, leaf.height)
         }
-        remote.messages(withMinHeight: minHeight, limit: Channel.SYNC_LIMIT) {
+        remote.query(withMinHeight: minHeight, limit: Channel.SYNC_LIMIT) {
             (response: QueryResponse) in
             self.handle(syncResponse: response, for: remote)
         }
@@ -285,7 +283,7 @@ class Channel {
         }
         
         if let cursor = cursor {
-            remote.messages(withCursor: cursor, limit: Channel.SYNC_LIMIT) {
+            remote.query(withCursor: cursor, limit: Channel.SYNC_LIMIT) {
                 (response: QueryResponse) in
                 self.handle(syncResponse: response, for: remote)
             }
@@ -345,6 +343,8 @@ class Channel {
         return QueryResponse(messages: filtered, forwardCursor: forward, backwardCursor: backward)
     }
     
+    // MARK: Utils
+    
     private func computeLeafs() throws -> [ChannelMessage] {
         var parents = Set<Bytes>()
         for message in messages {
@@ -365,5 +365,35 @@ class Channel {
         }
         
         return result
+    }
+    
+    // MARK: Helpers
+    
+    static func text(_ message: String) -> Proto_ChannelMessage.Body {
+        return Proto_ChannelMessage.Body.with { (body) in
+            body.text.text = message
+        }
+    }
+    
+    static func root() -> Proto_ChannelMessage.Body {
+        return Proto_ChannelMessage.Body.with({ (body) in
+            body.root = Proto_ChannelMessage.Root()
+        })
+    }
+    
+    // MARK: RemoteChannel (mostly for testing)
+    
+    func query(withCursor cursor: Bytes, limit: Int, andClosure closure: (Channel.QueryResponse) -> Void) {
+        let response = try! query(withCursor: cursor, andLimit: limit)
+        closure(response)
+    }
+    
+    func query(withMinHeight minHeight: UInt64, limit: Int, andClosure closure: (Channel.QueryResponse) -> Void) {
+        let response = try! query(withMinHeight: minHeight, andLimit: limit)
+        closure(response)
+    }
+
+    func close(withError message: String) {
+        // no-op
     }
 }

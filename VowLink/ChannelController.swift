@@ -78,7 +78,7 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
         let cell = tableView.dequeueReusableCell(withIdentifier: "messageCell")!
         let message = channel.messages[indexPath.row]
         
-        guard case .decrypted(let content) = message.content else {
+        guard let content = message.decryptedContent else {
             cell.textLabel?.text = "<encrypted>"
             return cell
         }

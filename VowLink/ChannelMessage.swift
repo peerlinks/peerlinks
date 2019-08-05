@@ -44,6 +44,24 @@ class ChannelMessage {
         }
     }
     
+    var decryptedContent: Content? {
+        get {
+            if case .decrypted(let content) = content {
+                return content
+            }
+            return nil
+        }
+    }
+    
+    var encryptedContent: Bytes? {
+        get {
+            if case .encrypted(let content) = content {
+                return content
+            }
+            return nil
+        }
+    }
+    
     // Decrypted message for Encrypted message, or vice versa
     private var counterpart: ChannelMessage? = nil
     
@@ -77,7 +95,7 @@ class ChannelMessage {
     }
     
     func verify(withChannel channel: Channel) throws -> Bool {
-        guard case .decrypted(let content) = self.content else {
+        guard let content = decryptedContent else {
             return false
         }
         
@@ -96,7 +114,7 @@ class ChannelMessage {
     
     func encrypted(withChannel channel: Channel) throws -> ChannelMessage {
         // Already encrypted
-        if case .encrypted(_) = content {
+        if isEncrypted {
             return self
         }
 
@@ -125,7 +143,7 @@ class ChannelMessage {
     }
     
     func decrypted(withChannel channel: Channel) throws -> ChannelMessage {
-        guard case .encrypted(let encrypted) = content else {
+        guard let encrypted = encryptedContent else {
             // Already decrypted
             return self
         }
@@ -162,7 +180,7 @@ class ChannelMessage {
     }
     
     func toProto() -> Proto_ChannelMessage? {
-        guard case .encrypted(let encrypted) = content else {
+        guard let encrypted = encryptedContent else {
             return nil
         }
         
@@ -190,7 +208,7 @@ class ChannelMessage {
     }
     
     private func contentProto() -> Proto_ChannelMessage.Content? {
-        guard case .decrypted(let content) = self.content else {
+        guard let content = decryptedContent else {
             return nil
         }
         
@@ -205,7 +223,7 @@ class ChannelMessage {
     }
     
     private func tbsProto() -> Proto_ChannelMessage.Content.TBS? {
-        guard case .decrypted(let content) = self.content else {
+        guard let content = decryptedContent else {
             return nil
         }
         

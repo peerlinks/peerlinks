@@ -113,6 +113,9 @@ message Error {
   string reason = 1;
 }
 
+message Subscribe {
+}
+
 message Packet {
   oneof content {
     EncryptedInvite invite = 1;
