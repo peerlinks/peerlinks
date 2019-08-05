@@ -48,7 +48,9 @@ class InviteConfirmController : UITableViewController {
         do {
             let link = try id.issueLink(for: Bytes(request.trusteePubKey), andChannel: channel)
             
-            let chain = try channel.chain.appendedLink(link)
+            guard let chain = try id.chain(for: channel)?.appendedLink(link) else {
+                fatalError("no chain available for the channel \(channel!)")
+            }
             
             let encryptedInvite = try chain.encrypt(withPublicKey: Bytes(request.boxPubKey), andChannel: channel)
             

@@ -51,14 +51,10 @@ message ChannelMessage {
     string text = 1;
   }
 
-  message Merge {
-  }
-
   message Body {
     oneof body {
       Root root = 1;
       Text text = 2;
-      Merge merge = 3;
     }
   }
 
@@ -133,8 +129,15 @@ message Packet {
 //
 
 message Identity {
+  message ChannelChain {
+    bytes channel_id = 1;
+    repeated Link links = 2;
+  }
+
   bytes public_key = 1;
   bytes secret_key = 2;
+
+  repeated ChannelChain channel_chains = 3;
 }
 
 message Channel {
@@ -142,11 +145,9 @@ message Channel {
   string name = 2;
   ChannelMessage root = 3;
 
-  repeated Link chain = 4;
-
   // XXX(indutny): this is a temporary solution. Use Core Data like a real iOS
   // developer.
-  repeated ChannelMessage messages = 5;
+  repeated ChannelMessage messages = 4;
 }
 
 message ChannelList {

@@ -47,7 +47,7 @@ class VowLinkTests: XCTestCase {
         
         let keyPair = context.sodium.box.keyPair()!
 
-        let chain = try! channel.chain.appendedLink(link)
+        let chain = try! id.chain(for: channel)!.appendedLink(link)
         let invite = try! chain.encrypt(withPublicKey: Bytes(keyPair.publicKey), andChannel: channel)
         
         let decrypted = try! Chain(invite, withContext: context, publicKey: keyPair.publicKey, andSecretKey: keyPair.secretKey)
@@ -157,8 +157,9 @@ class VowLinkTests: XCTestCase {
         let channelCopy = try! Channel(context: context,
                                        publicKey: channelA.publicKey,
                                        name: channelA.name,
-                                       root: channelA.root,
-                                       chain: chain)
+                                       root: channelA.root)
+        
+        try! idB.addChain(chain, for: channelCopy)
         
         let root = channelA.leafs[0]
         let encryptedRoot = try! root.encrypted(withChannel: channelA)
@@ -247,15 +248,16 @@ class VowLinkTests: XCTestCase {
         let channelB = try! Channel(context: context,
                                     publicKey: channelA.publicKey,
                                     name: channelA.name,
-                                    root: channelA.root,
-                                    chain: chain)
+                                    root: channelA.root)
+        
+        try! idB.addChain(chain, for: channelB)
         
         let _ = try! channelA.post(message: Channel.text("hello idB"), by: idA)
         let _ = try! channelB.post(message: Channel.text("hello idA"), by: idB)
         let _ = try! channelB.post(message: Channel.text("how are you?"), by: idB)
         
-        channelA.sync(with: channelB, andIdentity: idA)
-        channelB.sync(with: channelA, andIdentity: idB)
+        channelA.sync(with: channelB)
+        channelB.sync(with: channelA)
         
         XCTAssertEqual(messages(in: channelA), messages(in: channelB))
     }

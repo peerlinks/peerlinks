@@ -115,4 +115,10 @@ class Chain {
         
         return Chain(context: context, links: links + [ link ])
     }
+    
+    func toProto() -> [Proto_Link] {
+        return links.map({ (link) -> Proto_Link in
+            return link.toProto()
+        })
+    }
 }

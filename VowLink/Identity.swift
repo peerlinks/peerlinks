@@ -22,6 +22,7 @@ class Identity {
     let name: String
     private var secretKey: Bytes
     let publicKey: Bytes
+    var chains = [Bytes:Chain]()
     
     static let DEFAULT_EXPIRATION: TimeInterval = 99.0 * 24.0 * 3600.0 // 99 days
     
@@ -37,6 +38,12 @@ class Identity {
             
             secretKey = Bytes(id.secretKey)
             publicKey = Bytes(id.publicKey)
+            for chain in id.channelChains {
+                let links = chain.links.map({ (proto) -> Link in
+                    return Link(context: context, link: proto)
+                })
+                chains[Bytes(chain.channelID)] = Chain(context: context, links: links)
+            }
         } else {
             debugPrint("[identity] generating new keypair for \(name)")
             let keyPair = self.context.sodium.sign.keyPair()!
@@ -55,6 +62,13 @@ class Identity {
         return Proto_Identity.with { (id) in
             id.secretKey = Data(self.secretKey)
             id.publicKey = Data(self.publicKey)
+            id.channelChains = chains.map({ (tuple) -> Proto_Identity.ChannelChain in
+                let (key: key, value: value) = tuple
+                return Proto_Identity.ChannelChain.with({ (chain) in
+                    chain.channelID = Data(key)
+                    chain.links = value.toProto()
+                })
+            })
         }
     }
     
@@ -62,6 +76,8 @@ class Identity {
         let data = try toProto().serializedData()
         try self.context.keychain.set(data, key: "identity/" + name)
     }
+    
+    // MARK: Chains
     
     func issueLink(for trusteePubKey: Bytes,
                    andChannel channel: Channel,
@@ -85,6 +101,22 @@ class Identity {
         
         return Link(context: context, link: proto)
     }
+    
+    func chain(for channel: Channel) -> Chain? {
+        // Empty chain for self-channel
+        if context.sodium.utils.equals(channel.publicKey, publicKey) {
+            return Chain(context: context, links: [])
+        }
+        
+        return chains[channel.channelID]
+    }
+    
+    func addChain(_ chain: Chain, for channel: Channel) throws {
+        chains[channel.channelID] = chain
+        try save()
+    }
+    
+    // MARK: Channel content
     
     func signContent(chain: Chain,
                      timestamp: TimeInterval,

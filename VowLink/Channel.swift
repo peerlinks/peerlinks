@@ -20,6 +20,7 @@ protocol RemoteChannel {
 }
 
 enum ChannelError : Error {
+    case noChainFound(Identity)
     case rootMustBeEncrypted
     case incomingMessageNotEncrypted
     case invalidSignature
@@ -43,7 +44,6 @@ class Channel: RemoteChannel {
     // TODO(indutny): sort in a CRDT way
     var messages = [ChannelMessage]()
     var leafs = [ChannelMessage]()
-    var chain: Chain
     
     weak var delegate: ChannelDelegate? = nil
     
@@ -59,7 +59,7 @@ class Channel: RemoteChannel {
     static let FUTURE: TimeInterval = 10.0 // seconds
     static let SYNC_LIMIT: Int = 128 // messages per query
     
-    init(context: Context, publicKey: Bytes, name: String, root: ChannelMessage, chain: Chain) throws {
+    init(context: Context, publicKey: Bytes, name: String, root: ChannelMessage) throws {
         // NOTE: Makes using `channel.root.hash!` very easy to use
         if !root.isEncrypted {
             throw ChannelError.rootMustBeEncrypted
@@ -69,7 +69,6 @@ class Channel: RemoteChannel {
         self.publicKey = publicKey
         self.name = name
         self.root = root
-        self.chain = chain
         
         let decryptedRoot = try root.decrypted(withChannel: self)
         self.messages = [ decryptedRoot ]
@@ -77,14 +76,10 @@ class Channel: RemoteChannel {
     }
     
     convenience init(context: Context, proto: Proto_Channel) throws {
-        let links = proto.chain.map { (link) -> Link in
-            return Link(context: context, link: link)
-        }
-        try self.init(context: context,
+       try self.init(context: context,
                       publicKey: Bytes(proto.publicKey),
                       name: proto.name,
-                      root: try ChannelMessage(context: context, proto: proto.root),
-                      chain: Chain(context: context, links: links))
+                      root: try ChannelMessage(context: context, proto: proto.root))
         
         for protoMessage in proto.messages {
             let message = try ChannelMessage(context: context, proto: protoMessage)
@@ -98,12 +93,11 @@ class Channel: RemoteChannel {
         self.context = identity.context
         self.publicKey = identity.publicKey
         self.name = identity.name
-        self.chain = Chain(context: identity.context, links: [])
         
         // Only a temporary measure, we should be fine
         root = nil
         
-        let content = try identity.signContent(chain: chain,
+        let content = try identity.signContent(chain: Chain(context: context, links: []),
                                                timestamp: NSDate().timeIntervalSince1970,
                                                body: Channel.root(),
                                                parents: [],
@@ -132,9 +126,6 @@ class Channel: RemoteChannel {
                 let encrypted = try! message.encrypted(withChannel: self)
                 return encrypted.toProto()!
             })
-            channel.chain = chain.links.map({ (link) -> Proto_Link in
-                return link.toProto()
-            })
         })
     }
     
@@ -156,6 +147,10 @@ class Channel: RemoteChannel {
         let height = leafs.reduce(0) { (acc, leaf) -> UInt64 in
             return max(acc, leaf.height)
         } + 1
+        
+        guard let chain = identity.chain(for: self) else {
+            throw ChannelError.noChainFound(identity)
+        }
         
         let content = try identity.signContent(chain: chain,
                                                timestamp: NSDate().timeIntervalSince1970,
@@ -239,17 +234,17 @@ class Channel: RemoteChannel {
     
     // MARK: Sync
     
-    func sync(with remote: RemoteChannel, andIdentity identity: Identity) {
+    func sync(with remote: RemoteChannel) {
         let minHeight: UInt64 = leafs.reduce(UInt64.max) { (minHeight, leaf) -> UInt64 in
             return min(minHeight, leaf.height)
         }
         remote.query(withMinHeight: minHeight, limit: Channel.SYNC_LIMIT) {
             (response: QueryResponse) in
-            self.handle(queryResponse: response, from: remote, andIdentity: identity)
+            self.handle(queryResponse: response, from: remote)
         }
     }
     
-    func handle(queryResponse response: QueryResponse, from remote: RemoteChannel, andIdentity identity: Identity) {
+    func handle(queryResponse response: QueryResponse, from remote: RemoteChannel) {
         if response.messages.count > Channel.SYNC_LIMIT {
             remote.close(withError: "message count overflow")
             return
@@ -285,16 +280,9 @@ class Channel: RemoteChannel {
         if let cursor = cursor {
             remote.query(withCursor: cursor, limit: Channel.SYNC_LIMIT) {
                 (response: QueryResponse) in
-                self.handle(queryResponse: response, from: remote, andIdentity: identity)
+                self.handle(queryResponse: response, from: remote)
             }
             return
-        } else if leafs.count > 1 {
-            debugPrint("[channel] \(leafs.count) leafs after sync, merging")
-            do {
-                let _ = try post(message: Channel.merge(), by: identity)
-            } catch {
-                debugPrint("[channel] merge failed due to error \(error)")
-            }
         }
         
         debugPrint("[channel] sync complete")
@@ -406,12 +394,6 @@ class Channel: RemoteChannel {
         return Proto_ChannelMessage.Body.with { (body) in
             body.text.text = message
         }
-    }
-    
-    static func merge() -> Proto_ChannelMessage.Body {
-        return Proto_ChannelMessage.Body.with({ (body) in
-            body.merge = Proto_ChannelMessage.Merge()
-        })
     }
     
     // MARK: RemoteChannel (mostly for testing)

@@ -49,8 +49,9 @@ class ChainReceivedController : ViewController {
             let channel = try Channel(context: app.context,
                                       publicKey: publicKey,
                                       name: name,
-                                      root: root,
-                                      chain: chain)
+                                      root: root)
+            try app.identity!.addChain(chain, for: channel)
+        
             try app.channelList.add(channel)
         } catch {
             // TODO(indutny): display
