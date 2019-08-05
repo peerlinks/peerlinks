@@ -13,6 +13,12 @@ protocol ChannelDelegate : AnyObject {
     func channel(_ channel: Channel, postedMessage message: ChannelMessage)
 }
 
+protocol RemoteChannel {
+    func messages(withMinHeight minHeight: UInt64, limit: Int, andClosure: (Channel.QueryResponse) -> Void)
+    func messages(withCursor cursor: Bytes, limit: Int, andClosure: (Channel.QueryResponse) -> Void)
+    func close(withError message: String)
+}
+
 enum ChannelError : Error {
     case rootMustBeEncrypted
     case incomingMessageNotEncrypted
@@ -24,6 +30,12 @@ enum ChannelError : Error {
 }
 
 class Channel {
+    struct QueryResponse {
+        let messages: [ChannelMessage]
+        let forwardCursor: Bytes?
+        let backwardCursor: Bytes?
+    }
+
     let context: Context
     let publicKey: Bytes
     var name: String
@@ -45,6 +57,7 @@ class Channel {
     
     static let CHANNEL_ID_LENGTH = 32
     static let FUTURE: TimeInterval = 10.0 // seconds
+    static let SYNC_LIMIT: Int = 128 // messages per query
     
     init(context: Context, publicKey: Bytes, name: String, root: ChannelMessage, chain: Chain) throws {
         // NOTE: Makes using `channel.root.hash!` very easy to use
@@ -226,6 +239,110 @@ class Channel {
         self.delegate?.channel(self, postedMessage: encrypted)
         
         return decrypted
+    }
+    
+    func sync(with remote: RemoteChannel) throws {
+        let minHeight: UInt64 = leafs.reduce(UInt64.max) { (minHeight, leaf) -> UInt64 in
+            return min(minHeight, leaf.height)
+        }
+        remote.messages(withMinHeight: minHeight, limit: Channel.SYNC_LIMIT) {
+            (response: QueryResponse) in
+            self.handle(syncResponse: response, for: remote)
+        }
+    }
+    
+    func handle(syncResponse response: QueryResponse, for remote: RemoteChannel) {
+        if response.messages.count > Channel.SYNC_LIMIT {
+            remote.close(withError: "message count overflow")
+            return
+        }
+        
+        var missing: Bool = false
+        
+        // NOTE: messages are assumed to be ordered
+        for encrypted in response.messages {
+            do {
+                let _ = try self.receive(encrypted: encrypted)
+            } catch ChannelError.parentNotFound(_) {
+                missing = true
+            } catch {
+                remote.close(withError: "invalid message \(encrypted.hash!), error: \(error)")
+                return
+            }
+        }
+        
+        var cursor: Bytes? = nil
+        
+        if missing {
+            cursor = response.backwardCursor
+            
+            if cursor == nil {
+                remote.close(withError: "empty backward cursor when messages are missing")
+                return
+            }
+        } else {
+            cursor = response.forwardCursor
+        }
+        
+        if let cursor = cursor {
+            remote.messages(withCursor: cursor, limit: Channel.SYNC_LIMIT) {
+                (response: QueryResponse) in
+                self.handle(syncResponse: response, for: remote)
+            }
+        }
+    }
+    
+    func query(withMinHeight minHeight: UInt64, andLimit limit: Int) throws -> QueryResponse {
+        let enforcedLimit = min(limit, Channel.SYNC_LIMIT)
+
+        var filtered = [ChannelMessage]()
+        var backward: Bytes?
+        var forward: Bytes?
+        for message in messages {
+            let encrypted = try message.encrypted(withChannel: self)
+            
+            if message.height < minHeight {
+                backward = encrypted.hash!
+                continue
+            }
+            
+            if filtered.count == enforcedLimit {
+                forward = encrypted.hash!
+                break
+            }
+            
+            filtered.append(encrypted)
+        }
+        
+        return QueryResponse(messages: filtered, forwardCursor: forward, backwardCursor: backward)
+    }
+    
+    func query(withCursor cursor: Bytes, andLimit limit: Int) throws -> QueryResponse {
+        let enforcedLimit = min(limit, Channel.SYNC_LIMIT)
+        
+        var filtered = [ChannelMessage]()
+        var backward: Bytes?
+        var forward: Bytes?
+        var found = false
+        for message in messages {
+            let encrypted = try message.encrypted(withChannel: self)
+
+            if !found && !context.sodium.utils.equals(encrypted.hash!, cursor) {
+                backward = encrypted.hash!
+                continue
+            }
+            
+            found = true
+            
+            if filtered.count == enforcedLimit {
+                forward = encrypted.hash!
+                break
+            }
+            
+            filtered.append(encrypted)
+        }
+        
+        return QueryResponse(messages: filtered, forwardCursor: forward, backwardCursor: backward)
     }
     
     private func computeLeafs() throws -> [ChannelMessage] {

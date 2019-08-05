@@ -119,35 +119,33 @@ The subscribers of the channel MUST verify the messages against full DAG:
 
 This DAG would make little sense without synchronization.
 
-Unencrypted `Sync` is sent in order to request the latest messages from the
+Unencrypted `Query` is sent in order to request the latest messages from the
 channel:
 ```proto
-message Sync {
+message Query {
   bytes channel_id = 1;
   uint64 min_height = 2;
-
-  // Optional, see re-issue below
-  uint64 max_height = 3;
+  bytes cursor = 3;
+  uint64 limit = 4;
 }
 ```
 
-It is trivial to filter the messages with `height` greater than
+It is trivial to filter the messages with `height` greater or equal to
 `sync.min_height`. Peers SHOULD send all messages with the `message.height`
-greater than `sync.min_height` and less or equal to `sync.max_height` (if
-it is present):
+greater or equal to `sync.min_height`. If `cursor` is present, the query MUST
+continue from it (the definition of cursor is dependent upon implementation
+of the remote peer, and MAY or MAY NOT be a message hash):
 ```proto
-message SyncResponse {
+message QueryResponse {
   bytes channel_id = 1;
   repeated ChannelMessage messages = 2;
+  bytes forward_cursor = 3;
+  bytes backward_cursor = 4;
 }
 ```
 
 It might be the case that either the recipient is an untrusted peer and has only
 disconnected portions of DAG, or that the DAG of sender and recipient has
-diverged at `message.height` less or equal to `sync.height`. The sender SHOULD
-repeatedly re-issue `Sync` with lowered `min_height` value by increments of 16
-and `max_height` equal to the last sent `sync.min_height` until the first common
-`message` is found.
-
-At any point ynchronization MUST be interrupted if the received
-`sync_response.messages` is empty.
+diverged at `message.height` less than `sync.height`. The sender SHOULD
+repeatedly re-issue `Query` cursor set either to `forward_cursor` or
+`backward_cursor` until all messages are received.

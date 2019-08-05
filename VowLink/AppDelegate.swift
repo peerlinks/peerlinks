@@ -177,6 +177,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
         }
 
         do {
+            // TODO(indutny): send to subscribers and use DHT otherwise
             try p2p.send(Proto_Packet.with({ (proto) in
                 proto.message = messageProto
             }))

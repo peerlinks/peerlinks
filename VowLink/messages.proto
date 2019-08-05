@@ -95,26 +95,32 @@ message ChannelMessage {
   bytes encrypted_content = 4;
 }
 
-message Sync {
+message Query {
   bytes channel_id = 1;
   uint64 min_height = 2;
-
-  // Optional, used when walking through past messages
-  uint64 max_height = 3;
+  bytes cursor = 3;
+  uint64 limit = 4;
 }
 
-message SyncResponse {
+message QueryResponse {
   bytes channel_id = 1;
   repeated ChannelMessage messages = 2;
+  bytes forward_cursor = 3;
+  bytes backward_cursor = 4;
+}
+
+message Error {
+  string reason = 1;
 }
 
 message Packet {
   oneof content {
     EncryptedInvite invite = 1;
     ChannelMessage message = 2;
+    Error error = 3;
 
-    Sync sync = 3;
-    SyncResponse sync_response = 4;
+    Query query = 4;
+    QueryResponse query_response = 5;
   }
 }
 
