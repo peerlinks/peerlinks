@@ -1,11 +1,3 @@
-//
-//  Chain.swift
-//  VowLink
-//
-//  Created by Indutnyy, Fedor on 8/4/19.
-//  Copyright © 2019 Indutnyy, Fedor. All rights reserved.
-//
-
 import Foundation
 import Sodium
 

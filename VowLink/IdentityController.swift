@@ -1,16 +1,9 @@
-//
-//  IdentityController.swift
-//  VowLink
-//
-//  Created by Indutnyy, Fedor on 7/30/19.
-//  Copyright © 2019 Indutnyy, Fedor. All rights reserved.
-//
-
 import UIKit
 
 class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     @IBOutlet weak var identityPicker: UIPickerView!
     @IBOutlet weak var selectButton: UIButton!
+    
     var app: AppDelegate!
     var context: Context!
     var identities = [Identity]()

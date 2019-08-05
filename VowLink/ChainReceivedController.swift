@@ -1,18 +1,10 @@
-//
-//  ChainLinkController.swift
-//  VowLink
-//
-//  Created by Indutnyy, Fedor on 8/1/19.
-//  Copyright © 2019 Indutnyy, Fedor. All rights reserved.
-//
-
 import UIKit
 
 enum ChainReceivedError : Error {
     case invalidInvite
 }
 
-class ChainReceivedController : ViewController {
+class ChainReceivedController : UIViewController {
     @IBOutlet weak var saveButton: UIBarButtonItem!
     @IBOutlet weak var descriptionField: UITextField!
     

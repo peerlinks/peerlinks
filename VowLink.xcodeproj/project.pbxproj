@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		4D23EDD322EECBE4003A9C20 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EDD222EECBE4003A9C20 /* AppDelegate.swift */; };
-		4D23EDD522EECBE4003A9C20 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EDD422EECBE4003A9C20 /* ViewController.swift */; };
 		4D23EDD822EECBE5003A9C20 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4D23EDD622EECBE5003A9C20 /* Main.storyboard */; };
 		4D23EDDB22EECBE5003A9C20 /* VowLink.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EDD922EECBE5003A9C20 /* VowLink.xcdatamodeld */; };
 		4D23EDDD22EECBE5003A9C20 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4D23EDDC22EECBE5003A9C20 /* Assets.xcassets */; };
@@ -241,7 +240,6 @@
 /* Begin PBXFileReference section */
 		4D23EDCF22EECBE4003A9C20 /* VowLink.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VowLink.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D23EDD222EECBE4003A9C20 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		4D23EDD422EECBE4003A9C20 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		4D23EDD722EECBE5003A9C20 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4D23EDDA22EECBE5003A9C20 /* VowLink.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = VowLink.xcdatamodel; sourceTree = "<group>"; };
 		4D23EDDC22EECBE5003A9C20 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -350,7 +348,6 @@
 				4D23EEB922EF3517003A9C20 /* Peer.swift */,
 				4D23EE0322EECBFD003A9C20 /* PeerToPeer.swift */,
 				4D23EEBB22EF3A5E003A9C20 /* RateLimiter.swift */,
-				4D23EDD422EECBE4003A9C20 /* ViewController.swift */,
 				4D23EDDC22EECBE5003A9C20 /* Assets.xcassets */,
 				4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */,
 				4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */,
@@ -717,7 +714,6 @@
 				4D339E6A22F74DB900EABA71 /* Chain.swift in Sources */,
 				4D339E5822F31EC800EABA71 /* ChannelList.swift in Sources */,
 				4D339E6622F6402A00EABA71 /* ChannelController.swift in Sources */,
-				4D23EDD522EECBE4003A9C20 /* ViewController.swift in Sources */,
 				4D339E5A22F320F700EABA71 /* Channel.swift in Sources */,
 				4D339E5422F0F95800EABA71 /* InviteController.swift in Sources */,
 				4D339E5622F1938F00EABA71 /* InviteConfirmController.swift in Sources */,

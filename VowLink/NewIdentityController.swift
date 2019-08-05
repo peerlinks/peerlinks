@@ -1,11 +1,3 @@
-//
-//  NewIdentityController.swift
-//  VowLink
-//
-//  Created by Indutnyy, Fedor on 7/30/19.
-//  Copyright © 2019 Indutnyy, Fedor. All rights reserved.
-//
-
 import UIKit
 
 class NewIdentityController : UITableViewController {
