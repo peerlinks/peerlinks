@@ -30,6 +30,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     // TODO(indutny): consider reasonable limit
     static let MAX_PEERS = 32
+    static let RECONNECT_DELAY: TimeInterval = 1.0
     
     init(context: Context, serviceType: String) {
         self.context = context
@@ -155,9 +156,13 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         peer.delegate = nil
         
         // Try to reconnect if the peer is still around
-        // TODO(indutny): delay between reconnects?
-        if availablePeers.contains(peer.remoteID) {
-            browser(browser, foundPeer: peer.remoteID, withDiscoveryInfo: nil)
+        if !availablePeers.contains(peer.remoteID) {
+            return
+        }
+        
+        Timer.scheduledTimer(withTimeInterval: PeerToPeer.RECONNECT_DELAY,
+              repeats: false) { (_) in
+            self.browser(self.browser, foundPeer: peer.remoteID, withDiscoveryInfo: nil)
         }
     }
     
