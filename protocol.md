@@ -154,7 +154,6 @@ message ChannelMessage {
   // Encryption nonce for Sodium
   bytes nonce = 4;
 
-  // NOTE: encryption key = HASH(channelPubKey, 'vowlink-symmetric')
   bytes encrypted_content = 5;
 }
 ```
@@ -166,6 +165,13 @@ each message except for the root MUST have one or more parents.
 `message` might be used as a parent for some future message. Thus messages form
 a directed graph with no cycles (merges are possible, but just as in [git][]
 they are not cycles because of edge directions).
+
+The hash of the message is computed as:
+```
+hash = HASH(Content)[:32]
+```
+
+Maximum text length in `Text` is `256` UTF-8 characters and MUST be enforced.
 
 `message.height` is a number of edges between the `message` and the
 `channel.root`. `channel.root` naturally MUST have `height = 0`, and in general
