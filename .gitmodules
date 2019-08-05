@@ -1,9 +1,9 @@
 [submodule "deps/Sodium"]
 	path = deps/Sodium
-	url = git@github.com:jedisct1/swift-sodium.git
+	url = https://github.com/jedisct1/swift-sodium
 [submodule "deps/SwiftProtobuf"]
 	path = deps/SwiftProtobuf
-	url = git@github.com:apple/swift-protobuf.git
+	url = https://github.com/apple/swift-protobuf
 [submodule "deps/KeychainAccess"]
 	path = deps/KeychainAccess
-	url = git@github.com:kishikawakatsumi/KeychainAccess.git
+	url = https://github.com/kishikawakatsumi/KeychainAccess
