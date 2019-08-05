@@ -11,7 +11,7 @@ import Sodium
 @testable import VowLink
 
 class VowLinkTests: XCTestCase {
-    let context = Context()
+    let context = Context(service: "com.indutny.vowlink.test")
 
     override func setUp() {
         try! context.keychain.removeAll()

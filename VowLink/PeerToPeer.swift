@@ -101,58 +101,50 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     }
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
-        DispatchQueue.main.async {
-            if self.peers[peerID] != nil || peerID == self.localID {
-                debugPrint("[p2p] declining invitation from \(peerID.displayName)")
-                invitationHandler(false, nil)
-                return
-            }
-            
-            if self.peers.count > PeerToPeer.MAX_PEERS {
-                debugPrint("[p2p] declining invitation from \(peerID.displayName) due to max peers limit")
-                invitationHandler(false, nil)
-                return
-            }
-            
-            debugPrint("[p2p] accepting invitation from \(peerID.displayName)")
-            let peer = Peer(context: self.context, localID: self.localID, remoteID: peerID)
-            peer.delegate = self
-            self.peers[peer.remoteID] = peer
-            
-            invitationHandler(true, peer.session)
+        if peers[peerID] != nil || peerID == localID {
+            debugPrint("[p2p] declining invitation from \(peerID.displayName)")
+            invitationHandler(false, nil)
+            return
         }
+        
+        if peers.count > PeerToPeer.MAX_PEERS {
+            debugPrint("[p2p] declining invitation from \(peerID.displayName) due to max peers limit")
+            invitationHandler(false, nil)
+            return
+        }
+        
+        debugPrint("[p2p] accepting invitation from \(peerID.displayName)")
+        let peer = Peer(context: self.context, localID: localID, remoteID: peerID)
+        peer.delegate = self
+        peers[peer.remoteID] = peer
+        
+        invitationHandler(true, peer.session)
     }
     
     // MARK: Browser
     
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
-        DispatchQueue.main.async {
-            debugPrint("[p2p] lost peer \(peerID.displayName)")
-            self.availablePeers.remove(peerID)
-        }
+        debugPrint("[p2p] lost peer \(peerID.displayName)")
+        self.availablePeers.remove(peerID)
     }
     
     func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error) {
-        DispatchQueue.main.async {
-            debugPrint("[p2p] did not start due to error \(error), retrying...")
-            browser.startBrowsingForPeers()
-        }
+        debugPrint("[p2p] did not start due to error \(error), retrying...")
+        browser.startBrowsingForPeers()
     }
     
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
-        DispatchQueue.main.async {
-            debugPrint("[p2p] found peer \(peerID.displayName) with info \(String(describing: info))")
-            self.availablePeers.insert(peerID)
-            
-            if peerID.displayName <= self.localID.displayName {
-                debugPrint("[p2p] waiting to be invited by peer \(peerID.displayName) into session")
-                return
-            }
+        debugPrint("[p2p] found peer \(peerID.displayName) with info \(String(describing: info))")
+        self.availablePeers.insert(peerID)
+        
+        if peerID.displayName <= self.localID.displayName {
+            debugPrint("[p2p] waiting to be invited by peer \(peerID.displayName) into session")
+            return
+        }
 
-            if let peer = self.connect(to: peerID) {
-                debugPrint("[p2p] inviting peer \(peerID.displayName) into session")
-                browser.invitePeer(peerID, to: peer.session, withContext: nil, timeout: 300.0)
-            }
+        if let peer = self.connect(to: peerID) {
+            debugPrint("[p2p] inviting peer \(peerID.displayName) into session")
+            browser.invitePeer(peerID, to: peer.session, withContext: nil, timeout: 300.0)
         }
     }
     

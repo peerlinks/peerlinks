@@ -112,20 +112,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
     // MARK: Peer to Peer
 
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer) {
-        debugPrint("[app] got packet \(packet) from peer \(peer)")
-        
-        switch packet.content {
-        case .some(.invite(let encryptedInvite)):
-            receive(encryptedInvite: encryptedInvite)
-            break
+        DispatchQueue.main.async {
+            debugPrint("[app] got packet \(packet) from peer \(peer)")
             
-        case .some(.message(let message)):
-            receive(encryptedMessage: message)
-            break
-            
-        default:
-            debugPrint("[app] unhandled packet \(packet)")
-            break
+            switch packet.content {
+            case .some(.invite(let encryptedInvite)):
+                self.receive(encryptedInvite: encryptedInvite)
+                break
+                
+            case .some(.message(let message)):
+                self.receive(encryptedMessage: message)
+                break
+                
+            default:
+                debugPrint("[app] unhandled packet \(packet)")
+                break
+            }
         }
     }
     

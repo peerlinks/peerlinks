@@ -103,53 +103,49 @@ class Peer: NSObject, MCSessionDelegate {
     // MARK: Session
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-        DispatchQueue.main.async {
-            debugPrint("[peer] received from \(peerID.displayName) data \(data)")
-            
-            do {
-                guard let packet = try self.receivePacket(data: data) else {
-                    debugPrint("[peer] reached rate limit or hello packet")
-                    return
-                }
-                
-                debugPrint("[peer] packet \(packet)")
-                
-                self.delegate?.peer(self, receivedPacket: packet)
-            } catch  {
-                debugPrint("[peer] parsing error \(error)")
-                session.disconnect()
+        debugPrint("[peer] received from \(peerID.displayName) data \(data)")
+        
+        do {
+            guard let packet = try receivePacket(data: data) else {
+                debugPrint("[peer] reached rate limit or hello packet")
+                return
             }
+            
+            debugPrint("[peer] packet \(packet)")
+            
+            delegate?.peer(self, receivedPacket: packet)
+        } catch  {
+            debugPrint("[peer] parsing error \(error)")
+            session.disconnect()
         }
     }
     
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        DispatchQueue.main.async {
-            switch state {
-            case .connecting:
-                debugPrint("[peer] connecting to \(peerID.displayName)")
-                return
-            case .notConnected:
-                debugPrint("[peer] disconnected from \(peerID.displayName)")
-                self.delegate?.peerDisconnected(self)
-                return
-            case .connected:
-                debugPrint("[peer] connected to \(peerID.displayName)")
-                
-                self.delegate?.peerConnected(self)
-                break
-            default:
-                debugPrint("[peer] unknown state transition for \(peerID.displayName)")
-                return
-            }
+        switch state {
+        case .connecting:
+            debugPrint("[peer] connecting to \(peerID.displayName)")
+            return
+        case .notConnected:
+            debugPrint("[peer] disconnected from \(peerID.displayName)")
+            delegate?.peerDisconnected(self)
+            return
+        case .connected:
+            debugPrint("[peer] connected to \(peerID.displayName)")
+            
+            delegate?.peerConnected(self)
+            break
+        default:
+            debugPrint("[peer] unknown state transition for \(peerID.displayName)")
+            return
+        }
 
-            do {
-                try self.sendHello()
-            } catch {
-                debugPrint("[peer] failed to send hello to \(peerID.displayName) due to error \(error)")
-                session.disconnect()
-                
-                self.delegate?.peerDisconnected(self)
-            }
+        do {
+            try sendHello()
+        } catch {
+            debugPrint("[peer] failed to send hello to \(peerID.displayName) due to error \(error)")
+            session.disconnect()
+            
+            delegate?.peerDisconnected(self)
         }
     }
     

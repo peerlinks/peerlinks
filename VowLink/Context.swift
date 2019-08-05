@@ -12,6 +12,10 @@ import KeychainAccess
 
 class Context {
     let sodium = Sodium()
-    let keychain = Keychain(service: "com.indutny.vowlink")
-        .synchronizable(true)
+    let keychain: Keychain
+    
+    init(service: String = "com.indutny.vowlink") {
+        keychain = Keychain(service: service)
+            .synchronizable(true)
+    }
 }
