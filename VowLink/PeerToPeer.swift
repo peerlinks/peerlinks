@@ -15,10 +15,6 @@ protocol PeerToPeerDelegate: AnyObject {
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer)
 }
 
-// TODO(indutny): connect randomly to peers. We should support at least a hundred of peers that are nearby.
-// Connecting to all of them is not only unreasonable, but likely is not going to work: 100 * 101 / 2 = 5050 connections!
-// It might be best to select 8 peers either randomly, or using some form of rendezvous hashing and work with them.
-// Maybe even rotate the peers from time to time.
 class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, PeerDelegate {
     let context: Context
     let localID: MCPeerID
