@@ -88,7 +88,7 @@ class Channel: RemoteChannel {
         
         for protoMessage in proto.messages {
             let message = try ChannelMessage(context: context, proto: protoMessage)
-            messages.append(try! message.decrypted(withChannel: self))
+            try self.append(try message.decrypted(withChannel: self))
         }
         
         leafs = try computeLeafs()
@@ -115,7 +115,7 @@ class Channel: RemoteChannel {
         let encryptedRoot = try unencryptedRoot.encrypted(withChannel: self)
         
         root = encryptedRoot
-        messages.append(unencryptedRoot)
+        try self.append(unencryptedRoot)
         
         leafs = try computeLeafs()
     }
@@ -172,7 +172,7 @@ class Channel: RemoteChannel {
         let encrypted = try decrypted.encrypted(withChannel: self)
         
         self.leafs = [ decrypted ]
-        self.messages.append(decrypted)
+        try self.append(decrypted)
         
         self.delegate?.channel(self, postedMessage: encrypted)
         
@@ -229,7 +229,7 @@ class Channel: RemoteChannel {
             return decrypted
         }
         
-        self.messages.append(decrypted)
+        try self.append(decrypted)
         self.leafs = try computeLeafs()
         
         self.delegate?.channel(self, postedMessage: encrypted)
@@ -365,6 +365,23 @@ class Channel: RemoteChannel {
         }
         
         return result
+    }
+    
+    private func append(_ message: ChannelMessage) throws {
+        self.messages.append(try message.decrypted(withChannel: self))
+        try self.messages.sort { (a, b) -> Bool in
+            if a.height < b.height {
+                return true
+            } else if a.height > b.height {
+                return false
+            }
+
+            // TODO(indutny): cache hashes in the storage, perhaps?
+            let encryptedA = try a.encrypted(withChannel: self)
+            let encryptedB = try b.encrypted(withChannel: self)
+            
+            return self.context.sodium.utils.compare(encryptedA.hash!, encryptedB.hash!) == -1
+        }
     }
     
     // MARK: Helpers

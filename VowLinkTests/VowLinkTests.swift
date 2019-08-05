@@ -20,6 +20,18 @@ class VowLinkTests: XCTestCase {
     override func tearDown() {
         try! context.keychain.removeAll()
     }
+    
+    func messages(in channel: Channel) -> [String] {
+        return channel.messages.map({ (message) -> String in
+            guard let content = message.decryptedContent else {
+                return "<encrypted>"
+            }
+            
+            let authorKey = content.chain.leafKey(withChannel: channel)
+            let author = context.sodium.utils.bin2hex(authorKey)!.prefix(6)
+            return "\(author): \(content.body.text.text)"
+        })
+    }
 
     func testIdentity() {
         let id = try! Identity(context: context, name: "test:identity")
@@ -244,12 +256,11 @@ class VowLinkTests: XCTestCase {
         
         channelA.sync(with: channelB)
         
-        func messages(channel: Channel) -> [String] {
-            return channel.messages.map({ (message) -> String in
-                return ""
-            })
-        }
+        // TODO(indutny): sync without merge
+        let _ = try! channelA.post(message: Channel.text("merge"), by: idA)
         
-        print("\(channelA.messages)")
+        channelB.sync(with: channelA)
+        
+        XCTAssertEqual(messages(in: channelA), messages(in: channelB))
     }
 }
