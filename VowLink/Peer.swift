@@ -30,11 +30,14 @@ class Peer: NSObject, MCSessionDelegate {
     var hello: Proto_Hello?
     let nonce: Bytes
     
+    var subscriptions = Set<Bytes>()
+    
     weak var delegate: PeerDelegate?
 
     static let PROTOCOL_VERSION: Int32 = 1
     static let RATE_LIMIT: Int32 = 1000
     static let NONCE_LENGTH: Int = 32
+    static let MAX_SUBSCRIPTIONS: Int = 1000
     
     init(context: Context, localID: MCPeerID, remoteID: MCPeerID) {
         self.context = context
@@ -77,18 +80,22 @@ class Peer: NSObject, MCSessionDelegate {
             return nil
         }
         
-        return try Proto_Packet(serializedData: data)
-    }
-    
-    func sendHello() throws {
-        let hello = Proto_Hello.with({ (hello) in
-            hello.version = Peer.PROTOCOL_VERSION
-            hello.rateLimit = Peer.RATE_LIMIT
-            hello.nonce = Data(self.nonce)
-        })
+        let packet = try Proto_Packet(serializedData: data)
         
-        let data = try hello.serializedData()
-        try session.send(data, toPeers: [ remoteID ], with: .reliable)
+        switch packet.content {
+        case .some(.error(let proto)):
+            debugPrint("[peer] got remote error \(proto.reason)")
+            break
+        case .some(.subscribe(let proto)):
+            subscribe(to: Bytes(proto.channelID))
+            break
+        
+        default:
+            return packet
+        }
+        
+        // Internal packets handled above
+        return nil
     }
     
     func send(_ data: Data) throws -> Bool {
@@ -100,6 +107,41 @@ class Peer: NSObject, MCSessionDelegate {
         return true
     }
     
+    func destroy(reason: String) {
+        let packet = Proto_Packet.with { (packet) in
+            packet.error.reason = reason
+        }
+        if let data = try? packet.serializedData() {
+            let _ = try? send(data)
+        }
+        session.disconnect()
+    }
+    
+    private func sendHello() throws {
+        let hello = Proto_Hello.with({ (hello) in
+            hello.version = Peer.PROTOCOL_VERSION
+            hello.rateLimit = Peer.RATE_LIMIT
+            hello.nonce = Data(self.nonce)
+        })
+        
+        let data = try hello.serializedData()
+        try session.send(data, toPeers: [ remoteID ], with: .reliable)
+    }
+    
+    private func subscribe(to channelID: Bytes) {
+        if channelID.count != Channel.CHANNEL_ID_LENGTH {
+            debugPrint("[peer] received invalid channelID length in Subscribe")
+            destroy(reason: "Invalid channelID length in Subscribe")
+            return
+        }
+        
+        // Distribute subscription through peers
+        if subscriptions.count == Peer.MAX_SUBSCRIPTIONS {
+            subscriptions.remove(subscriptions.randomElement()!)
+        }
+        subscriptions.insert(channelID)
+    }
+    
     // MARK: Session
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
@@ -107,7 +149,7 @@ class Peer: NSObject, MCSessionDelegate {
         
         do {
             guard let packet = try receivePacket(data: data) else {
-                debugPrint("[peer] reached rate limit or hello packet")
+                debugPrint("[peer] ignoring internal packet")
                 return
             }
             

@@ -117,11 +117,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
             
             switch packet.content {
             case .some(.invite(let encryptedInvite)):
-                self.receive(encryptedInvite: encryptedInvite)
+                self.receive(encryptedInvite: encryptedInvite, from: peer)
                 break
                 
             case .some(.message(let message)):
-                self.receive(encryptedMessage: message)
+                self.receive(encryptedMessage: message, from: peer)
                 break
                 
             default:
@@ -131,7 +131,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
         }
     }
     
-    func receive(encryptedInvite proto: Proto_EncryptedInvite) {
+    func receive(encryptedInvite proto: Proto_EncryptedInvite, from peer: Peer) {
         guard let _ = self.identity else {
             debugPrint("[app] no identity available, ignoring invite")
             return
@@ -150,10 +150,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
             chainDelegate.chain(received: chain)
         } catch {
             debugPrint("[app] failed to decrypt invite due to error \(error)")
+            peer.destroy(reason: "failed to decrypt invite due to error \(error)")
         }
     }
     
-    func receive(encryptedMessage proto: Proto_ChannelMessage) {
+    func receive(encryptedMessage proto: Proto_ChannelMessage, from peer: Peer) {
         guard let channel = channelList.find(byChannelID: Bytes(proto.channelID)) else {
             debugPrint("[app] channel \(proto.channelID) is unknown")
             return
@@ -164,6 +165,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
             let _ = try channel.receive(encrypted: encrypted)
         } catch {
             debugPrint("[app] failed to create/receive ChannelMessage due to error \(error)")
+            peer.destroy(reason: "failed to create/receive message du to error \(error)")
             return
         }
         
