@@ -1,6 +1,6 @@
 # Protocol
 
-*Version 1*
+**DRAFT**
 
 ## Goals
 
