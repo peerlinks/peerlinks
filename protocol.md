@@ -336,6 +336,11 @@ h=0 | h=1       | h=2
     |  *        |
 ```
 
+The messages in channel MUST be sorted by increasing `height` and then by
+increasing `hash`. Thus the list of messages per-channel becomes a [CRDT][]
+list, and two fully synchronized peers MUST agree completely on the order of
+the messages.
+
 ## DHT
 
 WIP
@@ -363,13 +368,9 @@ storage is exhausted messages are evicted one-by-one until the required amount
 of storage is regained. Public pool SHOULD not evict messages unless needed.
 Public pool SHOULD persist messages between application restarts.
 
-Subscribed channels have to evict some messages on storage exhaustion as well.
-Each message is assigned a rank (defined below). The eviction removes only the
-messages that have the lowest rank and the oldest among the ones that stored
-until enough space is regained. Subscribed channels SHOULD persist messages
-between application restarts. The messages with the highest rank (channel
-messages) MUST not be removed under any circumstances as they provide
-mandatory channel information.
+There is no mechanism for evicting the messages from channels the user is
+subscribed too. However, in the future versions the channel operator MAY be able
+to issue a new channel root from time to time so that past DAGs may be evicted.
 
 ## Relays
 
@@ -387,3 +388,4 @@ Ideas:
 [MultipeerConnectivity]: https://developer.apple.com/documentation/multipeerconnectivity
 [git]: https://git-scm.com/
 [Public Key Infrastructure]: https://en.wikipedia.org/wiki/Public_key_infrastructure
+[CRDT]: https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type
