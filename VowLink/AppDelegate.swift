@@ -196,6 +196,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
     
     func receive(query proto: Proto_Query, from peer: Peer) {
         let channelID = Bytes(proto.channelID)
+        if channelID.count != Channel.CHANNEL_ID_LENGTH {
+            peer.destroy(reason: "Invalid channel id length in query")
+            return
+        }
+        
         guard let channel = channelList.find(byChannelID: channelID) else {
             debugPrint("[app] channel \(channelID) not found for query")
             return

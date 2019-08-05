@@ -29,9 +29,6 @@ struct Proto_Hello {
   /// maximum number of messages per hour
   var rateLimit: Int32 = 0
 
-  /// encryption nonce
-  var nonce: Data = SwiftProtobuf.Internal.emptyData
-
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -561,7 +558,6 @@ extension Proto_Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "version"),
     2: .standard(proto: "rate_limit"),
-    3: .same(proto: "nonce"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -569,7 +565,6 @@ extension Proto_Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
       switch fieldNumber {
       case 1: try decoder.decodeSingularInt32Field(value: &self.version)
       case 2: try decoder.decodeSingularInt32Field(value: &self.rateLimit)
-      case 3: try decoder.decodeSingularBytesField(value: &self.nonce)
       default: break
       }
     }
@@ -582,16 +577,12 @@ extension Proto_Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
     if self.rateLimit != 0 {
       try visitor.visitSingularInt32Field(value: self.rateLimit, fieldNumber: 2)
     }
-    if !self.nonce.isEmpty {
-      try visitor.visitSingularBytesField(value: self.nonce, fieldNumber: 3)
-    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Proto_Hello, rhs: Proto_Hello) -> Bool {
     if lhs.version != rhs.version {return false}
     if lhs.rateLimit != rhs.rateLimit {return false}
-    if lhs.nonce != rhs.nonce {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

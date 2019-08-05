@@ -26,6 +26,9 @@ protocol RemoteChannel {
 }
 
 enum ChannelError : Error {
+    case invalidPublicKeySize(Int)
+    case invalidChannelNameSize(Int)
+    
     case noChainFound(Identity)
     case rootMustBeEncrypted
     case incomingMessageNotEncrypted
@@ -48,7 +51,6 @@ class Channel: RemoteChannel {
     let publicKey: Bytes
     var name: String
     
-    // TODO(indutny): sort in a CRDT way
     var messages = [ChannelMessage]()
     var leafs = [ChannelMessage]()
     
@@ -73,6 +75,7 @@ class Channel: RemoteChannel {
     static let CHANNEL_ID_LENGTH = 32
     static let FUTURE: TimeInterval = 10.0 // seconds
     static let SYNC_LIMIT: Int = 128 // messages per query
+    static let MAX_NAME_LENGTH = 128
     
     init(context: Context, publicKey: Bytes, name: String, root: ChannelMessage) throws {
         // NOTE: Makes using `channel.root.hash!` very easy to use
@@ -88,6 +91,13 @@ class Channel: RemoteChannel {
         let decryptedRoot = try root.decrypted(withChannel: self)
         self.messages = [ decryptedRoot ]
         self.leafs = [ decryptedRoot ]
+        
+        if publicKey.count != context.sodium.sign.PublicKeyBytes {
+            throw ChannelError.invalidPublicKeySize(publicKey.count)
+        }
+        if name.count > Channel.MAX_NAME_LENGTH {
+            throw ChannelError.invalidChannelNameSize(name.count)
+        }
     }
     
     convenience init(context: Context, proto: Proto_Channel) throws {

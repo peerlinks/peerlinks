@@ -10,6 +10,9 @@ import Foundation
 import Sodium
 
 enum ChainError : Error {
+    case invalidPublicKeySize(Int)
+    case invalidChannelNameSize(Int)
+    
     case invalidPubKey
     case maximumChainLengthReached
     case invalidChain
@@ -37,13 +40,20 @@ class Chain {
     
         var links = [Link]()
         for protoLink in proto.links {
-            let link = Link(context: context, link: protoLink)
+            let link = try Link(context: context, link: protoLink)
             links.append(link)
         }
         self.links = links
         
+        // NOTE: This is somewhat redundant, but why not?
         if proto.channelPubKey.count != context.sodium.sign.PublicKeyBytes {
-            throw ChainError.invalidPubKey
+            throw ChainError.invalidPublicKeySize(proto.channelPubKey.count)
+        }
+        if proto.channelName.count > Channel.MAX_NAME_LENGTH {
+            throw ChainError.invalidChannelNameSize(proto.channelName.count)
+        }
+        if links.count > Chain.MAX_LENGTH {
+            throw ChainError.maximumChainLengthReached
         }
         
         self.channelPubKey = Bytes(proto.channelPubKey)

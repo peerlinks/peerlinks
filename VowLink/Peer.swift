@@ -12,7 +12,6 @@ import Sodium
 
 enum PeerError: Error {
     case invalidVersion(Int32)
-    case invalidNonceLength(Int)
 }
 
 protocol PeerDelegate : AnyObject {
@@ -29,7 +28,6 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     let incoming: RateLimiter
     var outgoing: RateLimiter?
     var hello: Proto_Hello?
-    let nonce: Bytes
     
     var subscriptions = Set<Bytes>()
     var queryResponses = [Bytes:(Channel.QueryResponse) -> Void]()
@@ -38,13 +36,11 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
 
     static let PROTOCOL_VERSION: Int32 = 1
     static let RATE_LIMIT: Int32 = 1000
-    static let NONCE_LENGTH: Int = 32
     static let MAX_SUBSCRIPTIONS: Int = 1000
     
     init(context: Context, localID: MCPeerID, remoteID: MCPeerID) {
         self.context = context
         self.remoteID = remoteID
-        nonce = self.context.sodium.randomBytes.buf(length: Peer.NONCE_LENGTH)!
         
         incoming = RateLimiter(limit: Peer.RATE_LIMIT)
         
@@ -74,6 +70,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         switch packet.content {
         case .some(.error(let proto)):
             debugPrint("[peer] got remote error \(proto.reason)")
+            session.disconnect()
             break
         case .some(.subscribe(let proto)):
             subscribe(to: Bytes(proto.channelID))
@@ -152,10 +149,6 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             throw PeerError.invalidVersion(hello.version)
         }
         
-        if hello.nonce.count != Peer.NONCE_LENGTH {
-            throw PeerError.invalidNonceLength(hello.nonce.count)
-        }
-        
         debugPrint("[peer] id=\(remoteID.displayName) got hello \(hello)")
         outgoing = RateLimiter(limit: hello.rateLimit)
         self.hello = hello
@@ -167,7 +160,6 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         let hello = Proto_Hello.with({ (hello) in
             hello.version = Peer.PROTOCOL_VERSION
             hello.rateLimit = Peer.RATE_LIMIT
-            hello.nonce = Data(self.nonce)
         })
         
         let data = try hello.serializedData()
@@ -192,6 +184,11 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     
     private func handle(queryResponse proto: Proto_QueryResponse) {
         let channelID = Bytes(proto.channelID)
+        if channelID.count != Channel.CHANNEL_ID_LENGTH {
+            destroy(reason: "Invalid channel ID size in query response")
+            return
+        }
+        
         guard let closure = queryResponses[channelID] else {
             debugPrint("[peer] unexpected query response, ignoring")
             return
@@ -217,10 +214,15 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             }
             
             queryResponses.removeValue(forKey: channelID)
-            closure(Channel.QueryResponse(messages: messages,
-                                          forwardCursor: forwardCursor,
-                                          backwardCursor: backwardCursor,
-                                          minLeafHeight: minLeafHeight))
+            
+            // NOTE: `closure` has to be invoked there because it interacts with UX
+            // TODO(indutny): reconsider doing it here
+            DispatchQueue.main.async {
+                closure(Channel.QueryResponse(messages: messages,
+                                              forwardCursor: forwardCursor,
+                                              backwardCursor: backwardCursor,
+                                              minLeafHeight: minLeafHeight))
+            }
         } catch {
             destroy(reason: "Failed to parse messages due to error \(error)")
         }

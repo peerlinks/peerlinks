@@ -49,6 +49,11 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
             body.text.text = text
         }
         
+        // TODO(indutny): UX
+        if text.count > ChannelMessage.MAX_TEXT_LENGTH {
+            return
+        }
+        
         do {
             let _ = try channel.post(message: body, by: app.identity!)
         } catch {

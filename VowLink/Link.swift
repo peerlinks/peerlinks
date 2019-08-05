@@ -11,6 +11,9 @@ import Sodium
 
 enum LinkError : Error {
     case decryptError
+    case invalidSignatureSize(Int)
+    case invalidChannelIDSize(Int)
+    case invalidPublicKeySize(Int)
 }
 
 class Link {
@@ -26,7 +29,16 @@ class Link {
         self.signature = signature
     }
     
-    convenience init(context: Context, link: Proto_Link) {
+    convenience init(context: Context, link: Proto_Link) throws {
+        if link.signature.count != context.sodium.sign.Bytes {
+            throw LinkError.invalidSignatureSize(link.signature.count)
+        }
+        if link.tbs.channelID.count != Channel.CHANNEL_ID_LENGTH {
+            throw LinkError.invalidChannelIDSize(link.tbs.channelID.count)
+        }
+        if link.tbs.trusteePubKey.count != context.sodium.sign.PublicKeyBytes {
+            throw LinkError.invalidPublicKeySize(link.tbs.trusteePubKey.count)
+        }
         self.init(context: context,
                   trusteePubKey: Bytes(link.tbs.trusteePubKey),
                   expiration: link.tbs.expiration,

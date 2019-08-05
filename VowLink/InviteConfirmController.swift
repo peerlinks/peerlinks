@@ -46,7 +46,7 @@ class InviteConfirmController : UITableViewController {
         guard let id = app.identity else {
             return
         }
-
+        
         // TODO(indutny): wait for peer to connect, or at least say that it is not connected
         
         do {

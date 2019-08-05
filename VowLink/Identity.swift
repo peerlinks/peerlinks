@@ -39,8 +39,8 @@ class Identity {
             secretKey = Bytes(id.secretKey)
             publicKey = Bytes(id.publicKey)
             for chain in id.channelChains {
-                let links = chain.links.map({ (proto) -> Link in
-                    return Link(context: context, link: proto)
+                let links = try chain.links.map({ (proto) -> Link in
+                    return try Link(context: context, link: proto)
                 })
                 chains[Bytes(chain.channelID)] = Chain(context: context, links: links)
             }
@@ -99,7 +99,7 @@ class Identity {
             link.signature = Data(signature)
         })
         
-        return Link(context: context, link: proto)
+        return try Link(context: context, link: proto)
     }
     
     func chain(for channel: Channel) -> Chain? {
