@@ -199,6 +199,11 @@ is greater than *30 days*. This mechanism ensures that the peers with expired
 links can at worst create messages in the past, and that after 30 days those
 messages will no longer need to be synchronized or persisted.
 
+NOTE: It is still possible for peers with valid chain to re-introduce those
+messages from the past into the current branch of DAG if they are out-of-sync
+with other peers. However, the mechanism above makes it unlikely (especially
+with introductions of https relays.)
+
 The subscribers of the channel MUST verify the messages against full DAG:
 
 * `height` MUST be checked
