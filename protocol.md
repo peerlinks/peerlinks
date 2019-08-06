@@ -186,6 +186,8 @@ and MUST be greater or equal to the maximum timestamp of the message parents.
 `content.timestamp` MUST NOT be too far in the future. Particular implementation
 SHOULD decide on the value of this leeway (5-10 seconds is recommended).
 
+_(TODO(indutny): timestamp is hard to enforce...)_
+
 The subscribers of the channel MUST verify the messages against full DAG:
 
 * `height` MUST be checked

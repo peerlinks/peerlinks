@@ -38,7 +38,7 @@
                                 <rect key="frame" x="0.0" y="298" width="375" height="216"/>
                             </pickerView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XAh-Kr-DZN">
-                                <rect key="frame" x="0.0" y="514" width="375" height="41"/>
+                                <rect key="frame" x="0.0" y="522" width="375" height="41"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <state key="normal" title="Select Identity"/>
                                 <connections>
@@ -58,11 +58,11 @@
                             <constraint firstItem="pb4-iV-tOR" firstAttribute="trailing" secondItem="uF3-Hj-fYb" secondAttribute="trailing" id="0dK-C2-KAM"/>
                             <constraint firstItem="XAh-Kr-DZN" firstAttribute="leading" secondItem="uF3-Hj-fYb" secondAttribute="leading" id="AHO-rd-HhS"/>
                             <constraint firstItem="uF3-Hj-fYb" firstAttribute="trailing" secondItem="JnH-et-7zN" secondAttribute="trailing" id="JXE-xM-kLq"/>
+                            <constraint firstItem="XAh-Kr-DZN" firstAttribute="top" secondItem="pb4-iV-tOR" secondAttribute="bottom" constant="8" id="Kr8-Nq-BZj"/>
                             <constraint firstItem="JnH-et-7zN" firstAttribute="bottom" secondItem="uF3-Hj-fYb" secondAttribute="bottom" id="MUp-eI-NfP"/>
                             <constraint firstItem="XAh-Kr-DZN" firstAttribute="trailing" secondItem="uF3-Hj-fYb" secondAttribute="trailing" id="OcS-sS-YUp"/>
                             <constraint firstItem="JnH-et-7zN" firstAttribute="leading" secondItem="uF3-Hj-fYb" secondAttribute="leading" id="USl-fv-9gb"/>
                             <constraint firstItem="pb4-iV-tOR" firstAttribute="centerY" secondItem="jaV-05-pdP" secondAttribute="centerY" id="ddA-C9-We7"/>
-                            <constraint firstItem="XAh-Kr-DZN" firstAttribute="top" secondItem="pb4-iV-tOR" secondAttribute="bottom" id="tV7-Ta-CBn"/>
                             <constraint firstItem="pb4-iV-tOR" firstAttribute="leading" secondItem="uF3-Hj-fYb" secondAttribute="leading" id="tha-4f-M9H"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="uF3-Hj-fYb"/>
