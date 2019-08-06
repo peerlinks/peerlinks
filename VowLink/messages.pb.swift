@@ -175,7 +175,6 @@ struct Proto_ChannelMessage {
     init() {}
   }
 
-  /// Merges are disallowed past 2 checkpoints
   struct Checkpoint {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for

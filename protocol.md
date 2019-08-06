@@ -209,7 +209,7 @@ min_checkpoint_time = min(c.timestamp for c in checkpoints)
 max_checkpoint_time = max(c.timestamp for c in checkpoints)
 delta_time = max_checkpoint_time - min_checkpoint_time
 ```
-`delta_time` is more than *one month*.
+`delta_time` is more than *30 days*.
 
 The subscribers of the channel MUST verify the messages against full DAG:
 
@@ -225,6 +225,12 @@ The subscribers of the channel MUST verify the messages against full DAG:
   small leeway has to be allowed. Several seconds of leniency should be enough
 * `timestamp` MUST be less than the minimum of `expiration` of links in the
   `chain`.
+
+### Merges
+
+Whenever new message is posted by a participant it SHOULD have all current DAG
+leafs that are not beyond 30 days checkpoint difference as its parents. Peers
+naturally merge different branches into a single new leaf.
 
 ### Link
 
@@ -367,10 +373,18 @@ h=0 | h=1       | h=2
     |  *        |
 ```
 
+IMPORTANT: leafs that are further than 30 day checkpoint difference MUST be
+ignored by `min_leaf_height` as they are ignored for merges.
+
 The messages in channel MUST be sorted by increasing `height` and then by
 increasing `hash`. Thus the list of messages per-channel becomes a [CRDT][]
 list, and two fully synchronized peers MUST agree completely on the order of
 the messages.
+
+The synchronization MUST stop if there are more than two checkpoints with:
+1. `height` greater or equal than currently synced message
+2. timestamp difference between the first and the last checkpoint greater than
+   30 days
 
 ## DHT
 

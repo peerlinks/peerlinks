@@ -45,6 +45,7 @@ class Channel: RemoteChannel {
     var name: String
     
     var messages = [ChannelMessage]()
+    var checkpoints = [ChannelMessage]()
     var leafs = [ChannelMessage]()
     
     weak var delegate: ChannelDelegate? = nil
