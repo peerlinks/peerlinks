@@ -185,7 +185,7 @@ and MUST be greater or equal to the maximum timestamp of the message parents.
 SHOULD decide on the value of this leeway (5-10 seconds is recommended).
 
 The validity of `content.timestamp` and the expiration of links MUST be enforced
-through checkpoint mechanism. Suppose that for a received `message`:
+through the following mechanism. Suppose that for a received `message`:
 ```
 min_timestamp = min(p.content.timestamp for p in message.parents)
 max_timestamp = max(p.content.timestamp for p in message.parents)
@@ -372,7 +372,7 @@ increasing `hash`. Thus the list of messages per-channel becomes a [CRDT][]
 list, and two fully synchronized peers MUST agree completely on the order of
 the messages.
 
-_(TODO(indutny): does checkpoint mechanism help here?)_
+_(TODO(indutny): does 30 day delta mechanism help here?)_
 
 ## DHT
 
@@ -403,7 +403,7 @@ storage is exhausted messages are evicted one-by-one until the required amount
 of storage is regained. Public pool SHOULD not evict messages unless needed.
 Public pool SHOULD persist messages between application restarts.
 
-_(TODO(indutny): does checkpoint mechanism help here?)_
+_(TODO(indutny): does 30 day delta mechanism help here?)_
 There is no mechanism for evicting the messages from channels the user is
 subscribed too. However, in the future versions the channel operator MAY be able
 to issue a new channel root from time to time so that past DAGs may be evicted.

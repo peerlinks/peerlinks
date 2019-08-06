@@ -31,8 +31,6 @@ enum ChannelError : Error {
     case invalidHeight(UInt64)
     case invalidTimestamp(TimeInterval)
     case parentTooFarInThePast
-    
-    case inconsistentCheckpoints(UInt64, UInt64)
 }
 
 class Channel: RemoteChannel {
@@ -72,7 +70,7 @@ class Channel: RemoteChannel {
     static let FUTURE: TimeInterval = 10.0 // seconds
     static let SYNC_LIMIT: Int = 128 // messages per query
     static let MAX_NAME_LENGTH = 128
-    static let MAX_CHECKPOINT_DELTA: TimeInterval = 30 * 24 * 3600; // 30 days
+    static let MAX_PARENT_DELTA: TimeInterval = 30 * 24 * 3600; // 30 days
     
     init(context: Context, publicKey: Bytes, name: String, root: ChannelMessage) throws {
         // NOTE: Makes using `channel.root.hash!` very easy to use
@@ -249,7 +247,7 @@ class Channel: RemoteChannel {
             throw ChannelError.invalidTimestamp(content.timestamp)
         }
         
-        if parentTimestamp - parentMinTimestamp > Channel.MAX_CHECKPOINT_DELTA {
+        if parentTimestamp - parentMinTimestamp > Channel.MAX_PARENT_DELTA {
             throw ChannelError.parentTooFarInThePast
         }
         
@@ -410,7 +408,7 @@ class Channel: RemoteChannel {
             }
         }
         
-        let threshold = maxTimestamp - Channel.MAX_CHECKPOINT_DELTA
+        let threshold = maxTimestamp - Channel.MAX_PARENT_DELTA
         return result.filter({ (leaf) -> Bool in
             return leaf.decryptedContent!.timestamp >= threshold
         })
