@@ -17,6 +17,11 @@ class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegat
         
         captureSession = AVCaptureSession()
         
+        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        previewLayer.frame = view.layer.bounds
+        previewLayer.videoGravity = .resizeAspectFill
+        view.layer.addSublayer(previewLayer)
+        
         // TODO(indutny): handle errors
         
         guard let device = AVCaptureDevice.default(for: .video) else {
@@ -45,11 +50,6 @@ class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegat
         output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
         output.metadataObjectTypes = [.qr]
         
-        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        previewLayer.frame = view.layer.bounds
-        previewLayer.videoGravity = .resizeAspectFill
-        view.layer.addSublayer(previewLayer)
-        
         captureSession.startRunning()
     }
     
@@ -60,7 +60,7 @@ class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegat
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        if captureSession?.isRunning == false {
+        if captureSession.isRunning == false {
             captureSession.startRunning()
         }
     }
@@ -68,7 +68,7 @@ class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegat
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        if captureSession?.isRunning == true {
+        if captureSession.isRunning == true {
             captureSession.stopRunning()
         }
     }
