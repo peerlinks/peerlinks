@@ -30,6 +30,7 @@ enum ChannelError : Error {
     case parentNotFound(Bytes)
     case invalidHeight(UInt64)
     case invalidTimestamp(TimeInterval)
+    case parentTooFarInThePast
     
     case inconsistentCheckpoints(UInt64, UInt64)
 }
@@ -47,8 +48,6 @@ class Channel: RemoteChannel {
     var name: String
     
     var messages = [ChannelMessage]()
-    // TODO(indutny): store checkpoints separately instead of loading them in runtime
-    var checkpoints = [ChannelMessage]()
     var leafs = [ChannelMessage]()
     
     weak var delegate: ChannelDelegate? = nil
@@ -225,6 +224,7 @@ class Channel: RemoteChannel {
         }
         
         var height: UInt64 = 0
+        var parentMinTimestamp: TimeInterval = 0.0
         var parentTimestamp: TimeInterval = 0.0
         for parentHash in decrypted.parents {
             guard let parent = self.message(byHash: parentHash) else {
@@ -236,6 +236,7 @@ class Channel: RemoteChannel {
             }
             
             height = max(height, parent.height + 1)
+            parentMinTimestamp = max(parentMinTimestamp, parentContent.timestamp)
             parentTimestamp = max(parentTimestamp, parentContent.timestamp)
         }
         if height != decrypted.height {
@@ -246,6 +247,10 @@ class Channel: RemoteChannel {
         let future = now + Channel.FUTURE
         if content.timestamp >= future || content.timestamp < parentTimestamp {
             throw ChannelError.invalidTimestamp(content.timestamp)
+        }
+        
+        if parentTimestamp - parentMinTimestamp > Channel.MAX_CHECKPOINT_DELTA {
+            throw ChannelError.parentTooFarInThePast
         }
         
         if let _ = message(byHash: encrypted.hash!) {
@@ -394,42 +399,25 @@ class Channel: RemoteChannel {
         
         var result = [ChannelMessage]()
         
+        var maxTimestamp: TimeInterval = 0.0
         for message in messages {
             // NOTE: This is actually cached
             let encrypted = try message.encrypted(withChannel: self)
             
             if !parents.contains(encrypted.hash!) {
                 result.append(message)
+                maxTimestamp = max(maxTimestamp, message.decryptedContent!.timestamp)
             }
         }
         
-        return result
-    }
-    
-    private func checkpointDelta() -> TimeInterval {
-        guard let first = checkpoints.first, let last = checkpoints.last else {
-            return 0.0
-        }
-        return last.decryptedContent!.timestamp - first.decryptedContent!.timestamp
+        let threshold = maxTimestamp - Channel.MAX_CHECKPOINT_DELTA
+        return result.filter({ (leaf) -> Bool in
+            return leaf.decryptedContent!.timestamp >= threshold
+        })
     }
     
     private func append(_ message: ChannelMessage) throws {
         let decrypted = try message.decrypted(withChannel: self)
-        let content = decrypted.decryptedContent!
-        
-        if case .some(.checkpoint(_)) = content.body.body {
-            if let last = checkpoints.last {
-                if last.height >= decrypted.height {
-                    throw ChannelError.inconsistentCheckpoints(last.height, decrypted.height)
-                }
-            }
-            checkpoints.append(decrypted)
-            
-            // Do not keep old checkpoints in memory
-            while checkpointDelta() > Channel.MAX_CHECKPOINT_DELTA {
-                checkpoints.removeFirst()
-            }
-        }
         
         self.messages.append(decrypted)
         try self.messages.sort { (a, b) -> Bool in

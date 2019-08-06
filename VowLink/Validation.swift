@@ -131,8 +131,6 @@ extension Proto_ChannelMessage.Body : Proto_Validation {
             try root.validate(context: context)
         case .some(.text(let text)):
             try text.validate(context: context)
-        case .some(.checkpoint(let checkpoint)):
-            try checkpoint.validate(context: context)
         case .none:
             break
         }
@@ -140,12 +138,6 @@ extension Proto_ChannelMessage.Body : Proto_Validation {
 }
 
 extension Proto_ChannelMessage.Root : Proto_Validation {
-    func validate(context: Context) throws {
-        // no-op
-    }
-}
-
-extension Proto_ChannelMessage.Checkpoint : Proto_Validation {
     func validate(context: Context) throws {
         // no-op
     }

@@ -48,9 +48,6 @@ message ChannelMessage {
   message Root {
   }
 
-  message Checkpoint {
-  }
-
   message Text {
     string text = 1;
   }
@@ -59,7 +56,6 @@ message ChannelMessage {
     oneof body {
       Root root = 1;
       Text text = 2;
-      Checkpoint checkpoint = 3;
     }
   }
 

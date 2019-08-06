@@ -110,9 +110,6 @@ message ChannelMessage {
   message Root {
   }
 
-  message Checkpoint {
-  }
-
   message Text {
     string text = 1;
   }
@@ -121,7 +118,6 @@ message ChannelMessage {
     oneof body {
       Root root = 1;
       Text text = 2;
-      Checkpoint checkpoint = 3;
     }
   }
 
@@ -194,22 +190,19 @@ and MUST be greater or equal to the maximum timestamp of the message parents.
 SHOULD decide on the value of this leeway (5-10 seconds is recommended).
 
 The validity of `content.timestamp` and the expiration of links MUST be enforced
-through checkpoint mechanism. Every day a channel owner (that has chain of
-length zero) posts a special `Checkpoint` message on a channel. Suppose that:
+through checkpoint mechanism. Suppose that for a received `message`:
 ```
-min_height = min(p.height for p in message.parents)
-max_height = max(p.height for p imessage.n parents)
+min_timestamp = min(p.content.timestamp for p in message.parents)
+max_timestamp = max(p.content.timestamp for p in message.parents)
 ```
-and `checkpoints` is a list of the checkpoint messages with height greater or
-equal to `min_height` and less or equal to `max_height`. Then the `message` MUST
-NOT be accepted and should be treated as INVALID (peer SHOULD issue an `Error`
-protocol packet and MUST close the connection to such peer) if for:
+The `message` MUST NOT be accepted and should be treated as INVALID (peer SHOULD
+issue an `Error` protocol packet and MUST close the connection to such peer) if:
 ```
-min_checkpoint_time = min(c.timestamp for c in checkpoints)
-max_checkpoint_time = max(c.timestamp for c in checkpoints)
-delta_time = max_checkpoint_time - min_checkpoint_time
+delta_time = max_timestamp - min_timestamp
 ```
-`delta_time` is more than *30 days*.
+is greater than *30 days*. This mechanism ensures that the peers with expired
+links can at worst create messages in the past, and that after 30 days those
+messages will no longer need to be synchronized or persisted.
 
 The subscribers of the channel MUST verify the messages against full DAG:
 
@@ -228,9 +221,12 @@ The subscribers of the channel MUST verify the messages against full DAG:
 
 ### Merges
 
-Whenever new message is posted by a participant it SHOULD have all current DAG
-leafs that are not beyond 30 days checkpoint difference as its parents. Peers
-naturally merge different branches into a single new leaf.
+Whenever new message is posted by a participant it SHOULD:
+1. Take all current DAG leafs
+2. Find the maximum of their timestamps
+3. Remove those that differ from the maximum timestamp by more than **30 days**.
+These leafs SHOULD be used as parents for the new message. Peers naturally merge
+different branches into a single new leaf.
 
 ### Link
 
@@ -373,18 +369,15 @@ h=0 | h=1       | h=2
     |  *        |
 ```
 
-IMPORTANT: leafs that are further than 30 day checkpoint difference MUST be
-ignored by `min_leaf_height` as they are ignored for merges.
+IMPORTANT: leafs that are further than 30 day from the latest (by timestamp)
+leaf MUST be ignored by `min_leaf_height` as they are ignored for merges.
 
 The messages in channel MUST be sorted by increasing `height` and then by
 increasing `hash`. Thus the list of messages per-channel becomes a [CRDT][]
 list, and two fully synchronized peers MUST agree completely on the order of
 the messages.
 
-The synchronization MUST stop if there are more than two checkpoints with:
-1. `height` greater or equal than currently synced message
-2. timestamp difference between the first and the last checkpoint greater than
-   30 days
+_(TODO(indutny): does checkpoint mechanism help here?)_
 
 ## DHT
 
@@ -415,6 +408,7 @@ storage is exhausted messages are evicted one-by-one until the required amount
 of storage is regained. Public pool SHOULD not evict messages unless needed.
 Public pool SHOULD persist messages between application restarts.
 
+_(TODO(indutny): does checkpoint mechanism help here?)_
 There is no mechanism for evicting the messages from channels the user is
 subscribed too. However, in the future versions the channel operator MAY be able
 to issue a new channel root from time to time so that past DAGs may be evicted.
