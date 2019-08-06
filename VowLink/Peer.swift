@@ -29,6 +29,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     static let PROTOCOL_VERSION: Int32 = 1
     static let RATE_LIMIT: Int32 = 1000
     static let MAX_SUBSCRIPTIONS: Int = 1000
+    static let MAX_PEER_ID_LENGTH: Int = 64
     
     init(context: Context, localID: MCPeerID, remoteID: MCPeerID) {
         self.context = context
@@ -58,18 +59,16 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         }
         
         let packet = try Proto_Packet(serializedData: data)
+        try packet.validate(context: context)
         
         switch packet.content {
         case .some(.error(let proto)):
             debugPrint("[peer] got remote error \(proto.reason)")
             session.disconnect()
-            break
         case .some(.subscribe(let proto)):
             subscribe(to: Bytes(proto.channelID))
-            break
         case .some(.queryResponse(let proto)):
             handle(queryResponse: proto)
-            break
         
         default:
             return packet
@@ -249,7 +248,6 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             return
         case .connected:
             debugPrint("[peer] connected to \(peerID.displayName)")
-            break
         default:
             debugPrint("[peer] unknown state transition for \(peerID.displayName)")
             return

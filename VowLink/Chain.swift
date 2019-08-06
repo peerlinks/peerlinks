@@ -2,9 +2,6 @@ import Foundation
 import Sodium
 
 enum ChainError : Error {
-    case invalidPublicKeySize(Int)
-    case invalidChannelNameSize(Int)
-    
     case invalidPubKey
     case maximumChainLengthReached
     case invalidChain
@@ -28,6 +25,8 @@ class Chain {
         
         let proto = try Proto_Invite(serializedData: Data(data))
         
+        try proto.validate(context: context)
+        
         self.context = context
     
         var links = [Link]()
@@ -36,17 +35,6 @@ class Chain {
             links.append(link)
         }
         self.links = links
-        
-        // NOTE: This is somewhat redundant, but why not?
-        if proto.channelPubKey.count != context.sodium.sign.PublicKeyBytes {
-            throw ChainError.invalidPublicKeySize(proto.channelPubKey.count)
-        }
-        if proto.channelName.count > Channel.MAX_NAME_LENGTH {
-            throw ChainError.invalidChannelNameSize(proto.channelName.count)
-        }
-        if links.count > Chain.MAX_LENGTH {
-            throw ChainError.maximumChainLengthReached
-        }
         
         self.channelPubKey = Bytes(proto.channelPubKey)
         self.channelRoot = try ChannelMessage(context: context, proto: proto.channelRoot)

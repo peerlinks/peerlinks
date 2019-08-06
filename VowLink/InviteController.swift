@@ -95,20 +95,27 @@ class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegat
             return
         }
 
-        if !value.starts(with: "vow-link://link-request/") {
+        if !value.starts(with: "vow-link://invite-request/") {
             return
         }
         
-        let index = value.index(value.startIndex, offsetBy: "vow-link://link-request/".count)
+        let index = value.index(value.startIndex, offsetBy: "vow-link://invite-request/".count)
         let b64 = String(value[index...])
         
         guard let binary = context.sodium.utils.base642bin(b64) else {
-            debugPrint("invalid base64 in scanned link request")
+            debugPrint("invalid base64 in scanned invite request")
             return
         }
         
         guard let request = try? Proto_InviteRequest(serializedData: Data(binary)) else {
-            debugPrint("invalid binary in scanned link request")
+            debugPrint("invalid binary in scanned invite request")
+            return
+        }
+        
+        do {
+            try request.validate(context: context)
+        } catch {
+            debugPrint("invalid invite request due to error \(error)")
             return
         }
         

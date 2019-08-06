@@ -128,19 +128,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
             switch packet.content {
             case .some(.invite(let encryptedInvite)):
                 self.receive(encryptedInvite: encryptedInvite, from: peer)
-                break
-                
             case .some(.message(let message)):
                 self.receive(encryptedMessage: message, from: peer)
-                break
-                
             case .some(.query(let query)):
                 self.receive(query: query, from: peer)
-                break
-                
             default:
                 debugPrint("[app] unhandled packet \(packet)")
-                break
             }
         }
     }

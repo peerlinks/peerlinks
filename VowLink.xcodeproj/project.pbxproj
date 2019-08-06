@@ -33,6 +33,7 @@
 		4D339E6622F6402A00EABA71 /* ChannelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E6522F6402A00EABA71 /* ChannelController.swift */; };
 		4D339E6822F6507100EABA71 /* ChannelMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E6722F6507100EABA71 /* ChannelMessage.swift */; };
 		4D339E6A22F74DB900EABA71 /* Chain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E6922F74DB900EABA71 /* Chain.swift */; };
+		4DD3FF6822F906E700FFA8BD /* Validation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD3FF6722F906E700FFA8BD /* Validation.swift */; };
 		4DF7CB0B22EF409900CD1C33 /* KeychainAccess.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF7CB0622EF409500CD1C33 /* KeychainAccess.framework */; };
 		4DF7CB0C22EF40C600CD1C33 /* KeychainAccess.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF7CB0622EF409500CD1C33 /* KeychainAccess.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4DF7CB0E22EF4C4500CD1C33 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7CB0D22EF4C4500CD1C33 /* Identity.swift */; };
@@ -268,6 +269,7 @@
 		4D339E6522F6402A00EABA71 /* ChannelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelController.swift; sourceTree = "<group>"; };
 		4D339E6722F6507100EABA71 /* ChannelMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelMessage.swift; sourceTree = "<group>"; };
 		4D339E6922F74DB900EABA71 /* Chain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chain.swift; sourceTree = "<group>"; };
+		4DD3FF6722F906E700FFA8BD /* Validation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Validation.swift; sourceTree = "<group>"; };
 		4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = KeychainAccess.xcodeproj; path = deps/KeychainAccess/Lib/KeychainAccess.xcodeproj; sourceTree = SOURCE_ROOT; };
 		4DF7CB0D22EF4C4500CD1C33 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
 		4DF7CB0F22EFB63F00CD1C33 /* Context.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Context.swift; sourceTree = "<group>"; };
@@ -348,6 +350,7 @@
 				4D23EEB922EF3517003A9C20 /* Peer.swift */,
 				4D23EE0322EECBFD003A9C20 /* PeerToPeer.swift */,
 				4D23EEBB22EF3A5E003A9C20 /* RateLimiter.swift */,
+				4DD3FF6722F906E700FFA8BD /* Validation.swift */,
 				4D23EDDC22EECBE5003A9C20 /* Assets.xcassets */,
 				4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */,
 				4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */,
@@ -710,6 +713,7 @@
 			files = (
 				4D23EE2D22EF1EBC003A9C20 /* messages.pb.swift in Sources */,
 				4DF7CB1822F0CD6A00CD1C33 /* IdentityController.swift in Sources */,
+				4DD3FF6822F906E700FFA8BD /* Validation.swift in Sources */,
 				4D339E6822F6507100EABA71 /* ChannelMessage.swift in Sources */,
 				4D339E6A22F74DB900EABA71 /* Chain.swift in Sources */,
 				4D339E5822F31EC800EABA71 /* ChannelList.swift in Sources */,

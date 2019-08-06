@@ -29,7 +29,7 @@ class ChainRequestController : UIViewController, ChainNotificationDelegate {
         }
         let binary = try! req.serializedData()
         let b64 = app.context.sodium.utils.bin2base64(Bytes(binary))!
-        let uri = "vow-link://link-request/\(b64)"
+        let uri = "vow-link://invite-request/\(b64)"
         
         let filter = CIFilter(name: "CIQRCodeGenerator")
         

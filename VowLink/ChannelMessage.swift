@@ -2,17 +2,9 @@ import Foundation
 import Sodium
 
 enum ChannelMessageError : Error {
-    case invalidSignatureSize(Int)
-    case invalidChainSize(Int)
-    case invalidNonceSize(Int)
-    case invalidChannelIDSize(Int)
-    case invalidMessageTextSize(Int)
-    case invalidParentSize(Int)
-    
     case failedToComputeEncryptionKey
     case encryptionFailed
     case decryptionFailed
-    case parentNotFound(Bytes)
 }
 
 class ChannelMessage {
@@ -88,19 +80,7 @@ class ChannelMessage {
     }
     
     convenience init(context: Context, proto: Proto_ChannelMessage) throws {
-        if proto.nonce.count != context.sodium.secretBox.NonceBytes {
-            throw ChannelMessageError.invalidNonceSize(proto.nonce.count)
-        }
-        
-        if proto.channelID.count != Channel.CHANNEL_ID_LENGTH {
-            throw ChannelMessageError.invalidChannelIDSize(proto.channelID.count)
-        }
-        
-        for parentHash in proto.parents {
-            if parentHash.count != ChannelMessage.MESSAGE_HASH_LENGTH {
-                throw ChannelMessageError.invalidParentSize(parentHash.count)
-            }
-        }
+        try proto.validate(context: context)
         
         try self.init(context: context,
                       channelID: Bytes(proto.channelID),
@@ -186,15 +166,7 @@ class ChannelMessage {
         }
         
         let contentProto = try Proto_ChannelMessage.Content(serializedData: Data(decrypted))
-        if contentProto.signature.count != context.sodium.sign.Bytes {
-            throw ChannelMessageError.invalidSignatureSize(contentProto.signature.count)
-        }
-        if contentProto.chain.count > Chain.MAX_LENGTH {
-            throw ChannelMessageError.invalidChainSize(contentProto.chain.count)
-        }
-        if contentProto.body.text.text.count > ChannelMessage.MAX_TEXT_LENGTH {
-            throw ChannelMessageError.invalidMessageTextSize(contentProto.body.text.text.count)
-        }
+        try contentProto.validate(context: context)
         
         let links = try contentProto.chain.map({ (link) -> Link in
             return try Link(context: self.context, link: link)
