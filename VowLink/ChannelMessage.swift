@@ -65,7 +65,7 @@ class ChannelMessage {
                                                     key: "vowlink-message".bytes,
                                                     outputLength: ChannelMessage.MESSAGE_HASH_LENGTH)!
     }()
-
+    
     static let MESSAGE_HASH_LENGTH = 32
     static let MAX_TEXT_LENGTH = 256
     
@@ -99,10 +99,10 @@ class ChannelMessage {
         
         guard let leafKey = try content.chain.verify(withChannel: channel,
                                                      andAgainstTimestamp: content.timestamp) else {
-            debugPrint("[channel-message] invalid chain for message \(String(describing: hash))")
-            return false
+                                                        debugPrint("[channel-message] invalid chain for message \(String(describing: hash))")
+                                                        return false
         }
-
+        
         if let publicKey = publicKey, !context.sodium.utils.equals(leafKey, publicKey) {
             debugPrint("[channel-message] invalid leaf key for message \(String(describing: hash))")
             return false
@@ -120,7 +120,7 @@ class ChannelMessage {
         if isEncrypted {
             return self
         }
-
+        
         // NOTE: We cache counterpart because `secretBox.seal` generates nonce randomly. Thus the
         // hash of encrypted message would be different every time.
         if let counterpart = counterpart {
@@ -134,7 +134,7 @@ class ChannelMessage {
         guard let box: Bytes = context.sodium.secretBox.seal(message: Bytes(content),
                                                              secretKey: encryptionKey,
                                                              nonce: nonce) else {
-            throw ChannelMessageError.encryptionFailed
+                                                                throw ChannelMessageError.encryptionFailed
         }
         
         counterpart = try ChannelMessage(context: context,
@@ -156,13 +156,13 @@ class ChannelMessage {
         if let counterpart = counterpart {
             return counterpart
         }
-
+        
         let encryptionKey = try computeEncryptionKey(channel: channel)
         
         guard let decrypted = context.sodium.secretBox.open(authenticatedCipherText: encrypted,
                                                             secretKey: encryptionKey,
                                                             nonce: nonce) else {
-            throw ChannelMessageError.decryptionFailed
+                                                                throw ChannelMessageError.decryptionFailed
         }
         
         let contentProto = try Proto_ChannelMessage.Content(serializedData: Data(decrypted))
@@ -206,10 +206,10 @@ class ChannelMessage {
     
     private func computeEncryptionKey(channel: Channel) throws -> Bytes {
         let inputData = channel.publicKey
-    
+        
         let maybeKey = self.context.sodium.genericHash.hash(message: Bytes(inputData),
-            key: "vowlink-symmetric".bytes,
-            outputLength: context.sodium.secretBox.KeyBytes)
+                                                            key: "vowlink-symmetric".bytes,
+                                                            outputLength: context.sodium.secretBox.KeyBytes)
         guard let key = maybeKey else {
             throw ChannelMessageError.failedToComputeEncryptionKey
         }

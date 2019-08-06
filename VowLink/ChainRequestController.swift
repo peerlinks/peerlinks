@@ -24,7 +24,7 @@ class ChainRequestController : UIViewController, ChainNotificationDelegate {
         let req = Proto_InviteRequest.with { (req) in
             req.peerID = app.p2p.localID.displayName
             req.trusteePubKey = Data(identity.publicKey)
-
+            
             req.boxPubKey = Data(keyPair.publicKey)
         }
         let binary = try! req.serializedData()
@@ -42,7 +42,7 @@ class ChainRequestController : UIViewController, ChainNotificationDelegate {
         }
         
         let scale = view.frame.size.width / image.extent.width
-
+        
         let transform = CGAffineTransform(scaleX: scale, y: scale)
         
         let qr = image.transformed(by: transform)
@@ -56,7 +56,7 @@ class ChainRequestController : UIViewController, ChainNotificationDelegate {
             sodium.utils.zero(&secretKey)
         }
     }
-
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let received = segue.destination as? ChainReceivedController {
             received.chain = chain

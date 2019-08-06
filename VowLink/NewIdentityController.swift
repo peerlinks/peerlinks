@@ -25,7 +25,7 @@ class NewIdentityController : UITableViewController {
             debugPrint("failed to create identity \(error)")
             return
         }
-
+        
         navigationController?.popViewController(animated: true)
     }
 }

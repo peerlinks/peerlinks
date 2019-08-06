@@ -28,7 +28,7 @@ class Chain {
         try proto.validate(context: context)
         
         self.context = context
-    
+        
         var links = [Link]()
         for protoLink in proto.chain {
             let link = try Link(context: context, link: protoLink)

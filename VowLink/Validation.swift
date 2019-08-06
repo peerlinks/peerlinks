@@ -19,7 +19,7 @@ enum ValidationError : Error {
     case invalidMessageTextSize(Int)
     
     case invalidQueryChannelIDSize(Int)
-
+    
     case invalidSubscribeChannelIDSize(Int)
 }
 
@@ -60,7 +60,7 @@ extension Proto_Invite : Proto_Validation {
         }
         
         try channelRoot.validate(context: context)
-
+        
         if chain.count > Chain.MAX_LENGTH {
             throw ValidationError.invalidInviteChainLength(chain.count)
         }

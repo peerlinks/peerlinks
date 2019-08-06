@@ -57,7 +57,7 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return identities[row].name
     }
-
+    
     // MARK: - Miscellaneous
     
     @IBAction func eraseClicked(_ sender: Any) {
@@ -73,7 +73,7 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
         identities.append(id)
         selectButton.isEnabled = true
         identityPicker.reloadAllComponents()
-
+        
         // Subscribe to our own channel
         try app.channelList.add(Channel(id))
     }

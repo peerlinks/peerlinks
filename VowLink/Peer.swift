@@ -25,7 +25,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     var queryResponses = [Bytes:(Channel.QueryResponse) -> Void]()
     
     weak var delegate: PeerDelegate?
-
+    
     static let PROTOCOL_VERSION: Int32 = 1
     static let RATE_LIMIT: Int32 = 1000
     static let MAX_SUBSCRIPTIONS: Int = 1000
@@ -69,7 +69,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             subscribe(to: Bytes(proto.channelID))
         case .some(.queryResponse(let proto)):
             handle(queryResponse: proto)
-        
+            
         default:
             return packet
         }
@@ -82,7 +82,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         if !(outgoing?.takeOne() ?? false) {
             return false
         }
-
+        
         try session.send(data, toPeers: [ self.remoteID ], with: .reliable)
         return true
     }
@@ -104,7 +104,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
                 proto.messages = response.messages.map({ (message) -> Proto_ChannelMessage in
                     return message.toProto()!
                 })
-
+                
                 if let forward = response.forwardCursor {
                     proto.forwardCursor = Data(forward)
                 }
@@ -252,7 +252,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             debugPrint("[peer] unknown state transition for \(peerID.displayName)")
             return
         }
-
+        
         do {
             try sendHello()
         } catch {
@@ -262,7 +262,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             delegate?.peerDisconnected(self)
             return
         }
-
+        
         delegate?.peerConnected(self)
     }
     
@@ -318,7 +318,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         do {
             let data = try proto.serializedData()
             let _ = try send(data)
-
+            
             queryResponses[channelID] = closure
         } catch {
             debugPrint("[peer] query error \(error)")

@@ -43,7 +43,7 @@ class ChainReceivedController : UIViewController {
                                       name: name,
                                       root: root)
             try app.identity!.addChain(chain, for: channel)
-        
+            
             try app.channelList.add(channel)
         } catch {
             // TODO(indutny): display

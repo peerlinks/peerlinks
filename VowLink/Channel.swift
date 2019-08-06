@@ -39,7 +39,7 @@ class Channel: RemoteChannel {
         let backwardCursor: Bytes?
         let minLeafHeight: UInt64?
     }
-
+    
     let context: Context
     let publicKey: Bytes
     var name: String
@@ -75,7 +75,7 @@ class Channel: RemoteChannel {
         if !root.isEncrypted {
             throw ChannelError.rootMustBeEncrypted
         }
-
+        
         self.context = context
         self.publicKey = publicKey
         self.name = name
@@ -99,7 +99,7 @@ class Channel: RemoteChannel {
     }
     
     convenience init(context: Context, proto: Proto_Channel) throws {
-       try self.init(context: context,
+        try self.init(context: context,
                       publicKey: Bytes(proto.publicKey),
                       name: proto.name,
                       root: try ChannelMessage(context: context, proto: proto.root))
@@ -162,14 +162,14 @@ class Channel: RemoteChannel {
         
         return nil
     }
-
+    
     func post(message body: Proto_ChannelMessage.Body, by identity: Identity) throws -> ChannelMessage {
         let parents = try leafs.map({ (leaf) -> Bytes in
             return try leaf.encrypted(withChannel: self).hash!
         })
         let height = leafs.reduce(0) { (acc, leaf) -> UInt64 in
             return max(acc, leaf.height)
-        } + 1
+            } + 1
         
         guard let chain = identity.chain(for: self) else {
             throw ChannelError.noChainFound(identity)
@@ -262,19 +262,19 @@ class Channel: RemoteChannel {
         remote.query(channelID: channelID,
                      withMinHeight: requestedHeight,
                      limit: Channel.SYNC_LIMIT) {
-            (response) in
-            self.handle(queryResponse: response, from: remote, andRequestedHeight: requestedHeight)
+                        (response) in
+                        self.handle(queryResponse: response, from: remote, andRequestedHeight: requestedHeight)
         }
     }
     
     func handle(queryResponse response: QueryResponse, from remote: RemoteChannel, andRequestedHeight requestedHeight: UInt64? = nil) {
         if let suggestedHeight = response.minLeafHeight,
-           let requestedHeight = requestedHeight,
-           suggestedHeight < requestedHeight {
+            let requestedHeight = requestedHeight,
+            suggestedHeight < requestedHeight {
             remote.query(channelID: channelID,
                          withMinHeight: suggestedHeight,
                          limit: Channel.SYNC_LIMIT) { (response) in
-                self.handle(queryResponse: response, from: remote)
+                            self.handle(queryResponse: response, from: remote)
             }
             return
         }
@@ -315,8 +315,8 @@ class Channel: RemoteChannel {
             remote.query(channelID: channelID,
                          withCursor: cursor,
                          limit: Channel.SYNC_LIMIT) {
-                (response) in
-                self.handle(queryResponse: response, from: remote)
+                            (response) in
+                            self.handle(queryResponse: response, from: remote)
             }
             return
         }
@@ -326,7 +326,7 @@ class Channel: RemoteChannel {
     
     func query(withMinHeight minHeight: UInt64, andLimit limit: Int) throws -> QueryResponse {
         let enforcedLimit = min(limit, Channel.SYNC_LIMIT)
-
+        
         var filtered = [ChannelMessage]()
         var backward: Bytes?
         var forward: Bytes?
@@ -358,7 +358,7 @@ class Channel: RemoteChannel {
         var found = false
         for message in messages {
             let encrypted = try message.encrypted(withChannel: self)
-
+            
             if !found && !context.sodium.utils.equals(encrypted.hash!, cursor) {
                 backward = encrypted.hash!
                 continue
@@ -409,7 +409,7 @@ class Channel: RemoteChannel {
             } else if a.height > b.height {
                 return false
             }
-
+            
             // TODO(indutny): cache hashes in the storage, perhaps?
             let encryptedA = try a.encrypted(withChannel: self)
             let encryptedB = try b.encrypted(withChannel: self)
@@ -449,7 +449,7 @@ class Channel: RemoteChannel {
         let response = try! query(withMinHeight: minHeight, andLimit: limit)
         closure(response)
     }
-
+    
     func destroy(reason: String) {
         // no-op
     }

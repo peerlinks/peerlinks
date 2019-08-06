@@ -14,7 +14,7 @@ class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegat
         
         let app = UIApplication.shared.delegate as! AppDelegate
         context = app.context
-
+        
         captureSession = AVCaptureSession()
         
         // TODO(indutny): handle errors
@@ -78,7 +78,7 @@ class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegat
             confirm.request = request
             confirm.channel = channel
         }
-            
+        
         super.prepare(for: segue, sender: sender)
     }
     
@@ -94,7 +94,7 @@ class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegat
         guard let value = qr.stringValue else {
             return
         }
-
+        
         if !value.starts(with: "vow-link://invite-request/") {
             return
         }

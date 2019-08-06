@@ -25,7 +25,7 @@ class Link {
                   expiration: link.tbs.expiration,
                   signature: Bytes(link.signature))
     }
-
+    
     func verify(withPublicKey publicKey: Bytes, andChannel channel: Channel) throws -> Bool {
         var tbs = toProto().tbs
         tbs.channelID = Data(channel.channelID)

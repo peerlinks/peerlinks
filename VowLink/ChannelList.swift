@@ -45,7 +45,7 @@ class ChannelList : ChannelDelegate {
         }
         
         channel.delegate = self
-
+        
         channels.append(channel)
         
         debugPrint("[channels] added new \(channel.publicKey)")
@@ -54,7 +54,7 @@ class ChannelList : ChannelDelegate {
         
         delegate?.channelList(added: channel)
     }
-
+    
     func find(byChannelID channelID: Bytes) -> Channel? {
         for channel in channels {
             if channel.channelID == channelID {
@@ -71,7 +71,7 @@ class ChannelList : ChannelDelegate {
             })
         })
     }
-
+    
     func save() throws {
         let data = try toProto().serializedData()
         

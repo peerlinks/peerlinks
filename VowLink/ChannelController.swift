@@ -108,7 +108,7 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     func channel(_ channel: Channel, postedMessage message: ChannelMessage) {
         if channel.channelID == self.channel.channelID {
             messagesView.reloadData()
-
+            
             scrollToBottom(animated: true)
         }
     }

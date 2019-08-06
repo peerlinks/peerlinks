@@ -24,7 +24,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     init(context: Context, serviceType: String) {
         self.context = context
-
+        
         // NOTE: The string is always random to avoid fingerprinting
         localID = MCPeerID(displayName: NSUUID().uuidString)
         
@@ -51,7 +51,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     func send(_ packet: Proto_Packet, to peers: [Peer]) throws {
         let data = try packet.serializedData()
-
+        
         for peer in peers {
             if try peer.send(data) == false {
                 debugPrint("[p2p] failed to send link due to rate limiting")
@@ -89,14 +89,14 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
             debugPrint("[p2p] ignoring peer \(remoteID.displayName) due to max peers limit")
             return nil
         }
-
+        
         let peer = Peer(context: context, localID: localID, remoteID: remoteID)
         peer.delegate = self
         self.peers[peer.remoteID] = peer
         
         return peer
     }
-
+    
     // MARK: Advertiser
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error) {
@@ -145,7 +145,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
             debugPrint("[p2p] waiting to be invited by peer \(peerID.displayName) into session")
             return
         }
-
+        
         if let peer = self.connect(to: peerID) {
             debugPrint("[p2p] inviting peer \(peerID.displayName) into session")
             browser.invitePeer(peerID, to: peer.session, withContext: nil, timeout: 300.0)
@@ -168,25 +168,25 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         
         // Try to reconnect if the peer is still around
         Timer.scheduledTimer(withTimeInterval: PeerToPeer.RECONNECT_DELAY,
-              repeats: false) { (_) in
-            // No peers to reconnect to
-            if self.availablePeers.count == 0 {
-                debugPrint("[p2p] no peers to reconnect to")
-                return
-            }
-
-            var remoteID = peer.remoteID
-            if self.availablePeers.contains(remoteID) {
-                debugPrint("[p2p] disconnected peer \(remoteID) is still there, reconnecting")
-            } else {
-                remoteID = self.availablePeers.randomElement()!
-                debugPrint("[p2p] disconnected peer is gone, reconnecting to \(remoteID)")
-            }
-                
-            if let peer = self.connect(to: peer.remoteID) {
-                debugPrint("[p2p] inviting peer \(remoteID.displayName) into session")
-                self.browser.invitePeer(peer.remoteID, to: peer.session, withContext: nil, timeout: 300.0)
-            }
+                             repeats: false) { (_) in
+                                // No peers to reconnect to
+                                if self.availablePeers.count == 0 {
+                                    debugPrint("[p2p] no peers to reconnect to")
+                                    return
+                                }
+                                
+                                var remoteID = peer.remoteID
+                                if self.availablePeers.contains(remoteID) {
+                                    debugPrint("[p2p] disconnected peer \(remoteID) is still there, reconnecting")
+                                } else {
+                                    remoteID = self.availablePeers.randomElement()!
+                                    debugPrint("[p2p] disconnected peer is gone, reconnecting to \(remoteID)")
+                                }
+                                
+                                if let peer = self.connect(to: peer.remoteID) {
+                                    debugPrint("[p2p] inviting peer \(remoteID.displayName) into session")
+                                    self.browser.invitePeer(peer.remoteID, to: peer.session, withContext: nil, timeout: 300.0)
+                                }
         }
     }
     
