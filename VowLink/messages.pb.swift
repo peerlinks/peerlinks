@@ -164,7 +164,19 @@ struct Proto_ChannelMessage {
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
+  /// First message on any channel
   struct Root {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+  }
+
+  /// Merges are disallowed past 2 checkpoints
+  struct Checkpoint {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -212,17 +224,27 @@ struct Proto_ChannelMessage {
       set {_uniqueStorage()._body = .text(newValue)}
     }
 
+    var checkpoint: Proto_ChannelMessage.Checkpoint {
+      get {
+        if case .checkpoint(let v)? = _storage._body {return v}
+        return Proto_ChannelMessage.Checkpoint()
+      }
+      set {_uniqueStorage()._body = .checkpoint(newValue)}
+    }
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     enum OneOf_Body: Equatable {
       case root(Proto_ChannelMessage.Root)
       case text(Proto_ChannelMessage.Text)
+      case checkpoint(Proto_ChannelMessage.Checkpoint)
 
     #if !swift(>=4.1)
       static func ==(lhs: Proto_ChannelMessage.Body.OneOf_Body, rhs: Proto_ChannelMessage.Body.OneOf_Body) -> Bool {
         switch (lhs, rhs) {
         case (.root(let l), .root(let r)): return l == r
         case (.text(let l), .text(let r)): return l == r
+        case (.checkpoint(let l), .checkpoint(let r)): return l == r
         default: return false
         }
       }
@@ -926,6 +948,25 @@ extension Proto_ChannelMessage.Root: SwiftProtobuf.Message, SwiftProtobuf._Messa
   }
 }
 
+extension Proto_ChannelMessage.Checkpoint: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Proto_ChannelMessage.protoMessageName + ".Checkpoint"
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let _ = try decoder.nextFieldNumber() {
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Proto_ChannelMessage.Checkpoint, rhs: Proto_ChannelMessage.Checkpoint) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 extension Proto_ChannelMessage.Text: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Proto_ChannelMessage.protoMessageName + ".Text"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -960,6 +1001,7 @@ extension Proto_ChannelMessage.Body: SwiftProtobuf.Message, SwiftProtobuf._Messa
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "root"),
     2: .same(proto: "text"),
+    3: .same(proto: "checkpoint"),
   ]
 
   fileprivate class _StorageClass {
@@ -1002,6 +1044,14 @@ extension Proto_ChannelMessage.Body: SwiftProtobuf.Message, SwiftProtobuf._Messa
           }
           try decoder.decodeSingularMessageField(value: &v)
           if let v = v {_storage._body = .text(v)}
+        case 3:
+          var v: Proto_ChannelMessage.Checkpoint?
+          if let current = _storage._body {
+            try decoder.handleConflictingOneOf()
+            if case .checkpoint(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {_storage._body = .checkpoint(v)}
         default: break
         }
       }
@@ -1015,6 +1065,8 @@ extension Proto_ChannelMessage.Body: SwiftProtobuf.Message, SwiftProtobuf._Messa
         try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
       case .text(let v)?:
         try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+      case .checkpoint(let v)?:
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
       case nil: break
       }
     }

@@ -48,6 +48,8 @@ message Hello {
 }
 ```
 
+_(TODO(indutny): remove rate limit, it makes no sense)_
+
 The `hello.version` specifies the protocol version and MUST be checked by the
 recipient. In case of the mismatch and/or other errors `Error` SHOULD be sent:
 ```proto
@@ -104,7 +106,11 @@ own feed). The channel MUST have a root message and MAY have more messages of
 following format:
 ```proto
 message ChannelMessage {
+  // First message on any channel
   message Root {
+  }
+
+  message Checkpoint {
   }
 
   message Text {
@@ -115,6 +121,7 @@ message ChannelMessage {
     oneof body {
       Root root = 1;
       Text text = 2;
+      Checkpoint checkpoint = 3;
     }
   }
 
@@ -186,7 +193,23 @@ and MUST be greater or equal to the maximum timestamp of the message parents.
 `content.timestamp` MUST NOT be too far in the future. Particular implementation
 SHOULD decide on the value of this leeway (5-10 seconds is recommended).
 
-_(TODO(indutny): timestamp is hard to enforce...)_
+The validity of `content.timestamp` and the expiration of links MUST be enforced
+through checkpoint mechanism. Every day a channel owner (that has chain of
+length zero) posts a special `Checkpoint` message on a channel. Suppose that:
+```
+min_height = min(p.height for p in parents)
+max_height = max(p.height for p in parents)
+```
+and `checkpoints` is a list of the checkpoint messages with height greater or
+equal to `min_height` and less or equal to `max_height`. Then the message MUST
+NOT be accepted and should be treated as INVALID (peer SHOULD issue an `Error`
+protocol packet and MUST close the connection to such peer) if for:
+```
+min_checkpoint_time = min(c.timestamp for c in checkpoints)
+max_checkpoint_time = max(c.timestamp for c in checkpoints)
+delta_time = max_checkpoint_time - min_checkpoint_time
+```
+`delta_time` is more than *one month*.
 
 The subscribers of the channel MUST verify the messages against full DAG:
 
@@ -224,10 +247,10 @@ message Link {
 that establish trust in a manner
 similar to [Public Key Infrastructure][] (PKI). Each successive link in a chain
 is signed by the private key of the previous link. The first link is signed by
-the root. The maximum length of the chain is `5`. Peer MUST validate the length
+the root. The maximum length of the chain is `3`. Peer MUST validate the length
 of the chain against the limit, and MUST NOT accept messages with longer chains.
 (This should encourage peers to form tighter groups, and have more control
-over participants. The number `5` MAY be revised in the future version of the
+over participants. The number `3` MAY be revised in the future version of the
 protocol.)
 
 The `link.expiration` is a Unix-time from Jan 1st 1970 00:00:00 UTC. The

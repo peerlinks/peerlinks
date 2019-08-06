@@ -44,7 +44,11 @@ message InviteRequest {
 }
 
 message ChannelMessage {
+  // First message on any channel
   message Root {
+  }
+
+  message Checkpoint {
   }
 
   message Text {
@@ -55,6 +59,7 @@ message ChannelMessage {
     oneof body {
       Root root = 1;
       Text text = 2;
+      Checkpoint checkpoint = 3;
     }
   }
 

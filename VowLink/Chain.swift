@@ -14,7 +14,7 @@ class Chain {
     let channelName: String?
     let links: [Link]
     
-    static let MAX_LENGTH = 5
+    static let MAX_LENGTH = 3
     
     init(_ encrypted: Proto_EncryptedInvite, withContext context: Context, publicKey: Bytes, andSecretKey secretKey: Bytes) throws {
         guard let data = context.sodium.box.open(anonymousCipherText: Bytes(encrypted.box),
