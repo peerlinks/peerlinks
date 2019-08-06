@@ -217,7 +217,7 @@ class Channel: RemoteChannel {
         }
         
         // Only one root is allowed at the moment
-        if decrypted.parents.count == 0 {
+        if decrypted.parents.count == 0 && !context.sodium.utils.equals(encrypted.hash!, root.hash!) {
             throw ChannelError.invalidParentCount
         }
         
@@ -266,6 +266,8 @@ class Channel: RemoteChannel {
     // MARK: Sync
     
     func sync(with remote: RemoteChannel) {
+        debugPrint("[channel] \(channelID) starting sync")
+
         let requestedHeight = minLeafHeight
         remote.query(channelID: channelID,
                      withMinHeight: requestedHeight,
@@ -329,7 +331,7 @@ class Channel: RemoteChannel {
             return
         }
         
-        debugPrint("[channel] sync complete")
+        debugPrint("[channel] \(channelID) sync complete")
     }
     
     func query(withMinHeight minHeight: UInt64, andLimit limit: Int) throws -> QueryResponse {

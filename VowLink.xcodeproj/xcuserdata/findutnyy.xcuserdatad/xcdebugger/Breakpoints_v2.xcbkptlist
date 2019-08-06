@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VowLink/IdentityController.swift"
-            timestampString = "586787466.902153"
+            timestampString = "586797058.167818"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "37"
@@ -26,7 +26,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VowLink/ChannelController.swift"
-            timestampString = "586787466.902279"
+            timestampString = "586797058.16792"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "111"
@@ -42,7 +42,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VowLink/ChannelController.swift"
-            timestampString = "586787466.902362"
+            timestampString = "586797058.168002"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "77"
@@ -58,7 +58,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VowLink/ChannelController.swift"
-            timestampString = "586787466.902434"
+            timestampString = "586797058.168077"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "94"
@@ -74,13 +74,77 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VowLink/ChannelController.swift"
-            timestampString = "586787466.9025"
+            timestampString = "586797058.168144"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "98"
             endingLineNumber = "98"
             landmarkName = "tableView(_:cellForRowAt:)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "VowLink/Channel.swift"
+            timestampString = "586797058.1682121"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "281"
+            endingLineNumber = "281"
+            landmarkName = "handle(queryResponse:from:andRequestedHeight:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "VowLink/PeerToPeer.swift"
+            timestampString = "586797058.16856"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "81"
+            endingLineNumber = "81"
+            landmarkName = "peers(byDisplayName:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "VowLink.PeerToPeer.peers(byDisplayName: Swift.String) -&gt; Swift.Array&lt;VowLink.Peer&gt;"
+                  moduleName = "VowLink"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/findutnyy/Code/indutny/VowLink/VowLink/PeerToPeer.swift"
+                  timestampString = "586791937.267556"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "73"
+                  endingLineNumber = "73"
+                  offsetFromSymbolStart = "567">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (__C.MCPeerID) -&gt; Swift.Optional&lt;VowLink.Peer&gt; in VowLink.PeerToPeer.peers(byDisplayName: Swift.String) -&gt; Swift.Array&lt;VowLink.Peer&gt;"
+                  moduleName = "VowLink"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/findutnyy/Code/indutny/VowLink/VowLink/PeerToPeer.swift"
+                  timestampString = "586791937.269359"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "74"
+                  endingLineNumber = "74"
+                  offsetFromSymbolStart = "34">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

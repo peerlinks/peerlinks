@@ -18,6 +18,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     let session: MCSession
     let remoteID: MCPeerID
     var hello: Proto_Hello?
+    var isReady: Bool = false
     
     var subscriptions = Set<Bytes>()
     var queryResponses = [Bytes:(Channel.QueryResponse) -> Void]()
@@ -40,6 +41,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     }
     
     deinit {
+        debugPrint("[peer] \(remoteID.displayName) disconnecting due to deinit")
         session.disconnect()
     }
     
@@ -54,11 +56,13 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         
         switch packet.content {
         case .some(.error(let proto)):
-            debugPrint("[peer] got remote error \(proto.reason)")
+            debugPrint("[peer] id=\(remoteID.displayName) got remote error \(proto.reason)")
             session.disconnect()
         case .some(.subscribe(let proto)):
+            debugPrint("[peer] id=\(remoteID.displayName) got subscription packet")
             subscribe(to: Bytes(proto.channelID))
         case .some(.queryResponse(let proto)):
+            debugPrint("[peer] id=\(remoteID.displayName) got query response packet")
             handle(queryResponse: proto)
             
         default:
@@ -116,6 +120,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         if let data = try? packet.serializedData() {
             let _ = try? send(data)
         }
+        debugPrint("[peer] id=\(remoteID.displayName) destroying due to error: \(reason)")
         session.disconnect()
     }
     
@@ -130,6 +135,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         debugPrint("[peer] id=\(remoteID.displayName) got hello \(hello)")
         self.hello = hello
         
+        self.isReady = true
         delegate?.peerReady(self)
     }
     
@@ -216,8 +222,8 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             debugPrint("[peer] packet \(packet)")
             
             delegate?.peer(self, receivedPacket: packet)
-        } catch  {
-            debugPrint("[peer] parsing error \(error)")
+        } catch {
+            debugPrint("[peer] id=\(remoteID.displayName) parsing error \(error)")
             session.disconnect()
         }
     }
@@ -225,23 +231,23 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         switch state {
         case .connecting:
-            debugPrint("[peer] connecting to \(peerID.displayName)")
+            debugPrint("[peer] id=\(remoteID.displayName) connecting")
             return
         case .notConnected:
-            debugPrint("[peer] disconnected from \(peerID.displayName)")
+            debugPrint("[peer] id=\(remoteID.displayName) disconnected")
             delegate?.peerDisconnected(self)
             return
         case .connected:
-            debugPrint("[peer] connected to \(peerID.displayName)")
+            debugPrint("[peer] id=\(remoteID.displayName) connected")
         default:
-            debugPrint("[peer] unknown state transition for \(peerID.displayName)")
+            debugPrint("[peer] id=\(remoteID.displayName) unknown state transition")
             return
         }
         
         do {
             try sendHello()
         } catch {
-            debugPrint("[peer] failed to send hello to \(peerID.displayName) due to error \(error)")
+            debugPrint("[peer] id=\(remoteID.displayName) failed to send hello due to error \(error)")
             session.disconnect()
             
             delegate?.peerDisconnected(self)
@@ -252,22 +258,22 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
-        debugPrint("[peer] received from \(peerID.displayName) stream, closing immediately")
+        debugPrint("[peer] id=\(peerID.displayName) received stream, closing immediately")
         stream.close()
     }
     
     func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
-        debugPrint("[peer] received from \(peerID.displayName) resource \(resourceName), cancelling")
+        debugPrint("[peer] id=\(peerID.displayName) received resource \(resourceName), cancelling")
         progress.cancel()
     }
     
     func session(_ session: MCSession, didReceiveCertificate certificate: [Any]?, fromPeer peerID: MCPeerID, certificateHandler: @escaping (Bool) -> Void) {
-        debugPrint("[peer] received from \(peerID.displayName) certificates \(String(describing: certificate))")
+        debugPrint("[peer] id=\(peerID.displayName) received certificates \(String(describing: certificate))")
         certificateHandler(true)
     }
     
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {
-        debugPrint("[peer] finished receiving from \(peerID.displayName) resource \(resourceName)")
+        debugPrint("[peer] id=\(peerID.displayName) finished receiving resource \(resourceName)")
     }
     
     // Mark: RemoteChannel
@@ -287,7 +293,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             
             queryResponses[channelID] = closure
         } catch {
-            debugPrint("[peer] query error \(error)")
+            debugPrint("[peer] id=\(remoteID.displayName) query error \(error)")
         }
     }
     
@@ -306,7 +312,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             
             queryResponses[channelID] = closure
         } catch {
-            debugPrint("[peer] query error \(error)")
+            debugPrint("[peer] id=\(remoteID.displayName) query error \(error)")
         }
     }
 }

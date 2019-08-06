@@ -239,7 +239,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
     // MARK: ChannelListDelegate
     
     func channelList(added channel: Channel) {
-        for peer in p2p.peers.values {
+        for peer in p2p.readyPeers {
             do {
                 let _ = try peer.send(subscribeTo: channel.channelID)
             } catch {

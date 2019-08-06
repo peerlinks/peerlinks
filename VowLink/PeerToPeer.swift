@@ -22,6 +22,14 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     static let MAX_PEERS = 32
     static let RECONNECT_DELAY: TimeInterval = 1.0
     
+    var readyPeers: [Peer] {
+        get {
+            return peers.values.filter({ (peer) -> Bool in
+                return peer.isReady
+            })
+        }
+    }
+    
     init(context: Context, serviceType: String) {
         self.context = context
         
