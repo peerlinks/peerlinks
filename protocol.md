@@ -197,11 +197,11 @@ The validity of `content.timestamp` and the expiration of links MUST be enforced
 through checkpoint mechanism. Every day a channel owner (that has chain of
 length zero) posts a special `Checkpoint` message on a channel. Suppose that:
 ```
-min_height = min(p.height for p in parents)
-max_height = max(p.height for p in parents)
+min_height = min(p.height for p in message.parents)
+max_height = max(p.height for p imessage.n parents)
 ```
 and `checkpoints` is a list of the checkpoint messages with height greater or
-equal to `min_height` and less or equal to `max_height`. Then the message MUST
+equal to `min_height` and less or equal to `max_height`. Then the `message` MUST
 NOT be accepted and should be treated as INVALID (peer SHOULD issue an `Error`
 protocol packet and MUST close the connection to such peer) if for:
 ```

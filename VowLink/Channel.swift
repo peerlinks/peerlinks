@@ -30,6 +30,8 @@ enum ChannelError : Error {
     case parentNotFound(Bytes)
     case invalidHeight(UInt64)
     case invalidTimestamp(TimeInterval)
+    
+    case inconsistentCheckpoints(UInt64, UInt64)
 }
 
 class Channel: RemoteChannel {
@@ -45,6 +47,7 @@ class Channel: RemoteChannel {
     var name: String
     
     var messages = [ChannelMessage]()
+    // TODO(indutny): store checkpoints separately instead of loading them in runtime
     var checkpoints = [ChannelMessage]()
     var leafs = [ChannelMessage]()
     
@@ -70,6 +73,7 @@ class Channel: RemoteChannel {
     static let FUTURE: TimeInterval = 10.0 // seconds
     static let SYNC_LIMIT: Int = 128 // messages per query
     static let MAX_NAME_LENGTH = 128
+    static let MAX_CHECKPOINT_DELTA: TimeInterval = 30 * 24 * 3600; // 30 days
     
     init(context: Context, publicKey: Bytes, name: String, root: ChannelMessage) throws {
         // NOTE: Makes using `channel.root.hash!` very easy to use
@@ -268,7 +272,7 @@ class Channel: RemoteChannel {
         }
     }
     
-    func handle(queryResponse response: QueryResponse, from remote: RemoteChannel, andRequestedHeight requestedHeight: UInt64? = nil) {
+    private func handle(queryResponse response: QueryResponse, from remote: RemoteChannel, andRequestedHeight requestedHeight: UInt64? = nil) {
         if let suggestedHeight = response.minLeafHeight,
             let requestedHeight = requestedHeight,
             suggestedHeight < requestedHeight {
@@ -402,8 +406,32 @@ class Channel: RemoteChannel {
         return result
     }
     
+    private func checkpointDelta() -> TimeInterval {
+        guard let first = checkpoints.first, let last = checkpoints.last else {
+            return 0.0
+        }
+        return last.decryptedContent!.timestamp - first.decryptedContent!.timestamp
+    }
+    
     private func append(_ message: ChannelMessage) throws {
-        self.messages.append(try message.decrypted(withChannel: self))
+        let decrypted = try message.decrypted(withChannel: self)
+        let content = decrypted.decryptedContent!
+        
+        if case .some(.checkpoint(_)) = content.body.body {
+            if let last = checkpoints.last {
+                if last.height >= decrypted.height {
+                    throw ChannelError.inconsistentCheckpoints(last.height, decrypted.height)
+                }
+            }
+            checkpoints.append(decrypted)
+            
+            // Do not keep old checkpoints in memory
+            while checkpointDelta() > Channel.MAX_CHECKPOINT_DELTA {
+                checkpoints.removeFirst()
+            }
+        }
+        
+        self.messages.append(decrypted)
         try self.messages.sort { (a, b) -> Bool in
             if a.height < b.height {
                 return true
