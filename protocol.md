@@ -398,6 +398,8 @@ the remote stores according the rendezvous hashing algorithm above.
 
 ## Storage and eviction policies
 
+WIP
+
 The amount of storage SHOULD be configurable in the application (with potential
 notifications for increasing the limit when needed). The split between public
 pool and subscribed feeds MAY be configurable.

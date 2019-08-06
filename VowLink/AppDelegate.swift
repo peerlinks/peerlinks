@@ -245,6 +245,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
             } catch {
                 debugPrint("[app] failed to send subscribe to new \(channel.channelID) due to error \(error)")
             }
+            
+            channel.sync(with: peer)
         }
     }
 }
