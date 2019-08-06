@@ -3,7 +3,7 @@ import Sodium
 enum ValidationError : Error {
     case invalidLinkSignatureSize(Int)
     case invalidLinkPublicKeySize(Int)
-    case invalidLinkChannelIDSize(Int)
+    case nonEmptyLinkChannelID
     
     case invalidInvitePublicKeySize(Int)
     case invalidInviteChannelNameSize(Int)
@@ -43,8 +43,8 @@ extension Proto_Link : Proto_Validation {
             throw ValidationError.invalidLinkPublicKeySize(tbs.trusteePubKey.count)
         }
         
-        if tbs.channelID.count != Channel.CHANNEL_ID_LENGTH {
-            throw ValidationError.invalidLinkChannelIDSize(tbs.channelID.count)
+        if !tbs.channelID.isEmpty {
+            throw ValidationError.nonEmptyLinkChannelID
         }
     }
 }

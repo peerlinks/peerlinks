@@ -74,7 +74,7 @@ class Identity {
     func issueLink(for trusteePubKey: Bytes,
                    andChannel channel: Channel,
                    withExpiration expiration: TimeInterval = Identity.DEFAULT_EXPIRATION) throws -> Link {
-        let tbs = Proto_Link.TBS.with { (tbs) in
+        var tbs = Proto_Link.TBS.with { (tbs) in
             tbs.trusteePubKey = Data(trusteePubKey)
             tbs.expiration = NSDate().timeIntervalSince1970 + expiration
             tbs.channelID = Data(channel.channelID)
@@ -84,6 +84,8 @@ class Identity {
         guard let signature = self.context.sodium.sign.signature(message: Bytes(tbsData), secretKey: secretKey) else {
             throw IdentityError.signatureError
         }
+        
+        tbs.channelID = Data([])
         
         let proto = Proto_Link.with({ (link) in
             link.tbs = tbs
