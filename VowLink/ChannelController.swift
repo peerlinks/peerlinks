@@ -8,6 +8,8 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     
     var app: AppDelegate!
     var channel: Channel!
+    var keyboardWillShow: NSObjectProtocol!
+    var keyboardWillHide: NSObjectProtocol!
     
     static let AUTHOR_LENGTH = 6
     
@@ -23,6 +25,27 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
         messagesView.delegate = self
         
         scrollToBottom(animated: false)
+        
+        let center = NotificationCenter.default
+        
+        keyboardWillShow = center.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: nil) {
+            (notification) in
+            guard let frameEnd = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+                return
+            }
+            self.additionalSafeAreaInsets.bottom = frameEnd.height
+        }
+        keyboardWillHide = center.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: nil) {
+            (notification) in
+            self.additionalSafeAreaInsets.bottom = 0.0
+        }
+    }
+    
+    deinit {
+        let center = NotificationCenter.default
+
+        center.removeObserver(keyboardWillShow as Any)
+        center.removeObserver(keyboardWillHide as Any)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
