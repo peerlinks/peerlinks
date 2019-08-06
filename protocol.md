@@ -44,11 +44,8 @@ The first message over any wire protocol MUST be:
 ```proto
 message Hello {
   int32 version = 1;
-  int32 rate_limit = 2; // maximum number of messages per hour
 }
 ```
-
-_(TODO(indutny): remove rate limit, it makes no sense)_
 
 The `hello.version` specifies the protocol version and MUST be checked by the
 recipient. In case of the mismatch and/or other errors `Error` SHOULD be sent:
@@ -75,11 +72,9 @@ message Packet {
 ```
 Particular packet sub-types are described below.
 
-Every received packet decreases `remaining = hello.rate_limit` by one and
-starts the timer for one hour. Once one hour passes, the remaining number of
-packets is restored back to `hello.rate_limit`. In case if `remaining == 0` and
-the remote peer sends a packet - the packet MUST be ignored and the connection
-SHOULD be terminated.
+_(TODO(indutny): find a mechanism to deter peers from spamming each other.
+Rate limit does not work, because the peer cannot be identified consistently
+in `MultipeerConnectivity`)_
 
 Each peer has a list of `Channel`s that they "follow". In order to receive
 channel updates they sent several `Subscribe` packets after `Hello`:

@@ -17,8 +17,6 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     let context: Context
     let session: MCSession
     let remoteID: MCPeerID
-    let incoming: RateLimiter
-    var outgoing: RateLimiter?
     var hello: Proto_Hello?
     
     var subscriptions = Set<Bytes>()
@@ -27,15 +25,12 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     weak var delegate: PeerDelegate?
     
     static let PROTOCOL_VERSION: Int32 = 1
-    static let RATE_LIMIT: Int32 = 1000
     static let MAX_SUBSCRIPTIONS: Int = 1000
     static let MAX_PEER_ID_LENGTH: Int = 64
     
     init(context: Context, localID: MCPeerID, remoteID: MCPeerID) {
         self.context = context
         self.remoteID = remoteID
-        
-        incoming = RateLimiter(limit: Peer.RATE_LIMIT)
         
         session = MCSession(peer: localID, securityIdentity: nil, encryptionPreference: .required)
         
@@ -51,10 +46,6 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     func receivePacket(data: Data) throws -> Proto_Packet? {
         if hello == nil {
             try receiveHello(_: data)
-            return nil
-        }
-        
-        if !incoming.takeOne() {
             return nil
         }
         
@@ -79,10 +70,6 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     }
     
     func send(_ data: Data) throws -> Bool {
-        if !(outgoing?.takeOne() ?? false) {
-            return false
-        }
-        
         try session.send(data, toPeers: [ self.remoteID ], with: .reliable)
         return true
     }
@@ -141,7 +128,6 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         }
         
         debugPrint("[peer] id=\(remoteID.displayName) got hello \(hello)")
-        outgoing = RateLimiter(limit: hello.rateLimit)
         self.hello = hello
         
         delegate?.peerReady(self)
@@ -150,7 +136,6 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     private func sendHello() throws {
         let hello = Proto_Hello.with({ (hello) in
             hello.version = Peer.PROTOCOL_VERSION
-            hello.rateLimit = Peer.RATE_LIMIT
         })
         
         let data = try hello.serializedData()

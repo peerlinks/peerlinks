@@ -21,7 +21,6 @@
 		4D23EEB422EF2E13003A9C20 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE9722EF2CEF003A9C20 /* SwiftProtobuf.framework */; };
 		4D23EEB522EF2E13003A9C20 /* SwiftProtobuf.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE9722EF2CEF003A9C20 /* SwiftProtobuf.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4D23EEBA22EF3517003A9C20 /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EEB922EF3517003A9C20 /* Peer.swift */; };
-		4D23EEBC22EF3A5E003A9C20 /* RateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EEBB22EF3A5E003A9C20 /* RateLimiter.swift */; };
 		4D339E4022F0E36300EABA71 /* NewIdentityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E3F22F0E36300EABA71 /* NewIdentityController.swift */; };
 		4D339E5222F0EDD500EABA71 /* ChainRequestController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E5122F0EDD500EABA71 /* ChainRequestController.swift */; };
 		4D339E5422F0F95800EABA71 /* InviteController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E5322F0F95800EABA71 /* InviteController.swift */; };
@@ -257,7 +256,6 @@
 		4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Sodium.xcodeproj; path = deps/Sodium/Sodium.xcodeproj; sourceTree = SOURCE_ROOT; };
 		4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SwiftProtobuf.xcodeproj; path = deps/SwiftProtobuf/SwiftProtobuf.xcodeproj; sourceTree = SOURCE_ROOT; };
 		4D23EEB922EF3517003A9C20 /* Peer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Peer.swift; sourceTree = "<group>"; };
-		4D23EEBB22EF3A5E003A9C20 /* RateLimiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateLimiter.swift; sourceTree = "<group>"; };
 		4D339E3F22F0E36300EABA71 /* NewIdentityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewIdentityController.swift; sourceTree = "<group>"; };
 		4D339E5122F0EDD500EABA71 /* ChainRequestController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainRequestController.swift; sourceTree = "<group>"; };
 		4D339E5322F0F95800EABA71 /* InviteController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteController.swift; sourceTree = "<group>"; };
@@ -349,7 +347,6 @@
 				4D339E3F22F0E36300EABA71 /* NewIdentityController.swift */,
 				4D23EEB922EF3517003A9C20 /* Peer.swift */,
 				4D23EE0322EECBFD003A9C20 /* PeerToPeer.swift */,
-				4D23EEBB22EF3A5E003A9C20 /* RateLimiter.swift */,
 				4DD3FF6722F906E700FFA8BD /* Validation.swift */,
 				4D23EDDC22EECBE5003A9C20 /* Assets.xcassets */,
 				4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */,
@@ -728,7 +725,6 @@
 				4D339E5E22F3300600EABA71 /* ChainReceivedController.swift in Sources */,
 				4D23EDDB22EECBE5003A9C20 /* VowLink.xcdatamodeld in Sources */,
 				4D23EEBA22EF3517003A9C20 /* Peer.swift in Sources */,
-				4D23EEBC22EF3A5E003A9C20 /* RateLimiter.swift in Sources */,
 				4DF7CB0E22EF4C4500CD1C33 /* Identity.swift in Sources */,
 				4D23EE0422EECBFD003A9C20 /* PeerToPeer.swift in Sources */,
 				4D23EDD322EECBE4003A9C20 /* AppDelegate.swift in Sources */,

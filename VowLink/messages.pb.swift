@@ -26,9 +26,6 @@ struct Proto_Hello {
 
   var version: Int32 = 0
 
-  /// maximum number of messages per hour
-  var rateLimit: Int32 = 0
-
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -559,14 +556,12 @@ extension Proto_Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
   static let protoMessageName: String = _protobuf_package + ".Hello"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "version"),
-    2: .standard(proto: "rate_limit"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
       case 1: try decoder.decodeSingularInt32Field(value: &self.version)
-      case 2: try decoder.decodeSingularInt32Field(value: &self.rateLimit)
       default: break
       }
     }
@@ -576,15 +571,11 @@ extension Proto_Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
     if self.version != 0 {
       try visitor.visitSingularInt32Field(value: self.version, fieldNumber: 1)
     }
-    if self.rateLimit != 0 {
-      try visitor.visitSingularInt32Field(value: self.rateLimit, fieldNumber: 2)
-    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Proto_Hello, rhs: Proto_Hello) -> Bool {
     if lhs.version != rhs.version {return false}
-    if lhs.rateLimit != rhs.rateLimit {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
