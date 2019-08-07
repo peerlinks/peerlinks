@@ -194,11 +194,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
         do {
             var response: Channel.QueryResponse?
             
-            if proto.cursor.isEmpty {
-                response = try channel.query(withMinHeight: proto.minHeight, andLimit: Int(proto.limit))
-            } else {
-                response = try channel.query(withCursor: Bytes(proto.cursor), andLimit: Int(proto.limit))
+            var cursor: Channel.Cursor?
+            switch proto.cursor {
+            case .some(.hash(let hash)):
+                cursor = .hash(Bytes(hash))
+            case .some(.height(let height)):
+                cursor = .height(height)
+            case .none:
+                debugPrint("[app] invalid cursor in query response")
+                return
             }
+            response = try channel.query(withCursor: cursor!, andLimit: Int(proto.limit))
             
             let _ = try peer.send(queryResponse: response!, from: channel)
         } catch {

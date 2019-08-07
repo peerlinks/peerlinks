@@ -19,6 +19,8 @@ enum ValidationError : Error {
     case invalidMessageTextSize(Int)
     
     case invalidQueryChannelIDSize(Int)
+    case invalidQueryHashSize(Int)
+    case missingQueryCursor
     
     case invalidSubscribeChannelIDSize(Int)
 }
@@ -156,6 +158,17 @@ extension Proto_Query : Proto_Validation {
         if channelID.count != Channel.CHANNEL_ID_LENGTH {
             throw ValidationError.invalidQueryChannelIDSize(channelID.count)
         }
+        
+        switch cursor {
+        case .some(.hash(let hash)):
+            if hash.count != ChannelMessage.MESSAGE_HASH_LENGTH {
+                throw ValidationError.invalidQueryHashSize(hash.count)
+            }
+        case .some(.height(_)):
+            return
+        case .none:
+            throw ValidationError.missingQueryCursor
+        }
     }
 }
 
@@ -163,6 +176,14 @@ extension Proto_QueryResponse : Proto_Validation {
     func validate(context: Context) throws {
         if channelID.count != Channel.CHANNEL_ID_LENGTH {
             throw ValidationError.invalidQueryChannelIDSize(channelID.count)
+        }
+        
+        if !forwardHash.isEmpty && forwardHash.count != ChannelMessage.MESSAGE_HASH_LENGTH {
+            throw ValidationError.invalidQueryHashSize(forwardHash.count)
+        }
+        
+        if !backwardHash.isEmpty && backwardHash.count != ChannelMessage.MESSAGE_HASH_LENGTH {
+            throw ValidationError.invalidQueryHashSize(forwardHash.count)
         }
         
         for message in messages {

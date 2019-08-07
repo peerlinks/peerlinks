@@ -21,7 +21,7 @@ class VowLinkTests: XCTestCase {
         try! context.keychain.removeAll()
     }
     
-    func messages(in channel: Channel) -> [String] {
+    func text(in channel: Channel) -> [String] {
         return channel.messages.map({ (message) -> String in
             guard let content = message.decryptedContent else {
                 return "<encrypted>"
@@ -239,26 +239,66 @@ class VowLinkTests: XCTestCase {
     func testChannelSync() {
         let idA = try! Identity(context: context, name: "test:a")
         let idB = try! Identity(context: context, name: "test:b")
+
+        enum TestMessage {
+            case a(String)
+            case b(String)
+            case syncAB
+            case syncBA
+        }
         
-        let channelA = try! Channel(idA)
-        let chain = Chain(context: context, links: [
-            try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
+        func check(_ messages: [TestMessage]) {
+            let channelA = try! Channel(idA)
+            let channelB = try! Channel(context: context,
+                                        publicKey: channelA.publicKey,
+                                        name: channelA.name,
+                                        root: channelA.root)
+            
+            let chain = Chain(context: context, links: [
+                try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
+            ])
+            
+            try! idB.addChain(chain, for: channelB)
+
+            for message in messages {
+                switch message {
+                case .a(let text):
+                    let _ = try! channelA.post(message: Channel.text(text), by: idA)
+                case .b(let text):
+                    let _ = try! channelB.post(message: Channel.text(text), by: idB)
+                case .syncAB:
+                    channelA.sync(with: channelB)
+                case .syncBA:
+                    channelB.sync(with: channelA)
+                }
+            }
+            
+            XCTAssertEqual(text(in: channelA), text(in: channelB))
+        }
+        
+        check([
+            .a("hello b"),
+            .b("hello a"),
+            .a("how are you?"),
+            .b("what's up?"),
+            .syncAB,
+            .syncBA
         ])
         
-        let channelB = try! Channel(context: context,
-                                    publicKey: channelA.publicKey,
-                                    name: channelA.name,
-                                    root: channelA.root)
+        check([
+            .a("hello b"),
+            .b("hello a"),
+            .a("how are you?"),
+            .syncAB,
+            .syncBA
+            ])
         
-        try! idB.addChain(chain, for: channelB)
-        
-        let _ = try! channelA.post(message: Channel.text("hello idB"), by: idA)
-        let _ = try! channelB.post(message: Channel.text("hello idA"), by: idB)
-        let _ = try! channelB.post(message: Channel.text("how are you?"), by: idB)
-        
-        channelA.sync(with: channelB)
-        channelB.sync(with: channelA)
-        
-        XCTAssertEqual(messages(in: channelA), messages(in: channelB))
+        check([
+            .a("hello b"),
+            .b("hello a"),
+            .b("what's up?"),
+            .syncAB,
+            .syncBA
+            ])
     }
 }

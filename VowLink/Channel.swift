@@ -7,11 +7,7 @@ protocol ChannelDelegate : AnyObject {
 
 protocol RemoteChannel {
     func query(channelID: Bytes,
-               withMinHeight minHeight: UInt64,
-               limit: Int,
-               andClosure closure: @escaping (Channel.QueryResponse) -> Void)
-    func query(channelID: Bytes,
-               withCursor cursor: Bytes,
+               withCursor cursor: Channel.Cursor,
                limit: Int,
                andClosure closure: @escaping (Channel.QueryResponse) -> Void)
     func destroy(reason: String)
@@ -36,9 +32,13 @@ enum ChannelError : Error {
 class Channel: RemoteChannel {
     struct QueryResponse {
         let messages: [ChannelMessage]
-        let forwardCursor: Bytes?
-        let backwardCursor: Bytes?
-        let minLeafHeight: UInt64?
+        let forwardHash: Bytes?
+        let backwardHash: Bytes?
+    }
+    
+    enum Cursor {
+        case height(UInt64)
+        case hash(Bytes)
     }
     
     let context: Context
@@ -268,27 +268,12 @@ class Channel: RemoteChannel {
     func sync(with remote: RemoteChannel) {
         debugPrint("[channel] \(channelID) starting sync")
 
-        let requestedHeight = minLeafHeight
-        remote.query(channelID: channelID,
-                     withMinHeight: requestedHeight,
-                     limit: Channel.SYNC_LIMIT) {
-                        (response) in
-                        self.handle(queryResponse: response, from: remote, andRequestedHeight: requestedHeight)
+        remote.query(channelID: channelID, withCursor: .height(minLeafHeight), limit: Channel.SYNC_LIMIT) { (response) in
+            self.handle(queryResponse: response, from: remote)
         }
     }
     
-    private func handle(queryResponse response: QueryResponse, from remote: RemoteChannel, andRequestedHeight requestedHeight: UInt64? = nil) {
-        if let suggestedHeight = response.minLeafHeight,
-            let requestedHeight = requestedHeight,
-            suggestedHeight < requestedHeight {
-            remote.query(channelID: channelID,
-                         withMinHeight: suggestedHeight,
-                         limit: Channel.SYNC_LIMIT) { (response) in
-                            self.handle(queryResponse: response, from: remote)
-            }
-            return
-        }
-        
+    private func handle(queryResponse response: QueryResponse, from remote: RemoteChannel) {
         if response.messages.count > Channel.SYNC_LIMIT {
             remote.destroy(reason: "message count overflow")
             return
@@ -311,22 +296,19 @@ class Channel: RemoteChannel {
         var cursor: Bytes? = nil
         
         if missing {
-            cursor = response.backwardCursor
+            cursor = response.backwardHash
             
             if cursor == nil {
                 remote.destroy(reason: "empty backward cursor when messages are missing")
                 return
             }
         } else {
-            cursor = response.forwardCursor
+            cursor = response.forwardHash
         }
         
         if let cursor = cursor {
-            remote.query(channelID: channelID,
-                         withCursor: cursor,
-                         limit: Channel.SYNC_LIMIT) {
-                            (response) in
-                            self.handle(queryResponse: response, from: remote)
+            remote.query(channelID: channelID, withCursor: .hash(cursor), limit: Channel.SYNC_LIMIT) { (response) in
+                self.handle(queryResponse: response, from: remote)
             }
             return
         }
@@ -334,57 +316,53 @@ class Channel: RemoteChannel {
         debugPrint("[channel] \(channelID) sync complete")
     }
     
-    func query(withMinHeight minHeight: UInt64, andLimit limit: Int) throws -> QueryResponse {
+    func query(withCursor cursor: Cursor, andLimit limit: Int) throws -> QueryResponse {
         let enforcedLimit = min(limit, Channel.SYNC_LIMIT)
         
-        var filtered = [ChannelMessage]()
-        var backward: Bytes?
-        var forward: Bytes?
-        for message in messages {
-            let encrypted = try message.encrypted(withChannel: self)
-            
-            if message.height < minHeight {
-                backward = encrypted.hash!
-                continue
-            }
-            
-            if filtered.count == enforcedLimit {
-                forward = encrypted.hash!
+        var first: Int?
+
+        switch cursor {
+        case .height(let height):
+            let requestHeight = min(height, minLeafHeight)
+        
+            for (i, message) in messages.enumerated() {
+                if message.height < requestHeight {
+                    continue
+                }
+                first = i
                 break
             }
-            
-            filtered.append(encrypted)
-        }
-        
-        return QueryResponse(messages: filtered, forwardCursor: forward, backwardCursor: backward, minLeafHeight: minLeafHeight)
-    }
-    
-    func query(withCursor cursor: Bytes, andLimit limit: Int) throws -> QueryResponse {
-        let enforcedLimit = min(limit, Channel.SYNC_LIMIT)
-        
-        var filtered = [ChannelMessage]()
-        var backward: Bytes?
-        var forward: Bytes?
-        var found = false
-        for message in messages {
-            let encrypted = try message.encrypted(withChannel: self)
-            
-            if !found && !context.sodium.utils.equals(encrypted.hash!, cursor) {
-                backward = encrypted.hash!
-                continue
-            }
-            
-            found = true
-            
-            if filtered.count == enforcedLimit {
-                forward = encrypted.hash!
+        case .hash(let hash):
+            for (i, message) in messages.enumerated() {
+                let encrypted = try! message.encrypted(withChannel: self)
+                if !context.sodium.utils.equals(encrypted.hash!, hash) {
+                    continue
+                }
+                first = i
                 break
             }
-            
-            filtered.append(encrypted)
         }
         
-        return QueryResponse(messages: filtered, forwardCursor: forward, backwardCursor: backward, minLeafHeight: nil)
+        let last = min(messages.count, first! + enforcedLimit)
+        
+        let result = try messages[first!..<last].map { (message) -> ChannelMessage in
+            return try message.encrypted(withChannel: self)
+        }
+        
+        var forward: Bytes? = nil
+        if last < messages.count {
+            let encrypted = try messages[last].encrypted(withChannel: self)
+            forward = encrypted.hash!
+        }
+        var backward: Bytes? = nil
+        if first! > 0 {
+            let encrypted = try messages[max(0, first! - enforcedLimit)].encrypted(withChannel: self)
+            backward = encrypted.hash!
+        }
+        
+        return QueryResponse(messages: result,
+                             forwardHash: forward,
+                             backwardHash: backward)
     }
     
     // MARK: Utils
@@ -452,18 +430,10 @@ class Channel: RemoteChannel {
     // MARK: RemoteChannel (mostly for testing)
     
     func query(channelID: Bytes,
-               withCursor cursor: Bytes,
+               withCursor cursor: Cursor,
                limit: Int,
                andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
         let response = try! query(withCursor: cursor, andLimit: limit)
-        closure(response)
-    }
-    
-    func query(channelID: Bytes,
-               withMinHeight minHeight: UInt64,
-               limit: Int,
-               andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
-        let response = try! query(withMinHeight: minHeight, andLimit: limit)
         closure(response)
     }
     

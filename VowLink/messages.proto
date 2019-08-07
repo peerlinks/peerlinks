@@ -100,17 +100,18 @@ message ChannelMessage {
 
 message Query {
   bytes channel_id = 1;
-  uint64 min_height = 2;
-  bytes cursor = 3;
+  oneof cursor {
+    uint64 height = 2;
+    bytes hash = 3;
+  }
   uint32 limit = 4;
 }
 
 message QueryResponse {
   bytes channel_id = 1;
   repeated ChannelMessage messages = 2;
-  bytes forward_cursor = 3;
-  bytes backward_cursor = 4;
-  uint64 min_leaf_height = 5;
+  bytes forward_hash = 3;
+  bytes backward_hash = 4;
 }
 
 message Error {

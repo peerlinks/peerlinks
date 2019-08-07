@@ -326,26 +326,27 @@ channel:
 ```proto
 message Query {
   bytes channel_id = 1;
-  uint64 min_height = 2;
-  bytes cursor = 3;
-  uint64 limit = 4;
+  oneof cursor {
+    uint64 height = 2;
+    bytes hash = 3;
+  }
+  uint32 limit = 4;
 }
 ```
+The `query.cursor` MUST be either of `height` or `hash`.
 
-It is trivial to filter the messages with `height` greater or equal to
-`sync.min_height`. Peers SHOULD send all messages with the `message.height`
-greater or equal to `sync.min_height`. If `cursor` is present, the query MUST
-continue from it (the definition of cursor is dependent upon implementation
-of the remote peer, and MAY or MAY NOT be a message hash):
+The remote peer responds with:
 ```proto
 message QueryResponse {
   bytes channel_id = 1;
   repeated ChannelMessage messages = 2;
-  bytes forward_cursor = 3;
-  bytes backward_cursor = 4;
-  uint64 min_leaf_height = 5;
+  bytes forward_hash = 3;
+  bytes backward_hash = 4;
 }
 ```
+
+The synchronization process is following:
+WIP
 
 It might be the case that either the recipient is an untrusted peer and has only
 disconnected portions of DAG, or that the DAG of sender and recipient has

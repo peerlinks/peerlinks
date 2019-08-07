@@ -325,13 +325,42 @@ struct Proto_Query {
 
   var channelID: Data = SwiftProtobuf.Internal.emptyData
 
-  var minHeight: UInt64 = 0
+  var cursor: Proto_Query.OneOf_Cursor? = nil
 
-  var cursor: Data = SwiftProtobuf.Internal.emptyData
+  var height: UInt64 {
+    get {
+      if case .height(let v)? = cursor {return v}
+      return 0
+    }
+    set {cursor = .height(newValue)}
+  }
+
+  var hash: Data {
+    get {
+      if case .hash(let v)? = cursor {return v}
+      return SwiftProtobuf.Internal.emptyData
+    }
+    set {cursor = .hash(newValue)}
+  }
 
   var limit: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  enum OneOf_Cursor: Equatable {
+    case height(UInt64)
+    case hash(Data)
+
+  #if !swift(>=4.1)
+    static func ==(lhs: Proto_Query.OneOf_Cursor, rhs: Proto_Query.OneOf_Cursor) -> Bool {
+      switch (lhs, rhs) {
+      case (.height(let l), .height(let r)): return l == r
+      case (.hash(let l), .hash(let r)): return l == r
+      default: return false
+      }
+    }
+  #endif
+  }
 
   init() {}
 }
@@ -345,11 +374,9 @@ struct Proto_QueryResponse {
 
   var messages: [Proto_ChannelMessage] = []
 
-  var forwardCursor: Data = SwiftProtobuf.Internal.emptyData
+  var forwardHash: Data = SwiftProtobuf.Internal.emptyData
 
-  var backwardCursor: Data = SwiftProtobuf.Internal.emptyData
-
-  var minLeafHeight: UInt64 = 0
+  var backwardHash: Data = SwiftProtobuf.Internal.emptyData
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1210,8 +1237,8 @@ extension Proto_Query: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
   static let protoMessageName: String = _protobuf_package + ".Query"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "channel_id"),
-    2: .standard(proto: "min_height"),
-    3: .same(proto: "cursor"),
+    2: .same(proto: "height"),
+    3: .same(proto: "hash"),
     4: .same(proto: "limit"),
   ]
 
@@ -1219,8 +1246,16 @@ extension Proto_Query: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
       case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
-      case 2: try decoder.decodeSingularUInt64Field(value: &self.minHeight)
-      case 3: try decoder.decodeSingularBytesField(value: &self.cursor)
+      case 2:
+        if self.cursor != nil {try decoder.handleConflictingOneOf()}
+        var v: UInt64?
+        try decoder.decodeSingularUInt64Field(value: &v)
+        if let v = v {self.cursor = .height(v)}
+      case 3:
+        if self.cursor != nil {try decoder.handleConflictingOneOf()}
+        var v: Data?
+        try decoder.decodeSingularBytesField(value: &v)
+        if let v = v {self.cursor = .hash(v)}
       case 4: try decoder.decodeSingularUInt32Field(value: &self.limit)
       default: break
       }
@@ -1231,11 +1266,12 @@ extension Proto_Query: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
     if !self.channelID.isEmpty {
       try visitor.visitSingularBytesField(value: self.channelID, fieldNumber: 1)
     }
-    if self.minHeight != 0 {
-      try visitor.visitSingularUInt64Field(value: self.minHeight, fieldNumber: 2)
-    }
-    if !self.cursor.isEmpty {
-      try visitor.visitSingularBytesField(value: self.cursor, fieldNumber: 3)
+    switch self.cursor {
+    case .height(let v)?:
+      try visitor.visitSingularUInt64Field(value: v, fieldNumber: 2)
+    case .hash(let v)?:
+      try visitor.visitSingularBytesField(value: v, fieldNumber: 3)
+    case nil: break
     }
     if self.limit != 0 {
       try visitor.visitSingularUInt32Field(value: self.limit, fieldNumber: 4)
@@ -1245,7 +1281,6 @@ extension Proto_Query: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
 
   static func ==(lhs: Proto_Query, rhs: Proto_Query) -> Bool {
     if lhs.channelID != rhs.channelID {return false}
-    if lhs.minHeight != rhs.minHeight {return false}
     if lhs.cursor != rhs.cursor {return false}
     if lhs.limit != rhs.limit {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -1258,9 +1293,8 @@ extension Proto_QueryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "channel_id"),
     2: .same(proto: "messages"),
-    3: .standard(proto: "forward_cursor"),
-    4: .standard(proto: "backward_cursor"),
-    5: .standard(proto: "min_leaf_height"),
+    3: .standard(proto: "forward_hash"),
+    4: .standard(proto: "backward_hash"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1268,9 +1302,8 @@ extension Proto_QueryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
       switch fieldNumber {
       case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
       case 2: try decoder.decodeRepeatedMessageField(value: &self.messages)
-      case 3: try decoder.decodeSingularBytesField(value: &self.forwardCursor)
-      case 4: try decoder.decodeSingularBytesField(value: &self.backwardCursor)
-      case 5: try decoder.decodeSingularUInt64Field(value: &self.minLeafHeight)
+      case 3: try decoder.decodeSingularBytesField(value: &self.forwardHash)
+      case 4: try decoder.decodeSingularBytesField(value: &self.backwardHash)
       default: break
       }
     }
@@ -1283,14 +1316,11 @@ extension Proto_QueryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     if !self.messages.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.messages, fieldNumber: 2)
     }
-    if !self.forwardCursor.isEmpty {
-      try visitor.visitSingularBytesField(value: self.forwardCursor, fieldNumber: 3)
+    if !self.forwardHash.isEmpty {
+      try visitor.visitSingularBytesField(value: self.forwardHash, fieldNumber: 3)
     }
-    if !self.backwardCursor.isEmpty {
-      try visitor.visitSingularBytesField(value: self.backwardCursor, fieldNumber: 4)
-    }
-    if self.minLeafHeight != 0 {
-      try visitor.visitSingularUInt64Field(value: self.minLeafHeight, fieldNumber: 5)
+    if !self.backwardHash.isEmpty {
+      try visitor.visitSingularBytesField(value: self.backwardHash, fieldNumber: 4)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1298,9 +1328,8 @@ extension Proto_QueryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
   static func ==(lhs: Proto_QueryResponse, rhs: Proto_QueryResponse) -> Bool {
     if lhs.channelID != rhs.channelID {return false}
     if lhs.messages != rhs.messages {return false}
-    if lhs.forwardCursor != rhs.forwardCursor {return false}
-    if lhs.backwardCursor != rhs.backwardCursor {return false}
-    if lhs.minLeafHeight != rhs.minLeafHeight {return false}
+    if lhs.forwardHash != rhs.forwardHash {return false}
+    if lhs.backwardHash != rhs.backwardHash {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

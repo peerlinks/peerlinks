@@ -96,14 +96,11 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
                     return message.toProto()!
                 })
                 
-                if let forward = response.forwardCursor {
-                    proto.forwardCursor = Data(forward)
+                if let forward = response.forwardHash {
+                    proto.forwardHash = Data(forward)
                 }
-                if let backward = response.backwardCursor {
-                    proto.backwardCursor = Data(backward)
-                }
-                if let minHeight = response.minLeafHeight {
-                    proto.minLeafHeight = minHeight
+                if let backward = response.backwardHash {
+                    proto.backwardHash = Data(backward)
                 }
             })
         }
@@ -179,18 +176,14 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
                 return try ChannelMessage(context: self.context, proto: proto)
             }
             
-            var forwardCursor: Bytes?
-            var backwardCursor: Bytes?
-            var minLeafHeight: UInt64?
+            var forwardHash: Bytes?
+            var backwardHash: Bytes?
             
-            if !proto.forwardCursor.isEmpty {
-                forwardCursor = Bytes(proto.forwardCursor)
+            if !proto.forwardHash.isEmpty {
+                forwardHash = Bytes(proto.forwardHash)
             }
-            if !proto.backwardCursor.isEmpty {
-                backwardCursor = Bytes(proto.backwardCursor)
-            }
-            if proto.minLeafHeight != 0 {
-                minLeafHeight = proto.minLeafHeight
+            if !proto.backwardHash.isEmpty {
+                backwardHash = Bytes(proto.backwardHash)
             }
             
             queryResponses.removeValue(forKey: channelID)
@@ -199,9 +192,8 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             // TODO(indutny): reconsider doing it here
             DispatchQueue.main.async {
                 closure(Channel.QueryResponse(messages: messages,
-                                              forwardCursor: forwardCursor,
-                                              backwardCursor: backwardCursor,
-                                              minLeafHeight: minLeafHeight))
+                                              forwardHash: forwardHash,
+                                              backwardHash: backwardHash))
             }
         } catch {
             return destroy(reason: "Failed to parse messages due to error \(error)")
@@ -278,30 +270,19 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     
     // Mark: RemoteChannel
     
-    func query(channelID: Bytes, withCursor cursor: Bytes, limit: Int, andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
+    func query(channelID: Bytes,
+               withCursor cursor: Channel.Cursor,
+               limit: Int,
+               andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
         let proto = Proto_Packet.with { (packet) in
             packet.query = Proto_Query.with({ (query) in
                 query.channelID = Data(channelID)
-                query.cursor = Data(cursor)
-                query.limit = UInt32(limit)
-            })
-        }
-        
-        do {
-            let data = try proto.serializedData()
-            let _ = try send(data)
-            
-            queryResponses[channelID] = closure
-        } catch {
-            debugPrint("[peer] id=\(remoteID.displayName) query error \(error)")
-        }
-    }
-    
-    func query(channelID: Bytes, withMinHeight minHeight: UInt64, limit: Int, andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
-        let proto = Proto_Packet.with { (packet) in
-            packet.query = Proto_Query.with({ (query) in
-                query.channelID = Data(channelID)
-                query.minHeight = minHeight
+                switch cursor {
+                case .hash(let hash):
+                    query.hash = Data(hash)
+                case .height(let height):
+                    query.height = height
+                }
                 query.limit = UInt32(limit)
             })
         }
