@@ -161,11 +161,10 @@
                                     </tableViewCell>
                                 </prototypes>
                             </tableView>
-                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="500" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="N6r-d9-r7e">
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="500" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="N6r-d9-r7e">
                                 <rect key="frame" x="16" y="748" width="291" height="30"/>
                                 <nil key="textColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" returnKeyType="send"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences" returnKeyType="send"/>
                                 <connections>
                                     <action selector="sendClicked:" destination="AC4-Jh-zDQ" eventType="primaryActionTriggered" id="qMq-u6-cKX"/>
                                 </connections>
@@ -188,6 +187,7 @@
                             <constraint firstItem="arC-bz-8bh" firstAttribute="top" secondItem="GsW-Oe-CMg" secondAttribute="bottom" constant="8" id="gUe-wI-aXi"/>
                             <constraint firstItem="arC-bz-8bh" firstAttribute="bottom" secondItem="oGk-sX-HDX" secondAttribute="bottom" id="ggu-bu-QXK"/>
                             <constraint firstItem="arC-bz-8bh" firstAttribute="leading" secondItem="N6r-d9-r7e" secondAttribute="trailing" constant="16" id="guB-MC-yhg"/>
+                            <constraint firstItem="N6r-d9-r7e" firstAttribute="bottom" secondItem="oGk-sX-HDX" secondAttribute="bottom" id="mck-2s-ASL"/>
                             <constraint firstItem="N6r-d9-r7e" firstAttribute="leading" secondItem="oGk-sX-HDX" secondAttribute="leading" constant="16" id="uYf-6t-He8"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="oGk-sX-HDX"/>
