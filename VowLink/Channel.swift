@@ -28,6 +28,7 @@ enum ChannelError : Error {
     case invalidHeight(UInt64)
     case invalidTimestamp(TimeInterval)
     case parentTooFarInThePast
+    case expectedDecryptedMessage
 }
 
 class Channel: RemoteChannel {
@@ -47,6 +48,7 @@ class Channel: RemoteChannel {
     var name: String
     
     var messages = [ChannelMessage]()
+    var messagesByHash = [Bytes:ChannelMessage]()
     var leafs = [ChannelMessage]()
     
     weak var delegate: ChannelDelegate? = nil
@@ -89,8 +91,9 @@ class Channel: RemoteChannel {
         self.root = root
         
         let decryptedRoot = try root.decrypted(withChannel: self)
-        self.messages = [ decryptedRoot ]
-        self.leafs = [ decryptedRoot ]
+        
+        try append(decryptedRoot)
+        leafs = try computeLeafs()
         
         if publicKey.count != context.sodium.sign.PublicKeyBytes {
             throw ChannelError.invalidPublicKeySize(publicKey.count)
@@ -160,14 +163,7 @@ class Channel: RemoteChannel {
     }
     
     func message(byHash hash: Bytes) -> ChannelMessage? {
-        for message in messages {
-            let encrypted = try! message.encrypted(withChannel: self)
-            if context.sodium.utils.equals(hash, encrypted.hash!) {
-                return message
-            }
-        }
-        
-        return nil
+        return messagesByHash[hash]
     }
     
     func post(message body: Proto_ChannelMessage.Body, by identity: Identity) throws -> ChannelMessage {
@@ -417,8 +413,16 @@ class Channel: RemoteChannel {
         })
     }
     
-    private func append(_ message: ChannelMessage) throws {
-        let decrypted = try message.decrypted(withChannel: self)
+    private func append(_ decrypted: ChannelMessage) throws {
+        if decrypted.isEncrypted {
+            throw ChannelError.expectedDecryptedMessage
+        }
+        
+        let encrypted = try decrypted.encrypted(withChannel: self)
+        if messagesByHash[encrypted.hash!] != nil {
+            return
+        }
+        messagesByHash[encrypted.hash!] = decrypted
         
         self.messages.append(decrypted)
         try self.messages.sort { (a, b) -> Bool in

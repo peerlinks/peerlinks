@@ -319,6 +319,9 @@ The `invite.links` MUST be a chain from `channel_priv_key` to the
 
 ### Synchronization
 
+_(TODO(indutny): send abbreviated messages with just hashes of themselves and
+their parents. Provide bulk request API)_
+
 This DAG would make little sense without synchronization.
 
 Unencrypted `Query` is sent in order to request the latest messages from the
