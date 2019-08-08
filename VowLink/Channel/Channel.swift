@@ -16,7 +16,7 @@ enum ChannelError : Error {
     case invalidSignature
     case invalidParentCount
     case parentNotFound(Bytes)
-    case invalidHeight(UInt64)
+    case invalidHeight(Int64)
     case invalidTimestamp(TimeInterval)
     case parentTooFarInThePast
     case expectedDecryptedMessage
@@ -129,7 +129,7 @@ class Channel {
         let parents = try leafs.map({ (leaf) -> Bytes in
             return try leaf.encrypted(withChannel: self).hash!
         })
-        let height = leafs.reduce(0) { (acc, leaf) -> UInt64 in
+        let height = leafs.reduce(0) { (acc, leaf) -> Int64 in
             return max(acc, leaf.height)
         } + 1
         
@@ -181,7 +181,7 @@ class Channel {
             throw ChannelError.invalidParentCount
         }
         
-        var height: UInt64 = 0
+        var height: Int64 = 0
         var parentMinTimestamp: TimeInterval = 0.0
         var parentTimestamp: TimeInterval = 0.0
         for parentHash in decrypted.parents {

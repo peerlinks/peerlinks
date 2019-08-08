@@ -116,7 +116,7 @@ class Identity {
                      timestamp: TimeInterval,
                      body: Proto_ChannelMessage.Body,
                      parents: [Bytes],
-                     height: UInt64) throws -> ChannelMessage.Content {
+                     height: Int64) throws -> ChannelMessage.Content {
         let tbsProto = Proto_ChannelMessage.Content.TBS.with { (tbs) in
             tbs.chain = chain.links.map({ (link) -> Proto_Link in
                 return link.toProto()

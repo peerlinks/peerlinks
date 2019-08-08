@@ -62,7 +62,7 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
     
     @IBAction func eraseClicked(_ sender: Any) {
         try! context.keychain.removeAll()
-        try! context.persistence.destroy()
+        try! context.persistence.removeAll()
         fatalError("Intentionally crashing the app")
     }
     

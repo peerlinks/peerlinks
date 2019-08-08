@@ -15,11 +15,12 @@ class VowLinkTests: XCTestCase {
 
     override func setUp() {
         try! context.keychain.removeAll()
+        try! context.persistence.removeAll()
     }
 
     override func tearDown() {
         try! context.keychain.removeAll()
-        try! context.persistence.destroy()
+        try! context.persistence.removeAll()
     }
     
     func text(in channel: Channel) -> [String] {
@@ -319,5 +320,14 @@ class VowLinkTests: XCTestCase {
         let fetch = try! context.persistence.message(withHash: message.hash!, andChannelID: channelID)
         
         XCTAssertEqual(fetch?.toProto(), message.toProto())
+        
+        let messages = try! context.persistence.messages(withMinHeight: -1, andChannelID: channelID)
+        XCTAssertEqual(messages.count, 1)
+        
+        let messages2 = try! context.persistence.messages(withMinHeight: 10, andChannelID: channelID)
+        XCTAssertEqual(messages2.count, 1)
+        
+        let messages3 = try! context.persistence.messages(withMinHeight: 11, andChannelID: channelID)
+        XCTAssertEqual(messages3.count, 0)
     }
 }

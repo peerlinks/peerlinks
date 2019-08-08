@@ -27,7 +27,7 @@ extension Channel: RemoteChannel {
     }
     
     enum Cursor {
-        case height(UInt64)
+        case height(Int64)
         case hash(Bytes)
     }
     
@@ -36,9 +36,9 @@ extension Channel: RemoteChannel {
         let forwardIndex: Int
     }
     
-    private var minLeafHeight: UInt64 {
+    private var minLeafHeight: Int64 {
         get {
-            return leafs.reduce(UInt64.max) { (minHeight, leaf) -> UInt64 in
+            return leafs.reduce(Int64.max) { (minHeight, leaf) -> Int64 in
                 return min(minHeight, leaf.height)
             }
         }

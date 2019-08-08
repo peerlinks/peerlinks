@@ -151,7 +151,7 @@ struct Proto_ChannelMessage {
   var parents: [Data] = []
 
   /// height = max(p.height for p in parents)
-  var height: UInt64 = 0
+  var height: Int64 = 0
 
   /// Encryption nonce for Sodium
   var nonce: Data = SwiftProtobuf.Internal.emptyData
@@ -298,7 +298,7 @@ struct Proto_ChannelMessage {
         set {_uniqueStorage()._parents = newValue}
       }
 
-      var height: UInt64 {
+      var height: Int64 {
         get {return _storage._height}
         set {_uniqueStorage()._height = newValue}
       }
@@ -327,7 +327,7 @@ struct Proto_Query {
 
   var cursor: Proto_Query.OneOf_Cursor? = nil
 
-  var height: UInt64 {
+  var height: Int64 {
     get {
       if case .height(let v)? = cursor {return v}
       return 0
@@ -350,7 +350,7 @@ struct Proto_Query {
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Cursor: Equatable {
-    case height(UInt64)
+    case height(Int64)
     case hash(Data)
 
   #if !swift(>=4.1)
@@ -950,7 +950,7 @@ extension Proto_ChannelMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
       switch fieldNumber {
       case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
       case 2: try decoder.decodeRepeatedBytesField(value: &self.parents)
-      case 3: try decoder.decodeSingularUInt64Field(value: &self.height)
+      case 3: try decoder.decodeSingularInt64Field(value: &self.height)
       case 4: try decoder.decodeSingularBytesField(value: &self.nonce)
       case 5: try decoder.decodeSingularBytesField(value: &self.encryptedContent)
       default: break
@@ -966,7 +966,7 @@ extension Proto_ChannelMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
       try visitor.visitRepeatedBytesField(value: self.parents, fieldNumber: 2)
     }
     if self.height != 0 {
-      try visitor.visitSingularUInt64Field(value: self.height, fieldNumber: 3)
+      try visitor.visitSingularInt64Field(value: self.height, fieldNumber: 3)
     }
     if !self.nonce.isEmpty {
       try visitor.visitSingularBytesField(value: self.nonce, fieldNumber: 4)
@@ -1217,7 +1217,7 @@ extension Proto_ChannelMessage.Content.TBS: SwiftProtobuf.Message, SwiftProtobuf
     var _timestamp: Double = 0
     var _body: Proto_ChannelMessage.Body? = nil
     var _parents: [Data] = []
-    var _height: UInt64 = 0
+    var _height: Int64 = 0
 
     static let defaultInstance = _StorageClass()
 
@@ -1248,7 +1248,7 @@ extension Proto_ChannelMessage.Content.TBS: SwiftProtobuf.Message, SwiftProtobuf
         case 2: try decoder.decodeSingularDoubleField(value: &_storage._timestamp)
         case 3: try decoder.decodeSingularMessageField(value: &_storage._body)
         case 4: try decoder.decodeRepeatedBytesField(value: &_storage._parents)
-        case 5: try decoder.decodeSingularUInt64Field(value: &_storage._height)
+        case 5: try decoder.decodeSingularInt64Field(value: &_storage._height)
         default: break
         }
       }
@@ -1270,7 +1270,7 @@ extension Proto_ChannelMessage.Content.TBS: SwiftProtobuf.Message, SwiftProtobuf
         try visitor.visitRepeatedBytesField(value: _storage._parents, fieldNumber: 4)
       }
       if _storage._height != 0 {
-        try visitor.visitSingularUInt64Field(value: _storage._height, fieldNumber: 5)
+        try visitor.visitSingularInt64Field(value: _storage._height, fieldNumber: 5)
       }
     }
     try unknownFields.traverse(visitor: &visitor)
@@ -1311,8 +1311,8 @@ extension Proto_Query: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
       case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
       case 2:
         if self.cursor != nil {try decoder.handleConflictingOneOf()}
-        var v: UInt64?
-        try decoder.decodeSingularUInt64Field(value: &v)
+        var v: Int64?
+        try decoder.decodeSingularInt64Field(value: &v)
         if let v = v {self.cursor = .height(v)}
       case 3:
         if self.cursor != nil {try decoder.handleConflictingOneOf()}
@@ -1332,7 +1332,7 @@ extension Proto_Query: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
     }
     switch self.cursor {
     case .height(let v)?:
-      try visitor.visitSingularUInt64Field(value: v, fieldNumber: 2)
+      try visitor.visitSingularInt64Field(value: v, fieldNumber: 2)
     case .hash(let v)?:
       try visitor.visitSingularBytesField(value: v, fieldNumber: 3)
     case nil: break

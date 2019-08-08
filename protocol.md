@@ -127,7 +127,7 @@ message ChannelMessage {
       // NOTE: Despite these fields being outside of content they have to be
       // included here to prevent replay attacks
       repeated bytes parents = 4;
-      uint64 height = 5;
+      int64 height = 5;
     }
 
     // Link chain that leads from the channel's public key to the signer of
@@ -149,7 +149,7 @@ message ChannelMessage {
   repeated bytes parents = 2;
 
   // height = max(p.height for p in parents)
-  uint64 height = 3;
+  int64 height = 3;
 
   // Encryption nonce for Sodium
   bytes nonce = 4;
@@ -329,7 +329,7 @@ channel:
 message Query {
   bytes channel_id = 1;
   oneof cursor {
-    uint64 height = 2;
+    int64 height = 2;
     bytes hash = 3;
   }
   bool is_backward = 4;

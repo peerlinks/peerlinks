@@ -22,7 +22,7 @@ class ChannelMessage {
     
     let context: Context
     let channelID: Bytes
-    let height: UInt64
+    let height: Int64
     let parents: [Bytes]
     let nonce: Bytes
     let content: EitherContent
@@ -77,7 +77,7 @@ class ChannelMessage {
     static let MESSAGE_HASH_LENGTH = 32
     static let MAX_TEXT_LENGTH = 256
     
-    init(context: Context, channelID: Bytes, content: EitherContent, height: UInt64, nonce: Bytes? = nil, parents: [Bytes] = []) throws {
+    init(context: Context, channelID: Bytes, content: EitherContent, height: Int64, nonce: Bytes? = nil, parents: [Bytes] = []) throws {
         self.context = context
         self.channelID = channelID
         self.parents = parents
