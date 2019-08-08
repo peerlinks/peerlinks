@@ -618,13 +618,6 @@ struct Proto_Channel {
   /// Clears the value of `root`. Subsequent reads from it will return its default value.
   mutating func clearRoot() {_uniqueStorage()._root = nil}
 
-  /// XXX(indutny): this is a temporary solution. Use Core Data like a real iOS
-  /// developer.
-  var messages: [Proto_ChannelMessage] {
-    get {return _storage._messages}
-    set {_uniqueStorage()._messages = newValue}
-  }
-
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1808,14 +1801,12 @@ extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
     1: .standard(proto: "public_key"),
     2: .same(proto: "name"),
     3: .same(proto: "root"),
-    4: .same(proto: "messages"),
   ]
 
   fileprivate class _StorageClass {
     var _publicKey: Data = SwiftProtobuf.Internal.emptyData
     var _name: String = String()
     var _root: Proto_ChannelMessage? = nil
-    var _messages: [Proto_ChannelMessage] = []
 
     static let defaultInstance = _StorageClass()
 
@@ -1825,7 +1816,6 @@ extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
       _publicKey = source._publicKey
       _name = source._name
       _root = source._root
-      _messages = source._messages
     }
   }
 
@@ -1844,7 +1834,6 @@ extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
         case 1: try decoder.decodeSingularBytesField(value: &_storage._publicKey)
         case 2: try decoder.decodeSingularStringField(value: &_storage._name)
         case 3: try decoder.decodeSingularMessageField(value: &_storage._root)
-        case 4: try decoder.decodeRepeatedMessageField(value: &_storage._messages)
         default: break
         }
       }
@@ -1862,9 +1851,6 @@ extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
       if let v = _storage._root {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
       }
-      if !_storage._messages.isEmpty {
-        try visitor.visitRepeatedMessageField(value: _storage._messages, fieldNumber: 4)
-      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1877,7 +1863,6 @@ extension Proto_Channel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
         if _storage._publicKey != rhs_storage._publicKey {return false}
         if _storage._name != rhs_storage._name {return false}
         if _storage._root != rhs_storage._root {return false}
-        if _storage._messages != rhs_storage._messages {return false}
         return true
       }
       if !storagesAreEqual {return false}

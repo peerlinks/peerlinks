@@ -85,11 +85,6 @@ class Channel {
                       name: proto.name,
                       root: try ChannelMessage(context: context, proto: proto.root))
         
-        for protoMessage in proto.messages {
-            let message = try ChannelMessage(context: context, proto: protoMessage)
-            try self.append(try message.decrypted(withChannel: self))
-        }
-        
         leafs = try computeLeafs()
     }
     
@@ -123,13 +118,6 @@ class Channel {
             channel.publicKey = Data(self.publicKey)
             channel.name = self.name
             channel.root = self.root.toProto()!
-            
-            let nonRoot = self.messages[1...]
-            
-            channel.messages = nonRoot.map({ (message) -> Proto_ChannelMessage in
-                let encrypted = try! message.encrypted(withChannel: self)
-                return encrypted.toProto()!
-            })
         })
     }
     
