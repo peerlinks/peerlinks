@@ -67,6 +67,8 @@ message Packet {
 
     Query query = 5;
     QueryResponse query_response = 6;
+    Bulk bulk = 7;
+    BulkResponse bulk_response = 8;
   }
 }
 ```
@@ -342,8 +344,13 @@ The `query.cursor` MUST be either of `height` or `hash`.
 The remote peer responds with:
 ```proto
 message QueryResponse {
+  message Abbreviated {
+    repeated bytes parents = 1;
+    bytes hash = 2;
+  }
+
   bytes channel_id = 1;
-  repeated ChannelMessage messages = 2;
+  repeated Abbreviated abbreviated_messages = 2;
   bytes forward_hash = 3;
   bytes backward_hash = 4;
 }
@@ -353,17 +360,44 @@ The synchronization process is following:
 1. Send `Query` with `cursor.height` set to local `min_leaf_height` (see below)
 2. Recipient of `Query` with `cursor.height` computes the starting `height` as
    `min(min_leaf_height, cursor.height)`
-3. Recipient replies with a slice of the list of messages (see CRDT Order below)
-   starting from the first message of `message.height == height` and either up
-   to the latest message or up to `query.limit` messages total.
-4. For recieved messages the recipient can either:
-  4.1. Commit those of messages that have known parent (and are thus verifiable)
-       and issue a query with `cursor.hash = response.backward_hash` and
-       `is_backward = true`
+3. Recipient replies with a slice of the list of abbreviated messages (see CRDT
+   Order below)    starting from the first message of `message.height == height`
+   and either up to the latest message or up to `query.limit` messages total
+4. For abbreviated messages the recipient can either:
+  4.1. Bulk fetch and commit those of messages that have known parent (and are
+       thus verifiable) and issue a query with
+       `cursor.hash = response.backward_hash` and `is_backward = true`
   4.2. If all messages have known parents - the recipient issues a query with
        `is_backward = false` and `cursor.hash = reponse.forward_hash`
 5. The synchronization is complete when the response the response with
    `forward_hash == nil` is fully processed and has no missing parents.
+
+### Bulk fetch
+
+During synchronization process above the recipient MUST request the messages
+that are not present in their dataset. This can be done with `Bulk` packet:
+```proto
+message Bulk {
+  bytes channel_id = 1;
+  repeated bytes hashes = 2;
+}
+```
+
+Remote side SHOULD reply with as many messages as possible. The messages should
+be in the side order as in `bulk.hashes`, except for allowed omissions for
+those hashes that were not found in the datastore or the trailing hashes that
+are omitted due to some constraints. In the latter case `forward_index` MUST be
+set to the number of processes messages:
+```proto
+message BulkResponse {
+  bytes channel_id = 1;
+  repeated ChannelMessage messages = 2;
+  uint32 forward_index = 3;
+}
+```
+
+The originator of `Bulk` SHOULD resume the fetch if `response.forward_index` is
+not equal to the number of `bulk.hashes` they sent.
 
 ### CRDT Order
 
