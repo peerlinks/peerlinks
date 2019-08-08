@@ -24,7 +24,7 @@ struct Proto_Hello {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var version: Int32 = 0
+  var version: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -590,7 +590,7 @@ extension Proto_Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
-      case 1: try decoder.decodeSingularInt32Field(value: &self.version)
+      case 1: try decoder.decodeSingularUInt32Field(value: &self.version)
       default: break
       }
     }
@@ -598,7 +598,7 @@ extension Proto_Hello: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.version != 0 {
-      try visitor.visitSingularInt32Field(value: self.version, fieldNumber: 1)
+      try visitor.visitSingularUInt32Field(value: self.version, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }

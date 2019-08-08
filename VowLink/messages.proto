@@ -6,7 +6,7 @@ package proto;
 //
 
 message Hello {
-  int32 version = 1;
+  uint32 version = 1;
 }
 
 message Link {

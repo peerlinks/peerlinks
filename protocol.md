@@ -43,7 +43,7 @@ signed by the `signature`.
 The first message over any wire protocol MUST be:
 ```proto
 message Hello {
-  int32 version = 1;
+  uint32 version = 1;
 }
 ```
 
