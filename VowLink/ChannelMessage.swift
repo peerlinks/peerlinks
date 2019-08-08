@@ -61,9 +61,17 @@ class ChannelMessage {
         guard let proto = toProto() else {
             return nil
         }
-        return self.context.sodium.genericHash.hash(message: Bytes(try! proto.serializedData()),
-                                                    key: "vowlink-message".bytes,
-                                                    outputLength: ChannelMessage.MESSAGE_HASH_LENGTH)!
+        return context.sodium.genericHash.hash(message: Bytes(try! proto.serializedData()),
+                                               key: "vowlink-message".bytes,
+                                               outputLength: ChannelMessage.MESSAGE_HASH_LENGTH)!
+    }()
+    
+    lazy var displayHash: String? = {
+        if let hash = self.hash {
+            return context.sodium.utils.bin2hex(hash)
+        } else {
+            return nil
+        }
     }()
     
     static let MESSAGE_HASH_LENGTH = 32
@@ -97,14 +105,16 @@ class ChannelMessage {
             return false
         }
         
-        guard let leafKey = try content.chain.verify(withChannel: channel,
-                                                     andAgainstTimestamp: content.timestamp) else {
-                                                        debugPrint("[channel-message] invalid chain for message \(String(describing: hash))")
-                                                        return false
+        let maybeLeaf = try content.chain.verify(withChannel: channel,
+                                                 andAgainstTimestamp: content.timestamp)
+        
+        guard let leafKey = maybeLeaf else {
+            debugPrint("[channel-message] invalid chain for message \(String(describing: displayHash))")
+            return false
         }
         
         if let publicKey = publicKey, !context.sodium.utils.equals(leafKey, publicKey) {
-            debugPrint("[channel-message] invalid leaf key for message \(String(describing: hash))")
+            debugPrint("[channel-message] invalid leaf key for message \(String(describing: displayHash))")
             return false
         }
         

@@ -104,7 +104,8 @@ message Query {
     uint64 height = 2;
     bytes hash = 3;
   }
-  uint32 limit = 4;
+  bool is_backward = 4;
+  uint32 limit = 5;
 }
 
 message QueryResponse {

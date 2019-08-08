@@ -330,7 +330,8 @@ message Query {
     uint64 height = 2;
     bytes hash = 3;
   }
-  uint32 limit = 4;
+  bool is_backward = 4;
+  uint32 limit = 5;
 }
 ```
 The `query.cursor` MUST be either of `height` or `hash`.
@@ -346,32 +347,22 @@ message QueryResponse {
 ```
 
 The synchronization process is following:
-WIP
+1. Send `Query` with `cursor.height` set to local `min_leaf_height` (see below)
+2. Recipient of `Query` with `cursor.height` computes the starting `height` as
+   `min(min_leaf_height, cursor.height)`
+3. Recipient replies with a slice of the list of messages (see CRDT Order below)
+   starting from the first message of `message.height == height` and either up
+   to the latest message or up to `query.limit` messages total.
+4. For recieved messages the recipient can either:
+  4.1. Commit those of messages that have known parent (and are thus verifiable)
+       and issue a query with `cursor.hash = response.backward_hash` and
+       `is_backward = true`
+  4.2. If all messages have known parents - the recipient issues a query with
+       `is_backward = false` and `cursor.hash = reponse.forward_hash`
+5. The synchronization is complete when the response the response with
+   `forward_hash == nil` is fully processed and has no missing parents.
 
-It might be the case that either the recipient is an untrusted peer and has only
-disconnected portions of DAG, or that the DAG of sender and recipient has
-diverged at `message.height` less than `sync.height`. The sender SHOULD
-repeatedly re-issue `Query` cursor set either to `forward_cursor` or
-`backward_cursor` until all messages are received.
-
-`min_leaf_height` is a suggestion for a better sync point, in case if there are
-different branches. In the example below top branch represents local messages,
-bottom branch represents remote messages. Requesting `min_height = 2` from
-remote MUST result in query response with `min_leaf_height = 1`:
-
-```
-h=0 | h=1       | h=2
-* - | --- * --- | --- *
- \  |           |
-  \ |           |
-   \|           |
-    |           |
-    | \         |
-    |  *        |
-```
-
-IMPORTANT: leafs that are further than 30 day from the latest (by timestamp)
-leaf MUST be ignored by `min_leaf_height` as they are ignored for merges.
+### CRDT Order
 
 The messages in channel MUST be sorted by increasing `height` and then by
 increasing `hash`. Thus the list of messages per-channel becomes a [CRDT][]

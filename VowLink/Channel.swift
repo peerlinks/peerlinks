@@ -8,6 +8,7 @@ protocol ChannelDelegate : AnyObject {
 protocol RemoteChannel {
     func query(channelID: Bytes,
                withCursor cursor: Channel.Cursor,
+               isBackward: Bool,
                limit: Int,
                andClosure closure: @escaping (Channel.QueryResponse) -> Void)
     func destroy(reason: String)
@@ -51,9 +52,13 @@ class Channel: RemoteChannel {
     weak var delegate: ChannelDelegate? = nil
     
     lazy var channelID: Bytes = {
-        return self.context.sodium.genericHash.hash(message: publicKey,
-                                                    key: "vowlink-channel-id".bytes,
-                                                    outputLength: Channel.CHANNEL_ID_LENGTH)!
+        return context.sodium.genericHash.hash(message: publicKey,
+                                               key: "vowlink-channel-id".bytes,
+                                               outputLength: Channel.CHANNEL_ID_LENGTH)!
+    }()
+    
+    lazy var channelDisplayID: String = {
+        return context.sodium.utils.bin2hex(channelID)!
     }()
     
     private var minLeafHeight: UInt64 {
@@ -266,9 +271,12 @@ class Channel: RemoteChannel {
     // MARK: Sync
     
     func sync(with remote: RemoteChannel) {
-        debugPrint("[channel] \(channelID) starting sync")
+        debugPrint("[channel] \(channelDisplayID) starting sync")
 
-        remote.query(channelID: channelID, withCursor: .height(minLeafHeight), limit: Channel.SYNC_LIMIT) { (response) in
+        remote.query(channelID: channelID,
+                     withCursor: .height(minLeafHeight),
+                     isBackward: false,
+                     limit: Channel.SYNC_LIMIT) { (response) in
             self.handle(queryResponse: response, from: remote)
         }
     }
@@ -307,62 +315,77 @@ class Channel: RemoteChannel {
         }
         
         if let cursor = cursor {
-            remote.query(channelID: channelID, withCursor: .hash(cursor), limit: Channel.SYNC_LIMIT) { (response) in
+            remote.query(channelID: channelID,
+                         withCursor: .hash(cursor),
+                         isBackward: missing,
+                         limit: Channel.SYNC_LIMIT) { (response) in
                 self.handle(queryResponse: response, from: remote)
             }
             return
         }
         
-        debugPrint("[channel] \(channelID) sync complete")
+        debugPrint("[channel] \(channelDisplayID) sync complete")
     }
     
-    func query(withCursor cursor: Cursor, andLimit limit: Int) throws -> QueryResponse {
-        let enforcedLimit = min(limit, Channel.SYNC_LIMIT)
+    func query(withCursor cursor: Cursor, isBackward: Bool, andLimit limit: Int) throws -> QueryResponse {
+        debugPrint("[channel] \(channelDisplayID) query isBackward=\(isBackward)")
         
-        var first: Int?
+        let enforcedLimit = min(limit, Channel.SYNC_LIMIT)
+        var index: (Int, ChannelMessage)?
 
         switch cursor {
         case .height(let height):
             let requestHeight = min(height, minLeafHeight)
-        
-            for (i, message) in messages.enumerated() {
-                if message.height < requestHeight {
-                    continue
-                }
-                first = i
-                break
+
+            // TODO(indutny): have some sort of height maps
+            index = messages.enumerated().first { (param) -> Bool in
+                let (_, message) = param
+                return message.height == requestHeight
             }
+
         case .hash(let hash):
-            for (i, message) in messages.enumerated() {
+            // NOTE: Reverse walk is more efficient since in the best
+            // case we are synchronizing just the tip
+            index = messages.enumerated().reversed().first { (param) -> Bool in
+                let (_, message) = param
                 let encrypted = try! message.encrypted(withChannel: self)
-                if !context.sodium.utils.equals(encrypted.hash!, hash) {
-                    continue
-                }
-                first = i
-                break
+                return context.sodium.utils.equals(encrypted.hash!, hash)
             }
         }
         
-        let last = min(messages.count, first! + enforcedLimit)
+        guard let (first, _) = index else {
+            debugPrint("[channel] \(channelDisplayID) query cursor not found")
+            return QueryResponse(messages: [], forwardHash: nil, backwardHash: nil)
+        }
         
-        let result = try messages[first!..<last].map { (message) -> ChannelMessage in
+        var subset: ArraySlice<ChannelMessage>?
+        var forwardIndex: Int
+        if isBackward {
+            let start = max(0, first - enforcedLimit)
+            subset = messages[start..<first]
+            forwardIndex = first
+
+            debugPrint("[channel] \(channelDisplayID) query result [\(start)..<\(first)] forwardIndex=\(forwardIndex)")
+        } else {
+            let end = min(messages.count, first + enforcedLimit)
+            subset = messages[first..<end]
+            forwardIndex = end
+            debugPrint("[channel] \(channelDisplayID) query result [\(first)..<\(end)] forwardIndex=\(forwardIndex)")
+        }
+
+        var forwardHash: Bytes?
+        if forwardIndex < messages.count {
+            let encrypted = try! messages[forwardIndex].encrypted(withChannel: self)
+            forwardHash = encrypted.hash!
+        }
+        
+        let result = try subset!.map { (message) -> ChannelMessage in
             return try message.encrypted(withChannel: self)
         }
         
-        var forward: Bytes? = nil
-        if last < messages.count {
-            let encrypted = try messages[last].encrypted(withChannel: self)
-            forward = encrypted.hash!
-        }
-        var backward: Bytes? = nil
-        if first! > 0 {
-            let encrypted = try messages[max(0, first! - enforcedLimit)].encrypted(withChannel: self)
-            backward = encrypted.hash!
-        }
-        
         return QueryResponse(messages: result,
-                             forwardHash: forward,
-                             backwardHash: backward)
+                             forwardHash: forwardHash,
+                             backwardHash: result.first?.hash)
     }
     
     // MARK: Utils
@@ -431,9 +454,10 @@ class Channel: RemoteChannel {
     
     func query(channelID: Bytes,
                withCursor cursor: Cursor,
+               isBackward: Bool,
                limit: Int,
                andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
-        let response = try! query(withCursor: cursor, andLimit: limit)
+        let response = try! query(withCursor: cursor, isBackward: isBackward, andLimit: limit)
         closure(response)
     }
     

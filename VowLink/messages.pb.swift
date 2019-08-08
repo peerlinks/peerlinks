@@ -343,6 +343,8 @@ struct Proto_Query {
     set {cursor = .hash(newValue)}
   }
 
+  var isBackward: Bool = false
+
   var limit: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -1239,7 +1241,8 @@ extension Proto_Query: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
     1: .standard(proto: "channel_id"),
     2: .same(proto: "height"),
     3: .same(proto: "hash"),
-    4: .same(proto: "limit"),
+    4: .standard(proto: "is_backward"),
+    5: .same(proto: "limit"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1256,7 +1259,8 @@ extension Proto_Query: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
         var v: Data?
         try decoder.decodeSingularBytesField(value: &v)
         if let v = v {self.cursor = .hash(v)}
-      case 4: try decoder.decodeSingularUInt32Field(value: &self.limit)
+      case 4: try decoder.decodeSingularBoolField(value: &self.isBackward)
+      case 5: try decoder.decodeSingularUInt32Field(value: &self.limit)
       default: break
       }
     }
@@ -1273,8 +1277,11 @@ extension Proto_Query: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
       try visitor.visitSingularBytesField(value: v, fieldNumber: 3)
     case nil: break
     }
+    if self.isBackward != false {
+      try visitor.visitSingularBoolField(value: self.isBackward, fieldNumber: 4)
+    }
     if self.limit != 0 {
-      try visitor.visitSingularUInt32Field(value: self.limit, fieldNumber: 4)
+      try visitor.visitSingularUInt32Field(value: self.limit, fieldNumber: 5)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1282,6 +1289,7 @@ extension Proto_Query: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
   static func ==(lhs: Proto_Query, rhs: Proto_Query) -> Bool {
     if lhs.channelID != rhs.channelID {return false}
     if lhs.cursor != rhs.cursor {return false}
+    if lhs.isBackward != rhs.isBackward {return false}
     if lhs.limit != rhs.limit {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

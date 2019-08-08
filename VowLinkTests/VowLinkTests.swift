@@ -247,7 +247,7 @@ class VowLinkTests: XCTestCase {
             case syncBA
         }
         
-        func check(_ messages: [TestMessage]) {
+        func check(_ messages: [TestMessage], message: String) {
             let channelA = try! Channel(idA)
             let channelB = try! Channel(context: context,
                                         publicKey: channelA.publicKey,
@@ -273,7 +273,7 @@ class VowLinkTests: XCTestCase {
                 }
             }
             
-            XCTAssertEqual(text(in: channelA), text(in: channelB))
+            XCTAssertEqual(text(in: channelA), text(in: channelB), message)
         }
         
         check([
@@ -283,15 +283,15 @@ class VowLinkTests: XCTestCase {
             .b("what's up?"),
             .syncAB,
             .syncBA
-        ])
-        
+            ], message: "2 in a, 2 in b")
+
         check([
             .a("hello b"),
             .b("hello a"),
             .a("how are you?"),
             .syncAB,
             .syncBA
-            ])
+            ], message: "2 in a, 1 in b")
         
         check([
             .a("hello b"),
@@ -299,6 +299,6 @@ class VowLinkTests: XCTestCase {
             .b("what's up?"),
             .syncAB,
             .syncBA
-            ])
+            ], message: "1 in a, 2 in b")
     }
 }

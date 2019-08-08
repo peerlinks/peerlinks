@@ -272,6 +272,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     
     func query(channelID: Bytes,
                withCursor cursor: Channel.Cursor,
+               isBackward: Bool,
                limit: Int,
                andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
         let proto = Proto_Packet.with { (packet) in
@@ -283,6 +284,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
                 case .height(let height):
                     query.height = height
                 }
+                query.isBackward = isBackward
                 query.limit = UInt32(limit)
             })
         }

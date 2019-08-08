@@ -204,7 +204,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
                 debugPrint("[app] invalid cursor in query response")
                 return
             }
-            response = try channel.query(withCursor: cursor!, andLimit: Int(proto.limit))
+            response = try channel.query(withCursor: cursor!,
+                                         isBackward: proto.isBackward,
+                                         andLimit: Int(proto.limit))
             
             let _ = try peer.send(queryResponse: response!, from: channel)
         } catch {
