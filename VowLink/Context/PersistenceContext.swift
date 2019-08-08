@@ -47,7 +47,8 @@ class PersistenceContext {
         let channelIDHex = context.sodium.utils.bin2hex(channelID)!
 
         let count = try db.scalar(messageTable
-            .filter(self.hash == hashHex && self.channelID == channelIDHex)
+            .filter(self.channelID == channelIDHex)
+            .filter(self.hash == hashHex)
             .count)
         return count != 0
     }
@@ -57,7 +58,8 @@ class PersistenceContext {
         let channelIDHex = context.sodium.utils.bin2hex(channelID)!
 
         let query = messageTable.select(protobuf)
-            .filter(self.hash == hashHex && self.channelID == channelIDHex)
+            .filter(self.channelID == channelIDHex)
+            .filter(self.hash == hashHex)
         
         guard let first = try db.pluck(query) else {
             return nil
@@ -71,7 +73,8 @@ class PersistenceContext {
         let channelIDHex = context.sodium.utils.bin2hex(channelID)!
 
         let query = messageTable.select(protobuf)
-            .filter(self.channelID == channelIDHex && height >= Int64(minHeight))
+            .filter(self.channelID == channelIDHex)
+            .filter(height >= Int64(minHeight))
             .order(height.asc, hash.asc)
             .limit(limit)
         
@@ -94,7 +97,8 @@ class PersistenceContext {
         let channelIDHex = context.sodium.utils.bin2hex(channelID)!
         
         let query = messageTable.select(protobuf)
-            .filter(self.channelID == channelIDHex && (height > minHeight || (height == minHeight && self.hash >= minHashHex)))
+            .filter(self.channelID == channelIDHex)
+            .filter(height > minHeight || (height == minHeight && self.hash >= minHashHex))
             .order(height.asc, self.hash.asc)
             .limit(limit)
         
