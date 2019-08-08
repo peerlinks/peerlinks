@@ -170,6 +170,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
         do {
             let encrypted = try ChannelMessage(context: context, proto: proto)
             let _ = try channel.receive(encrypted: encrypted)
+        } catch ChannelError.parentNotFound(_) {
+            debugPrint("[app] failed to receive message due to missing parent, starting sync")
+            channel.sync(with: peer)
         } catch {
             debugPrint("[app] failed to create/receive ChannelMessage due to error \(error)")
             peer.destroy(reason: "failed to create/receive message du to error \(error)")
