@@ -81,7 +81,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         return realIDs.map({ (id) -> Peer? in
             return self.peers[id]
         }).filter({ (peer) -> Bool in
-            return peer != nil
+            return peer?.isReady ?? false
         }).map({ (peer) -> Peer in
             return peer!
         })
@@ -171,31 +171,26 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     }
     
     func peerDisconnected(_ peer: Peer) {
+        debugPrint("[p2p] peer disconnected \(peer.remoteID.displayName)")
         self.peers.removeValue(forKey: peer.remoteID)
         peer.delegate = nil
         
-        // Try to reconnect if the peer is still around
-        Timer.scheduledTimer(withTimeInterval: PeerToPeer.RECONNECT_DELAY,
-                             repeats: false) { (_) in
-                                // No peers to reconnect to
-                                if self.availablePeers.count == 0 {
-                                    debugPrint("[p2p] no peers to reconnect to")
-                                    return
-                                }
-                                
-                                var remoteID = peer.remoteID
-                                if self.availablePeers.contains(remoteID) {
-                                    debugPrint("[p2p] disconnected peer \(remoteID) is still there, reconnecting")
-                                } else {
-                                    remoteID = self.availablePeers.randomElement()!
-                                    debugPrint("[p2p] disconnected peer is gone, reconnecting to \(remoteID)")
-                                }
-                                
-                                if let peer = self.connect(to: peer.remoteID) {
-                                    debugPrint("[p2p] inviting peer \(remoteID.displayName) into session")
-                                    self.browser.invitePeer(peer.remoteID, to: peer.session, withContext: nil, timeout: 300.0)
-                                }
+        // Try to reconnect to any other peers
+        let timer = Timer(timeInterval: PeerToPeer.RECONNECT_DELAY, repeats: false) { (timer) in
+            let connectedPeers = Set<MCPeerID>(self.peers.keys)
+            let notConnectedPeers = self.availablePeers.subtracting(connectedPeers)
+            
+            guard let remoteID = notConnectedPeers.randomElement() else {
+                debugPrint("[p2p] no peers to reconnect")
+                return
+            }
+            
+            if let peer = self.connect(to: remoteID) {
+                debugPrint("[p2p] inviting peer \(remoteID.displayName) into session")
+                self.browser.invitePeer(peer.remoteID, to: peer.session, withContext: nil, timeout: 300.0)
+            }
         }
+        RunLoop.main.add(timer, forMode: .common)
     }
     
     func peer(_ peer: Peer, receivedPacket packet: Proto_Packet) {

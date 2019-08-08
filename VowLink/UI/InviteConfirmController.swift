@@ -25,21 +25,19 @@ class InviteConfirmController : UITableViewController {
     }
     
     @IBAction func doneClicked(_ sender: Any) {
-        defer {
-            if let nav = navigationController {
-                // Pop to the channel view
-                let preLast = nav.viewControllers[nav.viewControllers.endIndex.advanced(by: -3)]
-                nav.popToViewController(preLast, animated: true)
-            }
-        }
-        guard let request = request else {
-            return
-        }
-        guard let id = app.identity else {
+        guard let request = request, let id = app.identity else {
             return
         }
         
-        // TODO(indutny): wait for peer to connect, or at least say that it is not connected
+        let peers = app.p2p.peers(byDisplayName: request.peerID)
+        if peers.isEmpty {
+            let alert = UIAlertController(title: "Peer offline",
+                                          message: "Make sure that invitee device is unlocked and running this application",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Close", style: .cancel, handler: nil))
+            present(alert, animated: true)
+            return
+        }
         
         do {
             let link = try id.issueLink(for: Bytes(request.trusteePubKey), andChannel: channel)
@@ -54,9 +52,21 @@ class InviteConfirmController : UITableViewController {
                 packet.invite = encryptedInvite
             }
             
-            try app.p2p.send(packet, to: app.p2p.peers(byDisplayName: request.peerID))
+            try app.p2p.send(packet, to: peers)
         } catch {
             fatalError("failed to issue invite \(request) due to error \(error)")
+        }
+        
+        if let nav = navigationController {
+            // Pop to the channel view
+            let preLast = nav.viewControllers.first { (viewController) -> Bool in
+                return viewController is ChannelController
+            }
+            if let preLast = preLast {
+                nav.popToViewController(preLast, animated: true)
+            } else {
+                nav.popViewController(animated: true)
+            }
         }
     }
 }
