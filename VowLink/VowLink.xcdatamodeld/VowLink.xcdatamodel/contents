@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <elements/>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14492.1" systemVersion="18G87" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="StoredMessage" representedClassName="StoredMessage" syncable="YES" codeGenerationType="class">
+        <attribute name="channelID" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="height" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="messageHash" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="proto" optional="YES" attributeType="Binary" syncable="YES"/>
+        <fetchIndex name="byPropertyIndex">
+            <fetchIndexElement property="height" type="Binary" order="ascending"/>
+            <fetchIndexElement property="channelID" type="Binary" order="ascending"/>
+            <fetchIndexElement property="messageHash" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+    <elements>
+        <element name="StoredMessage" positionX="-45" positionY="0" width="128" height="105"/>
+    </elements>
 </model>

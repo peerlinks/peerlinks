@@ -7,3 +7,6 @@
 [submodule "deps/KeychainAccess"]
 	path = deps/KeychainAccess
 	url = https://github.com/kishikawakatsumi/KeychainAccess
+[submodule "deps/SQLite.swift"]
+	path = deps/SQLite.swift
+	url = https://github.com/stephencelis/SQLite.swift.git

@@ -11,7 +11,7 @@ import Sodium
 @testable import VowLink
 
 class VowLinkTests: XCTestCase {
-    let context = Context(service: "com.indutny.vowlink.test")
+    let context = try! Context(service: "com.indutny.vowlink.test")
 
     override func setUp() {
         try! context.keychain.removeAll()
@@ -19,6 +19,7 @@ class VowLinkTests: XCTestCase {
 
     override func tearDown() {
         try! context.keychain.removeAll()
+        try! context.persistence.destroy()
     }
     
     func text(in channel: Channel) -> [String] {
@@ -300,5 +301,23 @@ class VowLinkTests: XCTestCase {
             .syncAB,
             .syncBA
             ], message: "1 in a, 2 in b")
+    }
+    
+    func testContextPersistence() {
+        let channelID = context.sodium.randomBytes.buf(length: Channel.CHANNEL_ID_LENGTH)!
+        let content = context.sodium.randomBytes.buf(length: 16)!
+        
+        let message = try! ChannelMessage(context: context,
+                                          channelID: channelID,
+                                          content: .encrypted(content),
+                                          height: 10)
+        XCTAssert(!(try! context.persistence.contains(messageWith: message.hash!, for: channelID)))
+        
+        try! context.persistence.append(encrypted: message, to: channelID)
+        XCTAssert(try! context.persistence.contains(messageWith: message.hash!, for: channelID))
+        
+        let fetch = try! context.persistence.message(byHash: message.hash!, for: channelID)
+        
+        XCTAssertEqual(fetch?.toProto(), message.toProto())
     }
 }

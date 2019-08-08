@@ -258,9 +258,10 @@ class Channel {
         }
         
         let encrypted = try decrypted.encrypted(withChannel: self)
-        if messagesByHash[encrypted.hash!] != nil {
+        if message(byHash: encrypted.hash!) != nil {
             return
         }
+        
         messagesByHash[encrypted.hash!] = decrypted
         
         self.messages.append(decrypted)
