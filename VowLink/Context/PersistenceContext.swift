@@ -40,7 +40,7 @@ class PersistenceContext {
         try db.run(messageTable.createIndex(height, unique: false, ifNotExists: true))
     }
     
-    func append(encrypted: ChannelMessage, to channelID: Bytes) throws {
+    func append(encryptedMessage encrypted: ChannelMessage, toChannelID channelID: Bytes) throws {
         let query = messageTable.insert(
             self.channelID <- Blob(bytes: channelID),
             hash <- Blob(bytes: encrypted.hash!),
@@ -52,14 +52,14 @@ class PersistenceContext {
         try db.run(query)
     }
     
-    func contains(messageWith hash: Bytes, for channelID: Bytes) throws -> Bool {
+    func contains(messageWithHash hash: Bytes, andChannelID channelID: Bytes) throws -> Bool {
         let count = try db.scalar(messageTable
             .filter(self.hash == Blob(bytes: hash) && self.channelID == Blob(bytes: channelID))
             .count)
         return count != 0
     }
     
-    func message(byHash hash: Bytes, for channelID: Bytes) throws -> ChannelMessage? {
+    func message(withHash hash: Bytes, andChannelID channelID: Bytes) throws -> ChannelMessage? {
         let query = messageTable.select(protobuf)
             .filter(self.hash == Blob(bytes: hash) && self.channelID == Blob(bytes: channelID))
         
@@ -70,6 +70,7 @@ class PersistenceContext {
         let proto = try Proto_ChannelMessage(serializedData: Data(first.get(protobuf).bytes))
         return try ChannelMessage(context: context, proto: proto)
     }
+    
     
     func destroy() throws {
         try db.run(messageTable.drop(ifExists: true))

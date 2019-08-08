@@ -311,12 +311,12 @@ class VowLinkTests: XCTestCase {
                                           channelID: channelID,
                                           content: .encrypted(content),
                                           height: 10)
-        XCTAssert(!(try! context.persistence.contains(messageWith: message.hash!, for: channelID)))
+        XCTAssert(!(try! context.persistence.contains(messageWithHash: message.hash!, andChannelID: channelID)))
         
-        try! context.persistence.append(encrypted: message, to: channelID)
-        XCTAssert(try! context.persistence.contains(messageWith: message.hash!, for: channelID))
+        try! context.persistence.append(encryptedMessage: message, toChannelID: channelID)
+        XCTAssert(try! context.persistence.contains(messageWithHash: message.hash!, andChannelID: channelID))
         
-        let fetch = try! context.persistence.message(byHash: message.hash!, for: channelID)
+        let fetch = try! context.persistence.message(withHash: message.hash!, andChannelID: channelID)
         
         XCTAssertEqual(fetch?.toProto(), message.toProto())
     }
