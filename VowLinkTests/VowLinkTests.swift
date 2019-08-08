@@ -321,13 +321,13 @@ class VowLinkTests: XCTestCase {
         
         XCTAssertEqual(fetch?.toProto(), message.toProto())
         
-        let messages = try! context.persistence.messages(withMinHeight: -1, andChannelID: channelID)
+        let messages = try! context.persistence.messages(withMinHeight: -1, channelID: channelID, andLimit: 1)
         XCTAssertEqual(messages.count, 1)
         
-        let messages2 = try! context.persistence.messages(withMinHeight: 10, andChannelID: channelID)
+        let messages2 = try! context.persistence.messages(withMinHeight: 10, channelID: channelID, andLimit: 1)
         XCTAssertEqual(messages2.count, 1)
         
-        let messages3 = try! context.persistence.messages(withMinHeight: 11, andChannelID: channelID)
+        let messages3 = try! context.persistence.messages(withMinHeight: 11, channelID: channelID, andLimit: 1)
         XCTAssertEqual(messages3.count, 0)
     }
 }
