@@ -23,6 +23,9 @@ enum ValidationError : Error {
     case missingQueryCursor
     
     case invalidSubscribeChannelIDSize(Int)
+    
+    case invalidBulkChannelIDSize(Int)
+    case invalidBulkHashSize(Int)
 }
 
 protocol Proto_Validation {
@@ -186,8 +189,21 @@ extension Proto_QueryResponse : Proto_Validation {
             throw ValidationError.invalidQueryHashSize(forwardHash.count)
         }
         
-        for message in messages {
-            try message.validate(context: context)
+        for abbr in abbreviatedMessages {
+            try abbr.validate(context: context)
+        }
+    }
+}
+
+extension Proto_QueryResponse.Abbreviated : Proto_Validation {
+    func validate(context: Context) throws {
+        for hash in parents {
+            if hash.count != ChannelMessage.MESSAGE_HASH_LENGTH {
+                throw ValidationError.invalidQueryHashSize(hash.count)
+            }
+        }
+        if hash.count != ChannelMessage.MESSAGE_HASH_LENGTH {
+            throw ValidationError.invalidQueryHashSize(hash.count)
         }
     }
 }
@@ -196,6 +212,32 @@ extension Proto_Subscribe : Proto_Validation {
     func validate(context: Context) throws {
         if channelID.count != Channel.CHANNEL_ID_LENGTH {
             throw ValidationError.invalidSubscribeChannelIDSize(channelID.count)
+        }
+    }
+}
+
+extension Proto_Bulk : Proto_Validation {
+    func validate(context: Context) throws {
+        if channelID.count != Channel.CHANNEL_ID_LENGTH {
+            throw ValidationError.invalidBulkChannelIDSize(channelID.count)
+        }
+        
+        for hash in hashes {
+            if hash.count != ChannelMessage.MESSAGE_HASH_LENGTH {
+                throw ValidationError.invalidBulkHashSize(hash.count)
+            }
+        }
+    }
+}
+
+extension Proto_BulkResponse : Proto_Validation {
+    func validate(context: Context) throws {
+        if channelID.count != Channel.CHANNEL_ID_LENGTH {
+            throw ValidationError.invalidBulkChannelIDSize(channelID.count)
+        }
+        
+        for message in messages {
+            try message.validate(context: context)
         }
     }
 }
@@ -215,6 +257,10 @@ extension Proto_Packet : Proto_Validation {
             try response.validate(context: context)
         case .some(.subscribe(let subscribe)):
             try subscribe.validate(context: context)
+        case .some(.bulk(let bulk)):
+            try bulk.validate(context: context)
+        case .some(.bulkResponse(let response)):
+            try response.validate(context: context)
         case .none:
             break
         }

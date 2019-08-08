@@ -109,10 +109,26 @@ message Query {
 }
 
 message QueryResponse {
+  message Abbreviated {
+    repeated bytes parents = 1;
+    bytes hash = 2;
+  }
+
   bytes channel_id = 1;
-  repeated ChannelMessage messages = 2;
+  repeated Abbreviated abbreviated_messages = 2;
   bytes forward_hash = 3;
   bytes backward_hash = 4;
+}
+
+message Bulk {
+  bytes channel_id = 1;
+  repeated bytes hashes = 2;
+}
+
+message BulkResponse {
+  bytes channel_id = 1;
+  repeated ChannelMessage messages = 2;
+  uint32 forward_index = 3;
 }
 
 message Error {
@@ -120,6 +136,7 @@ message Error {
 }
 
 message Subscribe {
+  // TODO(indutny): Make it an array
   bytes channel_id = 1;
 }
 
@@ -130,8 +147,11 @@ message Packet {
     Error error = 3;
     Subscribe subscribe = 4;
 
+    // Synchronization
     Query query = 5;
     QueryResponse query_response = 6;
+    Bulk bulk = 7;
+    BulkResponse bulk_response = 8;
   }
 }
 

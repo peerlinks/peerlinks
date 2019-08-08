@@ -6,11 +6,15 @@ protocol ChannelDelegate : AnyObject {
 }
 
 protocol RemoteChannel {
-    func query(channelID: Bytes,
-               withCursor cursor: Channel.Cursor,
-               isBackward: Bool,
-               limit: Int,
-               andClosure closure: @escaping (Channel.QueryResponse) -> Void)
+    func remoteChannel(performQueryFor channelID: Bytes,
+                       withCursor cursor: Channel.Cursor,
+                       isBackward: Bool,
+                       limit: Int,
+                       andClosure closure: @escaping (Channel.QueryResponse) -> Void)
+    func remoteChannel(fetchBulkFor channelID: Bytes,
+                       withHashes hashes: [Bytes],
+                       andClosure closure: @escaping (Channel.BulkResponse) -> Void)
+    
     func destroy(reason: String)
 }
 
@@ -32,8 +36,13 @@ enum ChannelError : Error {
 }
 
 class Channel: RemoteChannel {
+    struct Abbreviated {
+        let parents: [Bytes]
+        let hash: Bytes
+    }
+    
     struct QueryResponse {
-        let messages: [ChannelMessage]
+        let abbreviatedMessages: [Abbreviated]
         let forwardHash: Bytes?
         let backwardHash: Bytes?
     }
@@ -41,6 +50,11 @@ class Channel: RemoteChannel {
     enum Cursor {
         case height(UInt64)
         case hash(Bytes)
+    }
+    
+    struct BulkResponse {
+        let messages: [ChannelMessage]
+        let forwardIndex: Int
     }
     
     let context: Context
@@ -172,7 +186,7 @@ class Channel: RemoteChannel {
         })
         let height = leafs.reduce(0) { (acc, leaf) -> UInt64 in
             return max(acc, leaf.height)
-            } + 1
+        } + 1
         
         guard let chain = identity.chain(for: self) else {
             throw ChannelError.noChainFound(identity)
@@ -269,16 +283,16 @@ class Channel: RemoteChannel {
     func sync(with remote: RemoteChannel) {
         debugPrint("[channel] \(channelDisplayID) starting sync")
 
-        remote.query(channelID: channelID,
-                     withCursor: .height(minLeafHeight),
-                     isBackward: false,
-                     limit: Channel.SYNC_LIMIT) { (response) in
+        remote.remoteChannel(performQueryFor: channelID,
+                            withCursor: .height(minLeafHeight),
+                            isBackward: false,
+                            limit: Channel.SYNC_LIMIT) { (response) in
             self.handle(queryResponse: response, from: remote)
         }
     }
     
     private func handle(queryResponse response: QueryResponse, from remote: RemoteChannel) {
-        if response.messages.count > Channel.SYNC_LIMIT {
+        if response.abbreviatedMessages.count > Channel.SYNC_LIMIT {
             remote.destroy(reason: "message count overflow")
             return
         }
@@ -286,19 +300,30 @@ class Channel: RemoteChannel {
         var missing: Bool = false
         
         // NOTE: messages are assumed to be ordered
-        for encrypted in response.messages {
-            do {
-                let _ = try self.receive(encrypted: encrypted)
-            } catch ChannelError.parentNotFound(_) {
-                missing = true
-            } catch {
-                remote.destroy(reason: "invalid message \(encrypted.hash!), error: \(error)")
-                return
+        var hashes = Set<Bytes>()
+        var hashList = [Bytes]()
+        for abbr in response.abbreviatedMessages {
+            var canCommit = true
+            for parentHash in abbr.parents {
+                if !hashes.contains(parentHash) && message(byHash: parentHash) == nil {
+                    canCommit = false
+                    break
+                }
             }
+            
+            if !canCommit {
+                missing = true
+                continue
+            }
+            
+            hashes.insert(abbr.hash)
+            
+            // NOTE: Set<> is unordered
+            hashList.append(abbr.hash)
         }
         
         var cursor: Bytes? = nil
-        
+
         if missing {
             cursor = response.backwardHash
             
@@ -310,11 +335,15 @@ class Channel: RemoteChannel {
             cursor = response.forwardHash
         }
         
+        remote.remoteChannel(fetchBulkFor: channelID, withHashes: hashList) { (response) in
+            self.handle(bulkResponse: response, from: remote, withHashes: hashList)
+        }
+        
         if let cursor = cursor {
-            remote.query(channelID: channelID,
-                         withCursor: .hash(cursor),
-                         isBackward: missing,
-                         limit: Channel.SYNC_LIMIT) { (response) in
+            remote.remoteChannel(performQueryFor: channelID,
+                                 withCursor: .hash(cursor),
+                                 isBackward: missing,
+                                 limit: Channel.SYNC_LIMIT) { (response) in
                 self.handle(queryResponse: response, from: remote)
             }
             return
@@ -351,7 +380,7 @@ class Channel: RemoteChannel {
         
         guard let (first, _) = index else {
             debugPrint("[channel] \(channelDisplayID) query cursor not found")
-            return QueryResponse(messages: [], forwardHash: nil, backwardHash: nil)
+            return QueryResponse(abbreviatedMessages: [], forwardHash: nil, backwardHash: nil)
         }
         
         var subset: ArraySlice<ChannelMessage>?
@@ -375,13 +404,58 @@ class Channel: RemoteChannel {
             forwardHash = encrypted.hash!
         }
         
-        let result = try subset!.map { (message) -> ChannelMessage in
-            return try message.encrypted(withChannel: self)
+        let result = try subset!.map { (message) -> Abbreviated in
+            let encrypted = try message.encrypted(withChannel: self)
+            return Abbreviated(parents: encrypted.parents, hash: encrypted.hash!)
         }
         
-        return QueryResponse(messages: result,
+        return QueryResponse(abbreviatedMessages: result,
                              forwardHash: forwardHash,
                              backwardHash: result.first?.hash)
+    }
+    
+    func handle(bulkResponse response: BulkResponse, from remote: RemoteChannel, withHashes hashes: [Bytes]) {
+        if response.messages.count > hashes.count {
+            return
+        }
+        
+        let set = Set<Bytes>(hashes)
+        
+        for message in response.messages {
+            if !set.contains(message.hash!) {
+                return remote.destroy(reason: "unexpected message in bulk response with hash \(message.hash!)")
+            }
+            
+            do {
+                let _ = try self.receive(encrypted: message)
+            } catch {
+                return remote.destroy(reason: "invalid encrypted message in bulk response due to error \(error)")
+            }
+        }
+     
+        if response.forwardIndex >= hashes.count {
+            return
+        }
+        
+        let remainingHashes = [Bytes](hashes[response.forwardIndex...])
+        remote.remoteChannel(fetchBulkFor: channelID, withHashes: remainingHashes) { (response) in
+            self.handle(bulkResponse: response, from: remote, withHashes: remainingHashes)
+        }
+    }
+    
+    func bulk(withHashes hashes: [Bytes]) throws -> BulkResponse {
+        let limit = min(hashes.count, Channel.SYNC_LIMIT)
+        var result = [ChannelMessage]()
+        for hash in hashes[..<limit] {
+            guard let decrypted = message(byHash: hash) else {
+                continue
+            }
+            let encrypted = try decrypted.encrypted(withChannel: self)
+         
+            result.append(encrypted)
+        }
+        
+        return BulkResponse(messages: result, forwardIndex: limit)
     }
     
     // MARK: Utils
@@ -456,12 +530,19 @@ class Channel: RemoteChannel {
     
     // MARK: RemoteChannel (mostly for testing)
     
-    func query(channelID: Bytes,
-               withCursor cursor: Cursor,
-               isBackward: Bool,
-               limit: Int,
-               andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
+    func remoteChannel(performQueryFor channelID: Bytes,
+                       withCursor cursor: Cursor,
+                       isBackward: Bool,
+                       limit: Int,
+                       andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
         let response = try! query(withCursor: cursor, isBackward: isBackward, andLimit: limit)
+        closure(response)
+    }
+    
+    func remoteChannel(fetchBulkFor channelID: Bytes,
+                       withHashes hashes: [Bytes],
+                       andClosure closure: @escaping (Channel.BulkResponse) -> Void) {
+        let response = try! bulk(withHashes: hashes)
         closure(response)
     }
     

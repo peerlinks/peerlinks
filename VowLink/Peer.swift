@@ -21,11 +21,12 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     var isReady: Bool = false
     
     var subscriptions = Set<Bytes>()
-    var queryResponses = [Bytes:(Channel.QueryResponse) -> Void]()
+    var queryResponses = [Bytes:[(Channel.QueryResponse) -> Void]]()
+    var bulkResponses = [Bytes:[(Channel.BulkResponse) -> Void]]()
     
     weak var delegate: PeerDelegate?
     
-    static let PROTOCOL_VERSION: Int32 = 1
+    static let PROTOCOL_VERSION: UInt32 = 1
     static let MAX_SUBSCRIPTIONS: Int = 1000
     static let MAX_PEER_ID_LENGTH: Int = 64
     
@@ -64,7 +65,10 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         case .some(.queryResponse(let proto)):
             debugPrint("[peer] id=\(remoteID.displayName) got query response packet")
             handle(queryResponse: proto)
-            
+        case .some(.bulkResponse(let proto)):
+            debugPrint("[peer] id=\(remoteID.displayName) got bulk response packet")
+            handle(bulkResponse: proto)
+
         default:
             return packet
         }
@@ -89,12 +93,19 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     }
     
     func send(queryResponse response: Channel.QueryResponse, from channel: Channel) throws -> Bool {
+        let abbreviatedMessages = response.abbreviatedMessages.map({ (abbr) -> Proto_QueryResponse.Abbreviated in
+            return Proto_QueryResponse.Abbreviated.with({ (proto) in
+                proto.hash = Data(abbr.hash)
+                proto.parents = abbr.parents.map({ (parent) -> Data in
+                    return Data(parent)
+                })
+            })
+        })
+        
         let proto = Proto_Packet.with { (proto) in
             proto.queryResponse = Proto_QueryResponse.with({ (proto) in
                 proto.channelID = Data(channel.channelID)
-                proto.messages = response.messages.map({ (message) -> Proto_ChannelMessage in
-                    return message.toProto()!
-                })
+                proto.abbreviatedMessages = abbreviatedMessages
                 
                 if let forward = response.forwardHash {
                     proto.forwardHash = Data(forward)
@@ -102,6 +113,22 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
                 if let backward = response.backwardHash {
                     proto.backwardHash = Data(backward)
                 }
+            })
+        }
+        
+        let data = try proto.serializedData()
+        
+        return try send(data)
+    }
+    
+    func send(bulkResponse response: Channel.BulkResponse, from channel: Channel) throws -> Bool {
+        let proto = Proto_Packet.with { (proto) in
+            proto.bulkResponse = Proto_BulkResponse.with({ (proto) in
+                proto.channelID = Data(channel.channelID)
+                proto.messages = response.messages.map({ (message) -> Proto_ChannelMessage in
+                    return message.toProto()!
+                })
+                proto.forwardIndex = UInt32(response.forwardIndex)
             })
         }
         
@@ -166,39 +193,76 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             return destroy(reason: "Invalid channel ID size in query response")
         }
         
-        guard let closure = queryResponses[channelID] else {
+        guard var closures = queryResponses[channelID] else {
             debugPrint("[peer] unexpected query response, ignoring")
             return
         }
         
-        do {
-            let messages = try proto.messages.map { (proto) -> ChannelMessage in
-                return try ChannelMessage(context: self.context, proto: proto)
-            }
-            
-            var forwardHash: Bytes?
-            var backwardHash: Bytes?
-            
-            if !proto.forwardHash.isEmpty {
-                forwardHash = Bytes(proto.forwardHash)
-            }
-            if !proto.backwardHash.isEmpty {
-                backwardHash = Bytes(proto.backwardHash)
-            }
-            
+        let closure = closures.removeFirst()
+        if closures.count == 0 {
             queryResponses.removeValue(forKey: channelID)
-            
-            // NOTE: `closure` has to be invoked there because it interacts with UX
-            // TODO(indutny): reconsider doing it here
-            DispatchQueue.main.async {
-                closure(Channel.QueryResponse(messages: messages,
-                                              forwardHash: forwardHash,
-                                              backwardHash: backwardHash))
-            }
-        } catch {
-            return destroy(reason: "Failed to parse messages due to error \(error)")
+        }
+        
+        let messages = proto.abbreviatedMessages.map { (proto) -> Channel.Abbreviated in
+            let parents = proto.parents.map({ (parent) -> Bytes in
+                return Bytes(parent)
+            })
+            let hash = Bytes(proto.hash)
+            return Channel.Abbreviated(parents: parents, hash: hash)
+        }
+        
+        var forwardHash: Bytes?
+        var backwardHash: Bytes?
+        
+        if !proto.forwardHash.isEmpty {
+            forwardHash = Bytes(proto.forwardHash)
+        }
+        if !proto.backwardHash.isEmpty {
+            backwardHash = Bytes(proto.backwardHash)
+        }
+        
+        // NOTE: `closure` has to be invoked there because it interacts with UX
+        // TODO(indutny): reconsider doing it here
+        DispatchQueue.main.async {
+            closure(Channel.QueryResponse(abbreviatedMessages: messages,
+                                          forwardHash: forwardHash,
+                                          backwardHash: backwardHash))
         }
     }
+    
+    private func handle(bulkResponse proto: Proto_BulkResponse) {
+        let channelID = Bytes(proto.channelID)
+        if channelID.count != Channel.CHANNEL_ID_LENGTH {
+            return destroy(reason: "Invalid channel ID size in query response")
+        }
+        
+        guard var closures = bulkResponses[channelID] else {
+            debugPrint("[peer] unexpected query response, ignoring")
+            return
+        }
+        
+        // TODO(indutny): DRY
+        let closure = closures.removeFirst()
+        if closures.count == 0 {
+            bulkResponses.removeValue(forKey: channelID)
+        }
+        
+        var messages: [ChannelMessage]!
+        do {
+            messages = try proto.messages.map { (proto) -> ChannelMessage in
+                return try ChannelMessage(context: self.context, proto: proto)
+            }
+        } catch {
+            return destroy(reason: "invalid message in bulk response, error \(error)")
+        }
+        
+        // NOTE: `closure` has to be invoked there because it interacts with UX
+        // TODO(indutny): reconsider doing it here
+        DispatchQueue.main.async {
+            closure(Channel.BulkResponse(messages: messages, forwardIndex: Int(proto.forwardIndex)))
+        }
+    }
+
     
     // MARK: Session
     
@@ -270,11 +334,11 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     
     // Mark: RemoteChannel
     
-    func query(channelID: Bytes,
-               withCursor cursor: Channel.Cursor,
-               isBackward: Bool,
-               limit: Int,
-               andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
+    func remoteChannel(performQueryFor channelID: Bytes,
+                       withCursor cursor: Channel.Cursor,
+                       isBackward: Bool,
+                       limit: Int,
+                       andClosure closure: @escaping (Channel.QueryResponse) -> Void) {
         let proto = Proto_Packet.with { (packet) in
             packet.query = Proto_Query.with({ (query) in
                 query.channelID = Data(channelID)
@@ -292,10 +356,40 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         do {
             let data = try proto.serializedData()
             let _ = try send(data)
-            
-            queryResponses[channelID] = closure
         } catch {
             debugPrint("[peer] id=\(remoteID.displayName) query error \(error)")
+        }
+        
+        if var list = queryResponses[channelID] {
+            list.append(closure)
+        } else {
+            queryResponses[channelID] = [ closure ]
+        }
+    }
+    
+    func remoteChannel(fetchBulkFor channelID: Bytes,
+                       withHashes hashes: [Bytes],
+                       andClosure closure: @escaping (Channel.BulkResponse) -> Void) {
+        let proto = Proto_Packet.with { (packet) in
+            packet.bulk = Proto_Bulk.with({ (bulk) in
+                bulk.channelID = Data(channelID)
+                bulk.hashes = hashes.map({ (hash) -> Data in
+                    return Data(hash)
+                })
+            })
+        }
+        
+        do {
+            let data = try proto.serializedData()
+            let _ = try send(data)
+        } catch {
+            debugPrint("[peer] id=\(remoteID.displayName) query error \(error)")
+        }
+        
+        if var list = bulkResponses[channelID] {
+            list.append(closure)
+        } else {
+            bulkResponses[channelID] = [ closure ]
         }
     }
 }

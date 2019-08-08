@@ -374,11 +374,55 @@ struct Proto_QueryResponse {
 
   var channelID: Data = SwiftProtobuf.Internal.emptyData
 
-  var messages: [Proto_ChannelMessage] = []
+  var abbreviatedMessages: [Proto_QueryResponse.Abbreviated] = []
 
   var forwardHash: Data = SwiftProtobuf.Internal.emptyData
 
   var backwardHash: Data = SwiftProtobuf.Internal.emptyData
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  struct Abbreviated {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var parents: [Data] = []
+
+    var hash: Data = SwiftProtobuf.Internal.emptyData
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+  }
+
+  init() {}
+}
+
+struct Proto_Bulk {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var channelID: Data = SwiftProtobuf.Internal.emptyData
+
+  var hashes: [Data] = []
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Proto_BulkResponse {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var channelID: Data = SwiftProtobuf.Internal.emptyData
+
+  var messages: [Proto_ChannelMessage] = []
+
+  var forwardIndex: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -402,6 +446,7 @@ struct Proto_Subscribe {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// TODO(indutny): Make it an array
   var channelID: Data = SwiftProtobuf.Internal.emptyData
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -451,6 +496,7 @@ struct Proto_Packet {
     set {_uniqueStorage()._content = .subscribe(newValue)}
   }
 
+  /// Synchronization
   var query: Proto_Query {
     get {
       if case .query(let v)? = _storage._content {return v}
@@ -467,6 +513,22 @@ struct Proto_Packet {
     set {_uniqueStorage()._content = .queryResponse(newValue)}
   }
 
+  var bulk: Proto_Bulk {
+    get {
+      if case .bulk(let v)? = _storage._content {return v}
+      return Proto_Bulk()
+    }
+    set {_uniqueStorage()._content = .bulk(newValue)}
+  }
+
+  var bulkResponse: Proto_BulkResponse {
+    get {
+      if case .bulkResponse(let v)? = _storage._content {return v}
+      return Proto_BulkResponse()
+    }
+    set {_uniqueStorage()._content = .bulkResponse(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Content: Equatable {
@@ -474,8 +536,11 @@ struct Proto_Packet {
     case message(Proto_ChannelMessage)
     case error(Proto_Error)
     case subscribe(Proto_Subscribe)
+    /// Synchronization
     case query(Proto_Query)
     case queryResponse(Proto_QueryResponse)
+    case bulk(Proto_Bulk)
+    case bulkResponse(Proto_BulkResponse)
 
   #if !swift(>=4.1)
     static func ==(lhs: Proto_Packet.OneOf_Content, rhs: Proto_Packet.OneOf_Content) -> Bool {
@@ -486,6 +551,8 @@ struct Proto_Packet {
       case (.subscribe(let l), .subscribe(let r)): return l == r
       case (.query(let l), .query(let r)): return l == r
       case (.queryResponse(let l), .queryResponse(let r)): return l == r
+      case (.bulk(let l), .bulk(let r)): return l == r
+      case (.bulkResponse(let l), .bulkResponse(let r)): return l == r
       default: return false
       }
     }
@@ -1300,7 +1367,7 @@ extension Proto_QueryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
   static let protoMessageName: String = _protobuf_package + ".QueryResponse"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "channel_id"),
-    2: .same(proto: "messages"),
+    2: .standard(proto: "abbreviated_messages"),
     3: .standard(proto: "forward_hash"),
     4: .standard(proto: "backward_hash"),
   ]
@@ -1309,7 +1376,7 @@ extension Proto_QueryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
       case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
-      case 2: try decoder.decodeRepeatedMessageField(value: &self.messages)
+      case 2: try decoder.decodeRepeatedMessageField(value: &self.abbreviatedMessages)
       case 3: try decoder.decodeSingularBytesField(value: &self.forwardHash)
       case 4: try decoder.decodeSingularBytesField(value: &self.backwardHash)
       default: break
@@ -1321,8 +1388,8 @@ extension Proto_QueryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     if !self.channelID.isEmpty {
       try visitor.visitSingularBytesField(value: self.channelID, fieldNumber: 1)
     }
-    if !self.messages.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.messages, fieldNumber: 2)
+    if !self.abbreviatedMessages.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.abbreviatedMessages, fieldNumber: 2)
     }
     if !self.forwardHash.isEmpty {
       try visitor.visitSingularBytesField(value: self.forwardHash, fieldNumber: 3)
@@ -1335,9 +1402,120 @@ extension Proto_QueryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
 
   static func ==(lhs: Proto_QueryResponse, rhs: Proto_QueryResponse) -> Bool {
     if lhs.channelID != rhs.channelID {return false}
-    if lhs.messages != rhs.messages {return false}
+    if lhs.abbreviatedMessages != rhs.abbreviatedMessages {return false}
     if lhs.forwardHash != rhs.forwardHash {return false}
     if lhs.backwardHash != rhs.backwardHash {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Proto_QueryResponse.Abbreviated: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Proto_QueryResponse.protoMessageName + ".Abbreviated"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "parents"),
+    2: .same(proto: "hash"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try decoder.decodeRepeatedBytesField(value: &self.parents)
+      case 2: try decoder.decodeSingularBytesField(value: &self.hash)
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.parents.isEmpty {
+      try visitor.visitRepeatedBytesField(value: self.parents, fieldNumber: 1)
+    }
+    if !self.hash.isEmpty {
+      try visitor.visitSingularBytesField(value: self.hash, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Proto_QueryResponse.Abbreviated, rhs: Proto_QueryResponse.Abbreviated) -> Bool {
+    if lhs.parents != rhs.parents {return false}
+    if lhs.hash != rhs.hash {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Proto_Bulk: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Bulk"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "channel_id"),
+    2: .same(proto: "hashes"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
+      case 2: try decoder.decodeRepeatedBytesField(value: &self.hashes)
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.channelID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.channelID, fieldNumber: 1)
+    }
+    if !self.hashes.isEmpty {
+      try visitor.visitRepeatedBytesField(value: self.hashes, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Proto_Bulk, rhs: Proto_Bulk) -> Bool {
+    if lhs.channelID != rhs.channelID {return false}
+    if lhs.hashes != rhs.hashes {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Proto_BulkResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".BulkResponse"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "channel_id"),
+    2: .same(proto: "messages"),
+    3: .standard(proto: "forward_index"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try decoder.decodeSingularBytesField(value: &self.channelID)
+      case 2: try decoder.decodeRepeatedMessageField(value: &self.messages)
+      case 3: try decoder.decodeSingularUInt32Field(value: &self.forwardIndex)
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.channelID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.channelID, fieldNumber: 1)
+    }
+    if !self.messages.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.messages, fieldNumber: 2)
+    }
+    if self.forwardIndex != 0 {
+      try visitor.visitSingularUInt32Field(value: self.forwardIndex, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Proto_BulkResponse, rhs: Proto_BulkResponse) -> Bool {
+    if lhs.channelID != rhs.channelID {return false}
+    if lhs.messages != rhs.messages {return false}
+    if lhs.forwardIndex != rhs.forwardIndex {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1410,6 +1588,8 @@ extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
     4: .same(proto: "subscribe"),
     5: .same(proto: "query"),
     6: .standard(proto: "query_response"),
+    7: .same(proto: "bulk"),
+    8: .standard(proto: "bulk_response"),
   ]
 
   fileprivate class _StorageClass {
@@ -1484,6 +1664,22 @@ extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
           }
           try decoder.decodeSingularMessageField(value: &v)
           if let v = v {_storage._content = .queryResponse(v)}
+        case 7:
+          var v: Proto_Bulk?
+          if let current = _storage._content {
+            try decoder.handleConflictingOneOf()
+            if case .bulk(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {_storage._content = .bulk(v)}
+        case 8:
+          var v: Proto_BulkResponse?
+          if let current = _storage._content {
+            try decoder.handleConflictingOneOf()
+            if case .bulkResponse(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {_storage._content = .bulkResponse(v)}
         default: break
         }
       }
@@ -1505,6 +1701,10 @@ extension Proto_Packet: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
         try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
       case .queryResponse(let v)?:
         try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
+      case .bulk(let v)?:
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+      case .bulkResponse(let v)?:
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
       case nil: break
       }
     }

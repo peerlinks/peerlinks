@@ -132,6 +132,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
                 self.receive(encryptedMessage: message, from: peer)
             case .some(.query(let query)):
                 self.receive(query: query, from: peer)
+            case .some(.bulk(let bulk)):
+                self.receive(bulk: bulk, from: peer)
             default:
                 debugPrint("[app] unhandled packet \(packet)")
             }
@@ -184,10 +186,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
     
     func receive(query proto: Proto_Query, from peer: Peer) {
         let channelID = Bytes(proto.channelID)
-        if channelID.count != Channel.CHANNEL_ID_LENGTH {
-            peer.destroy(reason: "Invalid channel id length in query")
-            return
-        }
         
         guard let channel = channelList.find(byChannelID: channelID) else {
             debugPrint("[app] channel \(channelID) not found for query")
@@ -204,8 +202,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
             case .some(.height(let height)):
                 cursor = .height(height)
             case .none:
-                debugPrint("[app] invalid cursor in query response")
-                return
+                return peer.destroy(reason: "invalid cursor in query response")
             }
             response = try channel.query(withCursor: cursor!,
                                          isBackward: proto.isBackward,
@@ -213,8 +210,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
             
             let _ = try peer.send(queryResponse: response!, from: channel)
         } catch {
-            debugPrint("[app] channel query failed due to \(error)")
+            return peer.destroy(reason: "channel query failed due to \(error)")
+        }
+    }
+    
+    func receive(bulk proto: Proto_Bulk, from peer: Peer) {
+        let channelID = Bytes(proto.channelID)
+        
+        guard let channel = channelList.find(byChannelID: channelID) else {
+            debugPrint("[app] channel \(channelID) not found for query")
             return
+        }
+
+        do {
+            let response = try channel.bulk(withHashes: proto.hashes.map({ (hash) -> Bytes in
+                return Bytes(hash)
+            }))
+            
+            let _ = try peer.send(bulkResponse: response, from: channel)
+        } catch {
+            return peer.destroy(reason: "channel bulk failed due to error \(error)")
         }
     }
     
