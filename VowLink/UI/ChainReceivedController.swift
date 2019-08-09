@@ -46,8 +46,12 @@ class ChainReceivedController : UIViewController {
             
             try app.channelList.add(channel)
         } catch {
-            // TODO(indutny): display
-            debugPrint("failed to save & subscribe to channel \(error)")
+            let alert = UIAlertController(title: "Subscription failed",
+                                          message: "Error: \(error)",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Close", style: .cancel, handler: nil))
+            present(alert, animated: true)
+            return
         }
         
         for viewController in navigationController!.viewControllers.reversed() {
