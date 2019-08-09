@@ -5,6 +5,7 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     @IBOutlet weak var navItem: UINavigationItem!
     @IBOutlet weak var messagesView: UITableView!
     @IBOutlet weak var messageText: UITextField!
+    @IBOutlet weak var sendButton: UIButton!
     
     var app: AppDelegate!
     var channel: Channel!
@@ -56,19 +57,24 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
         }
     }
     
+    @IBAction func messageTextChanged(_ sender: Any) {
+        let count = messageText.text?.count ?? 0
+        sendButton.isEnabled = count < ChannelMessage.MAX_TEXT_LENGTH
+    }
+    
     @IBAction func sendClicked(_ sender: Any) {
         // TODO(indutny): trim?
         guard let text = messageText.text, !text.isEmpty else {
             return
         }
         
-        let body = Proto_ChannelMessage.Body.with { (body) in
-            body.text.text = text
+        if text.count > ChannelMessage.MAX_TEXT_LENGTH {
+            // The button is disabled anyway, what do they think should happen?
+            return
         }
         
-        // TODO(indutny): UX
-        if text.count > ChannelMessage.MAX_TEXT_LENGTH {
-            return
+        let body = Proto_ChannelMessage.Body.with { (body) in
+            body.text.text = text
         }
         
         do {
