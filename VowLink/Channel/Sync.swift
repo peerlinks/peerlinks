@@ -38,7 +38,7 @@ extension Channel: RemoteChannel {
     
     private var minLeafHeight: Int64 {
         get {
-            return leafs.reduce(Int64.max) { (minHeight, leaf) -> Int64 in
+            return leaves.reduce(Int64.max) { (minHeight, leaf) -> Int64 in
                 return min(minHeight, leaf.height)
             }
         }
@@ -95,7 +95,7 @@ extension Channel: RemoteChannel {
         
         var cursor: Bytes? = nil
         
-        if missing {
+        if missing || response.abbreviatedMessages.isEmpty {
             cursor = response.backwardHash
             
             if cursor == nil {
@@ -124,8 +124,6 @@ extension Channel: RemoteChannel {
     }
     
     func query(withCursor cursor: Cursor, isBackward: Bool, andLimit limit: Int) throws -> QueryResponse {
-        debugPrint("[channel] \(channelDisplayID) query isBackward=\(isBackward)")
-        
         var amendedCursor = cursor
         if case .height(let height) = cursor {
             amendedCursor = .height(min(height, minLeafHeight))
@@ -142,6 +140,7 @@ extension Channel: RemoteChannel {
             return Abbreviated(parents: message.parents, hash: message.hash!)
         }
         
+        debugPrint("[channel] \(channelDisplayID) query isBackward=\(isBackward), response.count=\(abbreviated.count)")
         return QueryResponse(abbreviatedMessages: abbreviated,
                              forwardHash: response.forwardHash,
                              backwardHash: response.backwardHash)

@@ -27,7 +27,7 @@ class Channel {
     let publicKey: Bytes
     var name: String
     
-    var leafs = [ChannelMessage]()
+    var leaves = [ChannelMessage]()
     
     weak var delegate: ChannelDelegate? = nil
     
@@ -64,7 +64,7 @@ class Channel {
         self.publicKey = publicKey
         self.name = name
         self.root = root
-        leafs = try context.persistence.leafs(forChannelID: channelID)
+        leaves = try context.persistence.leaves(forChannelID: channelID)
         
         let decryptedRoot = try root.decrypted(withChannel: self)
         
@@ -110,7 +110,7 @@ class Channel {
         let encryptedRoot = try unencryptedRoot.encrypted(withChannel: self)
         
         root = encryptedRoot
-        leafs = try context.persistence.leafs(forChannelID: channelID)
+        leaves = try context.persistence.leaves(forChannelID: channelID)
         try self.append(unencryptedRoot)
     }
     
@@ -132,10 +132,10 @@ class Channel {
     }
     
     @discardableResult func post(message body: Proto_ChannelMessage.Body, by identity: Identity) throws -> ChannelMessage {
-        let parents = try leafs.map({ (leaf) -> Bytes in
+        let parents = try leaves.map({ (leaf) -> Bytes in
             return try leaf.encrypted(withChannel: self).hash!
         })
-        let height = leafs.reduce(0) { (acc, leaf) -> Int64 in
+        let height = leaves.reduce(0) { (acc, leaf) -> Int64 in
             return max(acc, leaf.height)
         } + 1
         
@@ -251,7 +251,7 @@ class Channel {
         // Recompute leafs
         // TODO(indutny): what if call above succeeds, but the save for the leafs will fail?
         // Should we store leafs in the same place as the messages?
-        var leafHashes = Set<Bytes>(leafs.map({ (leaf) -> Bytes in
+        var leafHashes = Set<Bytes>(leaves.map({ (leaf) -> Bytes in
             return leaf.hash!
         }))
         
@@ -263,13 +263,13 @@ class Channel {
         // Persist message and new leafs
         try context.persistence.append(encryptedMessage: encrypted,
                                        toChannelID: channelID,
-                                       withNewLeafs: [Bytes](leafHashes))
+                                       withNewLeaves: [Bytes](leafHashes))
         
         // Recompute in-memory leafs
-        leafs = leafs.filter({ (leaf) -> Bool in
+        leaves = leaves.filter({ (leaf) -> Bool in
             return leafHashes.contains(leaf.hash!)
         })
-        leafs.append(encrypted)
+        leaves.append(encrypted)
     }
     
     // MARK: Helpers

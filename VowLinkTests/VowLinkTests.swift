@@ -1,11 +1,3 @@
-//
-//  VowLinkTests.swift
-//  VowLinkTests
-//
-//  Created by Indutnyy, Fedor on 7/29/19.
-//  Copyright © 2019 Indutnyy, Fedor. All rights reserved.
-//
-
 import XCTest
 import Sodium
 @testable import VowLink
@@ -13,7 +5,7 @@ import Sodium
 class VowLinkTests: XCTestCase {
     let context = try! Context(service: "com.indutny.vowlink.test")
     let context2 = try! Context(service: "com.indutny.vowlink.test-copy")
-
+    
     override func setUp() {
         try! context.keychain.removeAll()
         try! context.persistence.removeAll()
@@ -244,75 +236,6 @@ class VowLinkTests: XCTestCase {
         }
     }
     
-    func testChannelSync() {
-        let idA = try! Identity(context: context, name: "test:a")
-        let idB = try! Identity(context: context2, name: "test:b")
-
-        enum TestMessage {
-            case a(String)
-            case b(String)
-            case syncAB
-            case syncBA
-        }
-        
-        func check(_ messages: [TestMessage], message: String) {
-            try! context.persistence.removeAll()
-            try! context2.persistence.removeAll()
-            
-            let channelA = try! Channel(idA)
-            let channelB = try! Channel(context: context2,
-                                        publicKey: channelA.publicKey,
-                                        name: channelA.name,
-                                        root: channelA.root)
-            
-            let chain = Chain(context: context, links: [
-                try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
-            ])
-            
-            try! idB.addChain(chain, for: channelB)
-
-            for message in messages {
-                switch message {
-                case .a(let text):
-                    try! channelA.post(message: Channel.text(text), by: idA)
-                case .b(let text):
-                    try! channelB.post(message: Channel.text(text), by: idB)
-                case .syncAB:
-                    channelA.sync(with: channelB)
-                case .syncBA:
-                    channelB.sync(with: channelA)
-                }
-            }
-            
-            XCTAssertEqual(text(in: channelA), text(in: channelB), message)
-        }
-        
-        check([
-            .a("hello b"),
-            .b("hello a"),
-            .a("how are you?"),
-            .b("what's up?"),
-            .syncAB,
-            .syncBA
-            ], message: "2 in a, 2 in b")
-
-        check([
-            .a("hello b"),
-            .b("hello a"),
-            .a("how are you?"),
-            .syncAB,
-            .syncBA
-            ], message: "2 in a, 1 in b")
-        
-        check([
-            .a("hello b"),
-            .b("hello a"),
-            .b("what's up?"),
-            .syncAB,
-            .syncBA
-            ], message: "1 in a, 2 in b")
-    }
-    
     func testContextPersistenceMessages() {
         let idA = try! Identity(context: context, name: "test:a")
         let channelA = try! Channel(idA)
@@ -377,11 +300,11 @@ class VowLinkTests: XCTestCase {
         XCTAssertEqual(empty.forwardHash, first2.backwardHash)
     }
     
-    func testContextPersistenceLeafs() {
+    func testContextPersistenceLeaves() {
         let idA = try! Identity(context: context, name: "test:a")
         let channelA = try! Channel(idA)
         
-        let fakeLeafs = [
+        let fakeLeaves = [
             try! channelA.post(message: Channel.text("1"), by: idA),
             try! channelA.post(message: Channel.text("2"), by: idA),
             try! channelA.post(message: Channel.text("3"), by: idA)
@@ -391,18 +314,18 @@ class VowLinkTests: XCTestCase {
         
         try! context.persistence.removeAll()
         
-        for leaf in fakeLeafs {
+        for leaf in fakeLeaves {
             try! context.persistence.append(encryptedMessage: leaf, toChannelID: channelA.channelID)
         }
         
-        let fakeLeafHashes = fakeLeafs.map({ (leaf) -> Bytes in
+        let fakeLeafHashes = fakeLeaves.map({ (leaf) -> Bytes in
             return leaf.hash!
         })
         try! context.persistence.append(encryptedMessage: main,
                                         toChannelID: channelA.channelID,
-                                        withNewLeafs: fakeLeafHashes)
+                                        withNewLeaves: fakeLeafHashes)
         
-        let leafs = try! context.persistence.leafs(forChannelID: channelA.channelID)
-        XCTAssertEqual(leafs.count, fakeLeafs.count)
+        let leaves = try! context.persistence.leafs(forChannelID: channelA.channelID)
+        XCTAssertEqual(leave.count, fakeLeaves.count)
     }
 }

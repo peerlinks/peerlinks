@@ -20,7 +20,7 @@ class PersistenceContext {
     private let height = Expression<Int64>("height")
     private let protobuf = Expression<Blob>("protobuf")
     
-    private let leafTable = Table("leafs")
+    private let leafTable = Table("leaves")
     private let leafHash = Expression<String>("leafHash")
     
     private static let DEBUG = false
@@ -53,7 +53,7 @@ class PersistenceContext {
     
     func append(encryptedMessage encrypted: ChannelMessage,
                 toChannelID channelID: Bytes,
-                withNewLeafs leafs: [Bytes] = []) throws {
+                withNewLeaves leaves: [Bytes] = []) throws {
         // TODO(indutny): store leafs
         let insertMessage = messageTable.insert(
             self.channelID <- context.sodium.utils.bin2hex(channelID)!,
@@ -67,14 +67,14 @@ class PersistenceContext {
             try db.run(insertMessage)
             try db.run(leafTable.delete())
             
-            for leafHash in leafs {
+            for leafHash in leaves {
                 let leafHashHex = context.sodium.utils.bin2hex(leafHash)!
                 try db.run(leafTable.insert(self.leafHash <- leafHashHex))
             }
         }
     }
     
-    func leafs(forChannelID channelID: Bytes) throws -> [ChannelMessage] {
+    func leaves(forChannelID channelID: Bytes) throws -> [ChannelMessage] {
         let query = leafTable.select(protobuf)
             .join(messageTable, on: leafHash == hash)
         
