@@ -12,28 +12,33 @@ import Sodium
 
 class VowLinkTests: XCTestCase {
     let context = try! Context(service: "com.indutny.vowlink.test")
+    let context2 = try! Context(service: "com.indutny.vowlink.test-copy")
 
     override func setUp() {
         try! context.keychain.removeAll()
         try! context.persistence.removeAll()
+        try! context2.keychain.removeAll()
+        try! context2.persistence.removeAll()
     }
 
     override func tearDown() {
         try! context.keychain.removeAll()
         try! context.persistence.removeAll()
+        try! context2.keychain.removeAll()
+        try! context2.persistence.removeAll()
     }
     
     func text(in channel: Channel) -> [String] {
-        let latest = try! channel.latestMessages()
-        return latest.map({ (message) -> String in
-            guard let content = message.decryptedContent else {
-                return "<encrypted>"
-            }
+        var result = [String]()
+        for i in 0..<channel.messageCount {
+            let message = try! channel.message(atOffset: i)!
+            let content = message.decryptedContent!
             
             let authorKey = content.chain.leafKey(withChannel: channel)
             let author = context.sodium.utils.bin2hex(authorKey)!.prefix(6)
-            return "\(author): \(content.body.text.text)"
-        })
+            result.append("\(author): \(content.body.text.text)")
+        }
+        return result
     }
 
     func testIdentity() {
@@ -150,14 +155,14 @@ class VowLinkTests: XCTestCase {
     
     func testChannelMessagePostReceive() {
         let idA = try! Identity(context: context, name: "test:a")
-        let idB = try! Identity(context: context, name: "test:b")
+        let idB = try! Identity(context: context2, name: "test:b")
         
         let channelA = try! Channel(idA)
         let chain = Chain(context: context, links: [
             try! idA.issueLink(for: idB.publicKey, andChannel: channelA),
         ])
         
-        let channelCopy = try! Channel(context: context,
+        let channelCopy = try! Channel(context: context2,
                                        publicKey: channelA.publicKey,
                                        name: channelA.name,
                                        root: channelA.root)
@@ -241,7 +246,7 @@ class VowLinkTests: XCTestCase {
     
     func testChannelSync() {
         let idA = try! Identity(context: context, name: "test:a")
-        let idB = try! Identity(context: context, name: "test:b")
+        let idB = try! Identity(context: context2, name: "test:b")
 
         enum TestMessage {
             case a(String)
@@ -252,7 +257,7 @@ class VowLinkTests: XCTestCase {
         
         func check(_ messages: [TestMessage], message: String) {
             let channelA = try! Channel(idA)
-            let channelB = try! Channel(context: context,
+            let channelB = try! Channel(context: context2,
                                         publicKey: channelA.publicKey,
                                         name: channelA.name,
                                         root: channelA.root)

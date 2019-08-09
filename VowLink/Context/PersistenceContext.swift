@@ -49,6 +49,10 @@ class PersistenceContext {
         return try db.scalar(messageTable.select(height.max)) ?? 0
     }
     
+    func messageCount() throws -> Int {
+        return try db.scalar(messageTable.count)
+    }
+    
     func append(encryptedMessage encrypted: ChannelMessage,
                 toChannelID channelID: Bytes,
                 withNewLeafs leafs: [Bytes] = []) throws {
@@ -111,6 +115,21 @@ class PersistenceContext {
             return nil
         }
         
+        let proto = try Proto_ChannelMessage(serializedData: Data(first.get(protobuf).bytes))
+        return try ChannelMessage(context: context, proto: proto)
+    }
+    
+    func message(atOffset offset: Int, andChannelID channelID: Bytes) throws -> ChannelMessage? {
+        let query = messageTable
+            .select(protobuf)
+            .filter(self.channelID == context.sodium.utils.bin2hex(channelID)!)
+            .order(height.asc, hash.asc)
+            .limit(1, offset: offset)
+        
+        // TODO(indutny): DRY
+        guard let first = try db.pluck(query) else {
+            return nil
+        }
         let proto = try Proto_ChannelMessage(serializedData: Data(first.get(protobuf).bytes))
         return try ChannelMessage(context: context, proto: proto)
     }

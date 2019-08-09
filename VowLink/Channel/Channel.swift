@@ -41,13 +41,18 @@ class Channel {
         return context.sodium.utils.bin2hex(channelID)!
     }()
     
+    var messageCount: Int {
+        get {
+            return (try? context.persistence.messageCount()) ?? 0
+        }
+    }
+    
     var root: ChannelMessage!
     
     static let CHANNEL_ID_LENGTH = 32
     static let FUTURE: TimeInterval = 10.0 // seconds
     static let MAX_NAME_LENGTH = 128
     static let MAX_PARENT_DELTA: TimeInterval = 30 * 24 * 3600; // 30 days
-    static let LATEST_MESSAGES_COUNT = 1000
     
     init(context: Context, publicKey: Bytes, name: String, root: ChannelMessage) throws {
         // NOTE: Makes using `channel.root.hash!` very easy to use
@@ -59,6 +64,7 @@ class Channel {
         self.publicKey = publicKey
         self.name = name
         self.root = root
+        leafs = try context.persistence.leafs(forChannelID: channelID)
         
         let decryptedRoot = try root.decrypted(withChannel: self)
         
@@ -82,8 +88,6 @@ class Channel {
                       publicKey: Bytes(proto.publicKey),
                       name: proto.name,
                       root: try ChannelMessage(context: context, proto: proto.root))
-        
-        leafs = try context.persistence.leafs(forChannelID: channelID)
     }
     
     init(_ identity: Identity) throws {
@@ -106,6 +110,7 @@ class Channel {
         let encryptedRoot = try unencryptedRoot.encrypted(withChannel: self)
         
         root = encryptedRoot
+        leafs = try context.persistence.leafs(forChannelID: channelID)
         try self.append(unencryptedRoot)
     }
     
@@ -117,9 +122,9 @@ class Channel {
         })
     }
     
-    // TODO(indutny): byHash => withHash
-    func message(byHash hash: Bytes) throws -> ChannelMessage? {
-        return try context.persistence.message(withHash: hash, andChannelID: channelID)
+    func message(withHash hash: Bytes) throws -> ChannelMessage? {
+        let encrypted = try context.persistence.message(withHash: hash, andChannelID: channelID)
+        return try encrypted?.decrypted(withChannel: self)
     }
     
     func contains(messageWithHash hash: Bytes) throws -> Bool {
@@ -185,7 +190,7 @@ class Channel {
         var parentMinTimestamp: TimeInterval = 0.0
         var parentTimestamp: TimeInterval = 0.0
         for parentHash in decrypted.parents {
-            guard let parent = try self.message(byHash: parentHash) else {
+            guard let parent = try self.message(withHash: parentHash) else {
                 throw ChannelError.parentNotFound(parentHash)
             }
             
@@ -222,14 +227,9 @@ class Channel {
         return decrypted
     }
     
-    // TODO(indutny): this is lame, we should be doing it differently
-    func latestMessages() throws -> [ChannelMessage] {
-        let maxHeight = try context.persistence.maxHeight()
-        let response = try context.persistence.messages(startingFrom: .height(maxHeight + 1),
-                                                        isBackward: true,
-                                                        channelID: channelID,
-                                                        andLimit: Channel.LATEST_MESSAGES_COUNT)
-        return response.messages
+    func message(atOffset offset: Int) throws -> ChannelMessage? {
+        let encrypted = try context.persistence.message(atOffset: offset, andChannelID: channelID)
+        return try encrypted?.decrypted(withChannel: self)
     }
 
     // MARK: Utils

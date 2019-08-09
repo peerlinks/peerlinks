@@ -72,7 +72,7 @@ extension Channel: RemoteChannel {
             var canCommit = true
             for parentHash in abbr.parents {
                 do {
-                    if !hashes.contains(parentHash), try message(byHash: parentHash) == nil {
+                    if !hashes.contains(parentHash), !(try contains(messageWithHash: parentHash)) {
                         canCommit = false
                         break
                     }
@@ -176,7 +176,7 @@ extension Channel: RemoteChannel {
         let limit = min(hashes.count, Channel.SYNC_LIMIT)
         var result = [ChannelMessage]()
         for hash in hashes[..<limit] {
-            guard let decrypted = try message(byHash: hash) else {
+            guard let decrypted = try message(withHash: hash) else {
                 continue
             }
             let encrypted = try decrypted.encrypted(withChannel: self)
@@ -207,6 +207,6 @@ extension Channel: RemoteChannel {
     }
     
     func destroy(reason: String) {
-        // no-op
+        debugPrint("[channel] \(channelDisplayID) (test) destroy with reason=\(reason)")
     }
 }
