@@ -60,7 +60,7 @@ class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegat
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        if captureSession.isRunning == false {
+        if captureSession.isRunning == false && !captureSession.inputs.isEmpty {
             captureSession.startRunning()
         }
     }
@@ -68,7 +68,7 @@ class InviteController : UIViewController, AVCaptureMetadataOutputObjectsDelegat
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        if captureSession.isRunning == true {
+        if captureSession.isRunning == true && !captureSession.inputs.isEmpty {
             captureSession.stopRunning()
         }
     }
