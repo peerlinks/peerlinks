@@ -39,7 +39,7 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
         }
         keyboardWillHide = center.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: nil) {
             (notification) in
-            self.additionalSafeAreaInsets.bottom = 0.0
+            self.additionalSafeAreaInsets.bottom = 0
         }
     }
     
