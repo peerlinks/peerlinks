@@ -1,6 +1,7 @@
 import UIKit
+import Sodium
 
-class ChannelListController : UIViewController, UITableViewDataSource {
+class ChannelListController : UIViewController, UITableViewDataSource, ChannelPeersDelegate {
     var network: NetworkManager!
     var channelList: ChannelList!
     @IBOutlet weak var tableView: UITableView!
@@ -11,6 +12,8 @@ class ChannelListController : UIViewController, UITableViewDataSource {
         let app = (UIApplication.shared.delegate as! AppDelegate)
         network = app.network
         channelList = network.channelList
+        
+        network.channelPeersDelegate = self
         
         tableView.dataSource = self
     }
@@ -33,8 +36,11 @@ class ChannelListController : UIViewController, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let name = network.queue.sync {
-            return channelList.channels[indexPath.row].name
+        let name: String = network.queue.sync {
+            let channel = channelList.channels[indexPath.row]
+            let peers = network.peerCount(for: channel.channelID)
+            
+            return "\(channel.name) [\(peers)]"
         }
         let cell = tableView.dequeueReusableCell(withIdentifier: "channelCell")!
         cell.textLabel?.text = name
@@ -43,5 +49,13 @@ class ChannelListController : UIViewController, UITableViewDataSource {
 
     func reloadChannels() {
         tableView.reloadData()
+    }
+    
+    // MARK: ChannelPeersDelegate
+    
+    func channelPeers(updatedForChannel channelID: Bytes) {
+        DispatchQueue.main.async {
+            self.reloadChannels()
+        }
     }
 }

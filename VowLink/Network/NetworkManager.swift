@@ -20,6 +20,10 @@ protocol InviteNotificationDelegate: AnyObject {
     func invite(received chain: Chain)
 }
 
+protocol ChannelPeersDelegate : AnyObject {
+    func channelPeers(updatedForChannel channelID: Bytes)
+}
+
 enum NetworkManagerError : Error {
     case chainNotFound
 }
@@ -33,6 +37,7 @@ class NetworkManager : PeerToPeerDelegate, ChannelListDelegate, ChannelDelegate 
     weak var delegate: NetworkManagerDelegate?
     weak var inviteDelegate: InviteNotificationDelegate?
     weak var channelDelegate: ChannelDelegate?
+    weak var channelPeersDelegate: ChannelPeersDelegate?
     
     init(context: Context) {
         self.context = context
@@ -48,6 +53,10 @@ class NetworkManager : PeerToPeerDelegate, ChannelListDelegate, ChannelDelegate 
     
     func addChannel(_ channel: Channel) throws {
         try channelList.add(channel)
+    }
+    
+    func peerCount(for channelID: Bytes) -> Int {
+        return p2p.subscribedPeers(to: channelID).count
     }
 
     // MARK: Invite
@@ -194,6 +203,16 @@ class NetworkManager : PeerToPeerDelegate, ChannelListDelegate, ChannelDelegate 
             
             channel.sync(with: peer)
         }
+    }
+    
+    func peerToPeer(_ p2p: PeerToPeer, disconnectedFrom peer: Peer) {
+        for channelID in peer.subscriptions {
+            channelPeersDelegate?.channelPeers(updatedForChannel: channelID)
+        }
+    }
+    
+    func peerToPeer(_ p2p: PeerToPeer, peer: Peer, subscribedToChannel channelID: Bytes) {
+        channelPeersDelegate?.channelPeers(updatedForChannel: channelID)
     }
     
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer) {

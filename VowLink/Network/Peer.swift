@@ -11,6 +11,7 @@ protocol PeerDelegate : AnyObject {
     func peerReady(_ peer: Peer)
     func peerConnected(_ peer: Peer)
     func peerDisconnected(_ peer: Peer)
+    func peer(_ peer: Peer, subscribedToChannel channelID: Bytes)
 }
 
 class Peer: NSObject, MCSessionDelegate, RemoteChannel {
@@ -191,6 +192,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         
         debugPrint("[peer] adding subscription to \(channelID)")
         subscriptions.insert(channelID)
+        delegate?.peer(self, subscribedToChannel: channelID)
     }
     
     private func handle(queryResponse proto: Proto_QueryResponse) {

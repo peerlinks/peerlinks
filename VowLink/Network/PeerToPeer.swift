@@ -5,8 +5,10 @@ import Sodium
 
 protocol PeerToPeerDelegate: AnyObject {
     func peerToPeer(_ p2p: PeerToPeer, connectedTo peer: Peer)
+    func peerToPeer(_ p2p: PeerToPeer, disconnectedFrom peer: Peer)
     func peerToPeer(_ p2p: PeerToPeer, peerReady peer: Peer)
     func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer)
+    func peerToPeer(_ p2p: PeerToPeer, peer: Peer, subscribedToChannel channelID: Bytes)
 }
 
 class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, PeerDelegate {
@@ -192,6 +194,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         debugPrint("[p2p] peer disconnected \(peer.remoteID.displayName)")
         self.peers.removeValue(forKey: peer.remoteID)
         peer.delegate = nil
+        delegate?.peerToPeer(self, disconnectedFrom: peer)
         
         // Try to reconnect to any other peers
         let timer = Timer(timeInterval: PeerToPeer.RECONNECT_DELAY, repeats: false) { (timer) in
@@ -213,5 +216,9 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     func peer(_ peer: Peer, receivedPacket packet: Proto_Packet) {
         self.delegate?.peerToPeer(self, didReceive: packet, fromPeer: peer)
+    }
+    
+    func peer(_ peer: Peer, subscribedToChannel channelID: Bytes) {
+        self.delegate?.peerToPeer(self, peer: peer, subscribedToChannel: channelID)
     }
 }

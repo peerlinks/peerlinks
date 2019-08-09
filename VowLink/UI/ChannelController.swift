@@ -112,11 +112,12 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func scrollToBottom(animated: Bool) {
-        let rows = messagesView.dataSource?.tableView(messagesView, numberOfRowsInSection: 0) ?? 0
+        let rows = messagesView.numberOfRows(inSection: 0)
         if rows == 0 {
             return
         }
         let index = IndexPath(row: rows - 1, section: 0)
+        
         messagesView.scrollToRow(at: index, at: .bottom, animated: animated)
     }
     
@@ -180,6 +181,5 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
         case .none:
             return "\(author): (none)"
         }
-        
     }
 }
