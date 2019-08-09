@@ -14,6 +14,10 @@ brew install swift-protobuf
 make proto
 ```
 
+## Attribution
+
+Icons by [Feather][]
+
 ## LICENSE
 
 This software is licensed under the MIT License.
@@ -40,3 +44,4 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 [Protocol]: protocol.md
+[Feather]: https://github.com/feathericons/feather

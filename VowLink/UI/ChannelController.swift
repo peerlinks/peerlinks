@@ -5,12 +5,13 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     @IBOutlet weak var navItem: UINavigationItem!
     @IBOutlet weak var messagesView: UITableView!
     @IBOutlet weak var messageText: UITextField!
-    @IBOutlet weak var sendButton: UIButton!
     
     var app: AppDelegate!
     var channel: Channel!
     var keyboardWillShow: NSObjectProtocol!
+    var keyboardDidShow: NSObjectProtocol!
     var keyboardWillHide: NSObjectProtocol!
+    var sendButton: UIButton!
     
     static let AUTHOR_LENGTH = 6
     
@@ -27,9 +28,23 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
         
         scrollToBottom(animated: false)
         
+        // Nice send button
+        sendButton = UIButton(type: .custom)
+        sendButton.setImage(UIImage(named: "Send"), for: .normal)
+        sendButton.frame = CGRect(x: 0.0, y: 0.0, width: 25.0 + 4.0, height: 25.0)
+        sendButton.addTarget(self, action: #selector(self.sendClicked), for: .primaryActionTriggered)
+        sendButton.imageEdgeInsets.right = 4.0
+        
+        messageText.rightViewMode = .always
+        messageText.rightView = sendButton
+        
+        // Set proper alpha
+        messageTextChanged(self)
+        
         // View resize on keyboard open/close
         
         let center = NotificationCenter.default
+        let originalBottomInset = additionalSafeAreaInsets.bottom
         
         keyboardWillShow = center.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: nil) {
             (notification) in
@@ -38,9 +53,13 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
             }
             self.additionalSafeAreaInsets.bottom = frameEnd.height
         }
+        keyboardDidShow = center.addObserver(forName: UIResponder.keyboardDidShowNotification, object: nil, queue: nil) {
+            (_) in
+            self.scrollToBottom(animated: true)
+        }
         keyboardWillHide = center.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: nil) {
-            (notification) in
-            self.additionalSafeAreaInsets.bottom = 0
+            (_) in
+            self.additionalSafeAreaInsets.bottom = originalBottomInset
         }
     }
     
@@ -48,6 +67,7 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
         let center = NotificationCenter.default
 
         center.removeObserver(keyboardWillShow as Any)
+        center.removeObserver(keyboardDidShow as Any)
         center.removeObserver(keyboardWillHide as Any)
     }
     
@@ -59,7 +79,12 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     
     @IBAction func messageTextChanged(_ sender: Any) {
         let count = messageText.text?.count ?? 0
-        sendButton.isEnabled = count < ChannelMessage.MAX_TEXT_LENGTH
+        let isVisible = count != 0 && count < ChannelMessage.MAX_TEXT_LENGTH
+
+        UIView.animate(withDuration: 0.1) {
+            self.sendButton.alpha = isVisible ? 1.0 : 0.0
+        }
+        sendButton.isEnabled = isVisible
     }
     
     @IBAction func sendClicked(_ sender: Any) {
@@ -68,18 +93,14 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
             return
         }
         
-        if text.count > ChannelMessage.MAX_TEXT_LENGTH {
+        if text.count == 0 || text.count > ChannelMessage.MAX_TEXT_LENGTH {
             // The button is disabled anyway, what do they think should happen?
             return
         }
         
-        let body = Proto_ChannelMessage.Body.with { (body) in
-            body.text.text = text
-        }
-        
         do {
             let _ = try app.network.queue.sync {
-                try channel.post(message: body, by: app.identity!)
+                try channel.post(message: Channel.text(text), by: app.identity!)
             }
         } catch {
             debugPrint("[channel-controller] failed to post message due to error \(error)")
@@ -87,6 +108,7 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
         }
         
         messageText.text = ""
+        messageTextChanged(self)
     }
     
     func scrollToBottom(animated: Bool) {
