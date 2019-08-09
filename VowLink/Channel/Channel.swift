@@ -242,8 +242,11 @@ class Channel {
         let encrypted = try decrypted.encrypted(withChannel: self)
         if try context.persistence.contains(messageWithHash: encrypted.hash!,
                                             andChannelID: channelID) {
+            debugPrint("[channel] \(channelDisplayID) duplicate message \(encrypted.displayHash!)")
             return
         }
+        
+        debugPrint("[channel] \(channelDisplayID) new message \(encrypted.displayHash!)")
         
         // Recompute leafs
         // TODO(indutny): what if call above succeeds, but the save for the leafs will fail?

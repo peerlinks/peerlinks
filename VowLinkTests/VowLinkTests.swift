@@ -256,6 +256,9 @@ class VowLinkTests: XCTestCase {
         }
         
         func check(_ messages: [TestMessage], message: String) {
+            try! context.persistence.removeAll()
+            try! context2.persistence.removeAll()
+            
             let channelA = try! Channel(idA)
             let channelB = try! Channel(context: context2,
                                         publicKey: channelA.publicKey,
