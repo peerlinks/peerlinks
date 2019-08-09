@@ -11,8 +11,9 @@ The goals of this protocol are:
    of transport of channel messages to interested peers
 3. Efficient synchronization of channel messages between semi-trusted and
    untrusted peers
-4. Confidentiality of messages. Only semi-trusted peers can read channel
-   messages
+4. Confidentiality of messages. Only past and current channel participants
+   can read the messages. NOTE: There is no end-to-end encryption involved
+   at least in not in this version of the protocol
 5. Eventual consistency. Messages must be viewable offline. New messages can be
    posted offline and distributed once remote peers are available.
 
