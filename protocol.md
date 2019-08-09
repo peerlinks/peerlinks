@@ -224,11 +224,11 @@ The subscribers of the channel MUST verify the messages against full DAG:
 ### Merges
 
 Whenever new message is posted by a participant it SHOULD:
-1. Take all current DAG leafs
+1. Take all current DAG leaves
 2. Find the maximum of their timestamps
 3. Remove those that differ from the maximum timestamp by more than **30 days**.
-These leafs SHOULD be used as parents for the new message. Peers naturally merge
-different branches into a single new leaf.
+These leaves SHOULD be used as parents for the new message. Peers naturally
+merge different branches into a single new leaf.
 
 ### Link
 
