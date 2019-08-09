@@ -19,6 +19,12 @@ class PersistenceContext {
     private let height = Expression<Int64>("height")
     private let protobuf = Expression<Blob>("protobuf")
     
+    struct MessageQueryResponse {
+        let messages: [ChannelMessage]
+        let forwardHash: Bytes?
+        let backwardHash: Bytes?
+    }
+    
     init(context: Context, service: String) throws {
         self.context = context
         
@@ -41,7 +47,8 @@ class PersistenceContext {
         
         try db.run(query)
     }
-    
+
+    // TODO(indutny): LRU cache
     func contains(messageWithHash hash: Bytes, andChannelID channelID: Bytes) throws -> Bool {
         let hashHex = context.sodium.utils.bin2hex(hash)!
         let channelIDHex = context.sodium.utils.bin2hex(channelID)!
@@ -53,6 +60,7 @@ class PersistenceContext {
         return count != 0
     }
     
+    // TODO(indutny): LRU cache
     func message(withHash hash: Bytes, andChannelID channelID: Bytes) throws -> ChannelMessage? {
         let hashHex = context.sodium.utils.bin2hex(hash)!
         let channelIDHex = context.sodium.utils.bin2hex(channelID)!
@@ -69,14 +77,59 @@ class PersistenceContext {
         return try ChannelMessage(context: context, proto: proto)
     }
     
-    func messages(withMinHeight minHeight: Int64, channelID: Bytes, andLimit limit: Int) throws -> [ChannelMessage] {
-        let channelIDHex = context.sodium.utils.bin2hex(channelID)!
+    func messages(startingFrom cursor: Channel.Cursor,
+                  isBackward: Bool,
+                  channelID: Bytes,
+                  andLimit limit: Int) throws -> MessageQueryResponse {
+        var minHeight: Int64!
+        var minHashHex: String?
 
-        let query = messageTable.select(protobuf)
+        switch cursor {
+        case .hash(let hash):
+            guard let message = try message(withHash: hash, andChannelID: channelID) else {
+                return MessageQueryResponse(messages: [], forwardHash: nil, backwardHash: nil)
+            }
+            
+            minHeight = message.height
+            minHashHex = message.displayHash!
+        case .height(let height):
+            minHeight = height
+        }
+        
+        let channelIDHex = context.sodium.utils.bin2hex(channelID)!
+        var filter: Expression<Bool>!
+        
+        if let minHashHex = minHashHex {
+            // NOTE: Filter is inclusive for `isBackward = true`, because we want to include the
+            // forward message.
+            // TODO(indutny): the comment above might need to be revisited in the future
+            // if optimization is needed
+            if isBackward {
+                filter = height < minHeight || (height == minHeight && self.hash <= minHashHex)
+            } else {
+                filter = height > minHeight || (height == minHeight && self.hash >= minHashHex)
+            }
+        } else {
+            if isBackward {
+                filter = height <= minHeight
+            } else {
+                filter = height >= minHeight
+            }
+        }
+        
+        var query = messageTable.select(protobuf)
             .filter(self.channelID == channelIDHex)
-            .filter(height >= Int64(minHeight))
-            .order(height.asc, hash.asc)
-            .limit(limit)
+            .filter(filter)
+        
+        if isBackward {
+            query = query.order(height.desc, self.hash.desc)
+        } else {
+            query = query.order(height.asc, self.hash.asc)
+        }
+        
+        // Request one more message to get non-inclusive `forwardHash`
+        let fullLimit = max(0, limit) + 1
+        query = query.limit(fullLimit)
         
         var result = [ChannelMessage]()
         for message in try db.prepare(query) {
@@ -84,32 +137,19 @@ class PersistenceContext {
             let proto = try Proto_ChannelMessage(serializedData: Data(raw))
             result.append(try ChannelMessage(context: context, proto: proto))
         }
-        return result
-    }
-    
-    func messages(startingFromHash hash: Bytes, channelID: Bytes, andLimit limit: Int) throws -> [ChannelMessage] {
-        guard let message = try message(withHash: hash, andChannelID: channelID) else {
-            return []
-        }
         
-        let minHeight = message.height
-        let minHashHex = message.displayHash!
-        let channelIDHex = context.sodium.utils.bin2hex(channelID)!
-        
-        let query = messageTable.select(protobuf)
-            .filter(self.channelID == channelIDHex)
-            .filter(height > minHeight || (height == minHeight && self.hash >= minHashHex))
-            .order(height.asc, self.hash.asc)
-            .limit(limit)
-        
-        var result = [ChannelMessage]()
-        for message in try db.prepare(query) {
-            let raw = try message.get(protobuf).bytes
-            let proto = try Proto_ChannelMessage(serializedData: Data(raw))
-            result.append(try ChannelMessage(context: context, proto: proto))
+        if isBackward {
+            result.reverse()
         }
 
-        return result
+        var forwardHash: Bytes?
+        if result.count == fullLimit || isBackward {
+            forwardHash = result.last!.hash!
+            result.removeLast()
+        }
+        let backwardHash = result.first?.hash!
+
+        return MessageQueryResponse(messages: result, forwardHash: forwardHash, backwardHash: backwardHash)
     }
     
     func removeAll() throws {

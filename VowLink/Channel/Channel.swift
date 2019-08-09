@@ -125,7 +125,7 @@ class Channel {
         return messagesByHash[hash]
     }
     
-    func post(message body: Proto_ChannelMessage.Body, by identity: Identity) throws -> ChannelMessage {
+    @discardableResult func post(message body: Proto_ChannelMessage.Body, by identity: Identity) throws -> ChannelMessage {
         let parents = try leafs.map({ (leaf) -> Bytes in
             return try leaf.encrypted(withChannel: self).hash!
         })

@@ -265,9 +265,9 @@ class VowLinkTests: XCTestCase {
             for message in messages {
                 switch message {
                 case .a(let text):
-                    let _ = try! channelA.post(message: Channel.text(text), by: idA)
+                    try! channelA.post(message: Channel.text(text), by: idA)
                 case .b(let text):
-                    let _ = try! channelB.post(message: Channel.text(text), by: idB)
+                    try! channelB.post(message: Channel.text(text), by: idB)
                 case .syncAB:
                     channelA.sync(with: channelB)
                 case .syncBA:
@@ -305,29 +305,66 @@ class VowLinkTests: XCTestCase {
     }
     
     func testContextPersistence() {
-        let channelID = context.sodium.randomBytes.buf(length: Channel.CHANNEL_ID_LENGTH)!
-        let content = context.sodium.randomBytes.buf(length: 16)!
+        let idA = try! Identity(context: context, name: "test:a")
+        let channelA = try! Channel(idA)
         
-        let message = try! ChannelMessage(context: context,
-                                          channelID: channelID,
-                                          content: .encrypted(content),
-                                          height: 10)
-        XCTAssert(!(try! context.persistence.contains(messageWithHash: message.hash!, andChannelID: channelID)))
+        let messages = [
+            try! channelA.post(message: Channel.text("1"), by: idA),
+            try! channelA.post(message: Channel.text("2"), by: idA),
+            try! channelA.post(message: Channel.text("3"), by: idA),
+            try! channelA.post(message: Channel.text("4"), by: idA)
+        ]
         
-        try! context.persistence.append(encryptedMessage: message, toChannelID: channelID)
-        XCTAssert(try! context.persistence.contains(messageWithHash: message.hash!, andChannelID: channelID))
+        // Clean-up
+        try! context.persistence.removeAll()
         
-        let fetch = try! context.persistence.message(withHash: message.hash!, andChannelID: channelID)
+        for message in messages {
+            try! context.persistence.append(encryptedMessage: message, toChannelID: channelA.channelID)
+        }
         
-        XCTAssertEqual(fetch?.toProto(), message.toProto())
+        // Start with height=0 query
+        let first = try! context.persistence.messages(startingFrom: .height(0),
+                                                      isBackward: false,
+                                                      channelID: channelA.channelID,
+                                                      andLimit: 2)
+        XCTAssertEqual(first.messages.count, 2)
+        XCTAssertEqual(first.messages[0].displayHash!, messages[0].displayHash!)
+        XCTAssertEqual(first.messages[1].displayHash!, messages[1].displayHash!)
         
-        let messages = try! context.persistence.messages(withMinHeight: -1, channelID: channelID, andLimit: 1)
-        XCTAssertEqual(messages.count, 1)
+        XCTAssertEqual(first.backwardHash, messages[0].hash!)
+        XCTAssertEqual(first.forwardHash, messages[2].hash!)
         
-        let messages2 = try! context.persistence.messages(withMinHeight: 10, channelID: channelID, andLimit: 1)
-        XCTAssertEqual(messages2.count, 1)
+        // Continue query forward
+        let next = try! context.persistence.messages(startingFrom: .hash(first.forwardHash!),
+                                                     isBackward: false,
+                                                     channelID: channelA.channelID,
+                                                     andLimit: 2)
+        XCTAssertEqual(next.messages.count, 2)
+        XCTAssertEqual(next.messages[0].displayHash!, messages[2].displayHash!)
+        XCTAssertEqual(next.messages[1].displayHash!, messages[3].displayHash!)
         
-        let messages3 = try! context.persistence.messages(withMinHeight: 11, channelID: channelID, andLimit: 1)
-        XCTAssertEqual(messages3.count, 0)
+        XCTAssertEqual(next.backwardHash, messages[2].hash!)
+        XCTAssertEqual(next.forwardHash, nil)
+        
+        // Step backward with hash cursor
+        let first2 = try! context.persistence.messages(startingFrom: .hash(next.backwardHash!),
+                                                       isBackward: true,
+                                                       channelID: channelA.channelID,
+                                                       andLimit: 2)
+        XCTAssertEqual(first2.messages.count, 2)
+        XCTAssertEqual(first2.messages[0].displayHash!, messages[0].displayHash!)
+        XCTAssertEqual(first2.messages[1].displayHash!, messages[1].displayHash!)
+        
+        XCTAssertEqual(first2.backwardHash, messages[0].hash!)
+        XCTAssertEqual(first2.forwardHash, messages[2].hash!)
+        
+        // Further backward step should return zero messages
+        let empty = try! context.persistence.messages(startingFrom: .hash(first2.backwardHash!),
+                                                      isBackward: true,
+                                                      channelID: channelA.channelID,
+                                                      andLimit: 2)
+        XCTAssertEqual(empty.messages.count, 0)
+        XCTAssertEqual(empty.backwardHash, nil)
+        XCTAssertEqual(empty.forwardHash, first2.backwardHash)
     }
 }
