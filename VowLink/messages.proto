@@ -136,7 +136,7 @@ message Error {
 }
 
 message Subscribe {
-  // TODO(indutny): Make it an array
+  // TODO(indutny): Make it an array?
   bytes channel_id = 1;
 }
 
