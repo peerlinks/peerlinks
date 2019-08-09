@@ -14,6 +14,13 @@ class Chain {
     let channelName: String?
     let links: [Link]
     
+    var canInvite: Bool {
+        get {
+            // TODO(indutny): take expiration in account
+            return links.count < Chain.MAX_LENGTH
+        }
+    }
+    
     static let MAX_LENGTH = 3
     
     init(_ encrypted: Proto_EncryptedInvite, withContext context: Context, publicKey: Bytes, andSecretKey secretKey: Bytes) throws {

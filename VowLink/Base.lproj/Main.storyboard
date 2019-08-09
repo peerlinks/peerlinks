@@ -205,6 +205,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="inviteButton" destination="yMR-VW-aJg" id="la0-WR-uS5"/>
                         <outlet property="messageText" destination="N6r-d9-r7e" id="VFK-DD-WJ4"/>
                         <outlet property="messagesView" destination="GsW-Oe-CMg" id="YCF-vw-EDG"/>
                         <outlet property="navItem" destination="8KN-8u-A2S" id="Y7d-ms-Awh"/>

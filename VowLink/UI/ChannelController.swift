@@ -5,6 +5,7 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     @IBOutlet weak var navItem: UINavigationItem!
     @IBOutlet weak var messagesView: UITableView!
     @IBOutlet weak var messageText: UITextField!
+    @IBOutlet weak var inviteButton: UIBarButtonItem!
     
     var app: AppDelegate!
     var channel: Channel!
@@ -37,6 +38,8 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
         
         messageText.rightViewMode = .always
         messageText.rightView = sendButton
+        
+        inviteButton.isEnabled = app.identity?.canInvite(toChannel: channel) ?? false
         
         // Set proper alpha
         messageTextChanged(self)

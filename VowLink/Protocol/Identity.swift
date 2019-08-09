@@ -110,6 +110,10 @@ class Identity {
         try save()
     }
     
+    func canInvite(toChannel channel: Channel) -> Bool {
+        return chain(for: channel)?.canInvite ?? false
+    }
+    
     // MARK: Channel content
     
     func signContent(chain: Chain,
