@@ -168,7 +168,8 @@ class Channel {
         return encrypted
     }
     
-    // NOTE: It is important to receive encrypted message, so that its hash won't change
+    // TODO(indutny): emit newly seen links and update chains in
+    // Identities when the intermediate link becomes available.
     func receive(encrypted: ChannelMessage) throws -> ChannelMessage {
         if !encrypted.isEncrypted {
             throw ChannelError.incomingMessageNotEncrypted
