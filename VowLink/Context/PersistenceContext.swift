@@ -14,10 +14,14 @@ class PersistenceContext {
     let db: Connection
     
     private let messageTable = Table("messages")
+    private let leafTable = Table("leafs")
+    
     private let channelID = Expression<String>("channelID")
     private let hash = Expression<String>("hash")
     private let height = Expression<Int64>("height")
     private let protobuf = Expression<Blob>("protobuf")
+    
+    private static let DEBUG = false
     
     struct MessageQueryResponse {
         let messages: [ChannelMessage]
@@ -32,12 +36,18 @@ class PersistenceContext {
             .documentDirectory, .userDomainMask, true
             ).first!
         db = try Connection("\(path)/\(service).sqlite3")
+        if PersistenceContext.DEBUG {
+            db.trace { print($0) }
+        }
         
         try createTables()
     }
     
-    func append(encryptedMessage encrypted: ChannelMessage, toChannelID channelID: Bytes) throws {
-        let query = messageTable.insert(
+    func append(encryptedMessage encrypted: ChannelMessage,
+                toChannelID channelID: Bytes,
+                withNewLeafs leafs: [Bytes] = []) throws {
+        // TODO(indutny): store leafs
+        let insertMessage = messageTable.insert(
             self.channelID <- context.sodium.utils.bin2hex(channelID)!,
             hash <- encrypted.displayHash!,
 
@@ -45,7 +55,20 @@ class PersistenceContext {
             protobuf <- Blob(bytes: Bytes(try encrypted.toProto()!.serializedData()))
         )
         
-        try db.run(query)
+        try db.transaction {
+            try db.run(insertMessage)
+            try db.run(leafTable.delete())
+            
+            for leafHash in leafs {
+                let leafHashHex = context.sodium.utils.bin2hex(leafHash)!
+                try db.run(leafTable.insert(hash <- leafHashHex))
+            }
+        }
+    }
+    
+    func leafs(forChannelID channelID: Bytes) throws -> [ChannelMessage] {
+        // TODO(indutny): load leafs
+        return []
     }
 
     // TODO(indutny): LRU cache
@@ -154,6 +177,7 @@ class PersistenceContext {
     
     func removeAll() throws {
         try db.run(messageTable.drop(ifExists: true))
+        try db.run(leafTable.drop(ifExists: true))
         try createTables()
     }
     
@@ -168,5 +192,11 @@ class PersistenceContext {
         try db.run(messageTable.createIndex(channelID, unique: false, ifNotExists: true))
         try db.run(messageTable.createIndex(hash, unique: true, ifNotExists: true))
         try db.run(messageTable.createIndex(height, unique: false, ifNotExists: true))
+        
+        try db.run(leafTable.create(ifNotExists: true) { (t) in
+            t.column(hash)
+        })
+        
+        try db.run(leafTable.createIndex(hash, unique: true, ifNotExists: true))
     }
 }

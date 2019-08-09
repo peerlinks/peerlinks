@@ -64,7 +64,6 @@ class Channel {
         let decryptedRoot = try root.decrypted(withChannel: self)
         
         try append(decryptedRoot)
-        leafs = try computeLeafs()
         
         if publicKey.count != context.sodium.sign.PublicKeyBytes {
             throw ChannelError.invalidPublicKeySize(publicKey.count)
@@ -85,7 +84,7 @@ class Channel {
                       name: proto.name,
                       root: try ChannelMessage(context: context, proto: proto.root))
         
-        leafs = try computeLeafs()
+        leafs = try context.persistence.leafs(forChannelID: channelID)
     }
     
     init(_ identity: Identity) throws {
@@ -109,8 +108,6 @@ class Channel {
         
         root = encryptedRoot
         try self.append(unencryptedRoot)
-        
-        leafs = try computeLeafs()
     }
     
     func toProto() -> Proto_Channel {
@@ -151,7 +148,6 @@ class Channel {
         
         let encrypted = try decrypted.encrypted(withChannel: self)
         
-        self.leafs = [ decrypted ]
         try self.append(decrypted)
         
         self.delegate?.channel(self, postedMessage: encrypted)
@@ -216,7 +212,6 @@ class Channel {
         }
         
         try self.append(decrypted)
-        self.leafs = try computeLeafs()
         
         self.delegate?.channel(self, postedMessage: encrypted)
         
@@ -225,43 +220,40 @@ class Channel {
 
     // MARK: Utils
     
-    private func computeLeafs() throws -> [ChannelMessage] {
-        var parents = Set<Bytes>()
-        for message in messages {
-            for parentHash in message.parents {
-                parents.insert(parentHash)
-            }
-        }
-        
-        var result = [ChannelMessage]()
-        
-        var maxTimestamp: TimeInterval = 0.0
-        for message in messages {
-            // NOTE: This is actually cached
-            let encrypted = try message.encrypted(withChannel: self)
-            
-            if !parents.contains(encrypted.hash!) {
-                result.append(message)
-                maxTimestamp = max(maxTimestamp, message.decryptedContent!.timestamp)
-            }
-        }
-        
-        let threshold = maxTimestamp - Channel.MAX_PARENT_DELTA
-        return result.filter({ (leaf) -> Bool in
-            return leaf.decryptedContent!.timestamp >= threshold
-        })
-    }
-    
     private func append(_ decrypted: ChannelMessage) throws {
         if decrypted.isEncrypted {
             throw ChannelError.expectedDecryptedMessage
         }
         
         let encrypted = try decrypted.encrypted(withChannel: self)
-        if message(byHash: encrypted.hash!) != nil {
+        if try context.persistence.contains(messageWithHash: encrypted.hash!, andChannelID: channelID) {
             return
         }
         
+        // Recompute leafs
+        // TODO(indutny): what if call above succeeds, but the save for the leafs will fail?
+        // Should we store leafs in the same place as the messages?
+        var leafHashes = Set<Bytes>(leafs.map({ (leaf) -> Bytes in
+            return leaf.hash!
+        }))
+        
+        for parent in encrypted.parents {
+            leafHashes.remove(parent)
+        }
+        leafHashes.insert(encrypted.hash!)
+
+        // Persist message and new leafs
+        try context.persistence.append(encryptedMessage: encrypted,
+                                       toChannelID: channelID,
+                                       withNewLeafs: [Bytes](leafHashes))
+        
+        // Recompute in-memory leafs
+        leafs = leafs.filter({ (leaf) -> Bool in
+            return leafHashes.contains(leaf.hash!)
+        })
+        leafs.append(encrypted)
+        
+        // TODO(indutny): remove code below
         messagesByHash[encrypted.hash!] = decrypted
         
         self.messages.append(decrypted)
