@@ -11,6 +11,8 @@ protocol PeerToPeerDelegate: AnyObject {
 
 class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, PeerDelegate {
     let context: Context
+    let queue: DispatchQueue
+    
     let localID: MCPeerID
     let advertiser: MCNearbyServiceAdvertiser
     let browser: MCNearbyServiceBrowser
@@ -30,8 +32,9 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         }
     }
     
-    init(context: Context, serviceType: String) {
+    init(context: Context, queue: DispatchQueue, andServiceType serviceType: String) {
         self.context = context
+        self.queue = queue
         
         // NOTE: The string is always random to avoid fingerprinting
         localID = MCPeerID(displayName: NSUUID().uuidString)
@@ -103,7 +106,7 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
             return nil
         }
         
-        let peer = Peer(context: context, localID: localID, remoteID: remoteID)
+        let peer = Peer(context: context, queue: queue, localID: localID, andRemoteID: remoteID)
         peer.delegate = self
         self.peers[peer.remoteID] = peer
         
@@ -113,53 +116,63 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     // MARK: Advertiser
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error) {
-        debugPrint("[p2p] did not start due to error \(error), retrying...")
-        advertiser.startAdvertisingPeer()
+        queue.async {
+            debugPrint("[p2p] did not start due to error \(error), retrying...")
+            advertiser.startAdvertisingPeer()
+        }
     }
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
-        if peers[peerID] != nil || peerID == localID {
-            debugPrint("[p2p] declining invitation from \(peerID.displayName)")
-            invitationHandler(false, nil)
-            return
+        queue.async {
+            if self.peers[peerID] != nil || peerID == self.localID {
+                debugPrint("[p2p] declining invitation from \(peerID.displayName)")
+                invitationHandler(false, nil)
+                return
+            }
+            
+            if self.peers.count > PeerToPeer.MAX_PEERS {
+                debugPrint("[p2p] declining invitation from \(peerID.displayName) due to max peers limit")
+                invitationHandler(false, nil)
+                return
+            }
+            
+            debugPrint("[p2p] accepting invitation from \(peerID.displayName)")
+            let peer = Peer(context: self.context, queue: self.queue, localID: self.localID, andRemoteID: peerID)
+            peer.delegate = self
+            self.peers[peer.remoteID] = peer
+            
+            invitationHandler(true, peer.session)
         }
-        
-        if peers.count > PeerToPeer.MAX_PEERS {
-            debugPrint("[p2p] declining invitation from \(peerID.displayName) due to max peers limit")
-            invitationHandler(false, nil)
-            return
-        }
-        
-        debugPrint("[p2p] accepting invitation from \(peerID.displayName)")
-        let peer = Peer(context: self.context, localID: localID, remoteID: peerID)
-        peer.delegate = self
-        peers[peer.remoteID] = peer
-        
-        invitationHandler(true, peer.session)
     }
     
     // MARK: Browser
     
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
-        debugPrint("[p2p] lost peer \(peerID.displayName)")
-        availablePeers.remove(peerID)
-        if let peer = peers[peerID] {
-            peer.destroy(reason: "Peer lost")
+        queue.async {
+            debugPrint("[p2p] lost peer \(peerID.displayName)")
+            self.availablePeers.remove(peerID)
+            if let peer = self.peers[peerID] {
+                peer.destroy(reason: "Peer lost")
+            }
         }
     }
     
     func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error) {
-        debugPrint("[p2p] did not start due to error \(error), retrying...")
-        browser.startBrowsingForPeers()
+        queue.async {
+            debugPrint("[p2p] did not start due to error \(error), retrying...")
+            browser.startBrowsingForPeers()
+        }
     }
     
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
-        debugPrint("[p2p] found peer \(peerID.displayName) with info \(String(describing: info))")
-        self.availablePeers.insert(peerID)
-        
-        if let peer = self.connect(to: peerID) {
-            debugPrint("[p2p] inviting peer \(peerID.displayName) into session")
-            browser.invitePeer(peerID, to: peer.session, withContext: nil, timeout: 10.0)
+        queue.async {
+            debugPrint("[p2p] found peer \(peerID.displayName) with info \(String(describing: info))")
+            self.availablePeers.insert(peerID)
+            
+            if let peer = self.connect(to: peerID) {
+                debugPrint("[p2p] inviting peer \(peerID.displayName) into session")
+                browser.invitePeer(peerID, to: peer.session, withContext: nil, timeout: 10.0)
+            }
         }
     }
     

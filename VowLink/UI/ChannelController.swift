@@ -20,7 +20,7 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
         navItem.title = channel.name
         
         app = (UIApplication.shared.delegate as! AppDelegate)
-        app.channelDelegate = self
+        app.network.channelDelegate = self
         
         messagesView.dataSource = self
         messagesView.delegate = self
@@ -99,14 +99,18 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: UITableViewDataSource
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return max(0, channel.messageCount - 1)
+        return app.network.queue.sync {
+            return max(0, channel.messageCount - 1)
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "messageCell")!
         
         // NOTE: Skip root
-        cell.textLabel?.text = messageText(atOffset: indexPath.row + 1)
+        app.network.queue.sync {
+            cell.textLabel?.text = messageText(atOffset: indexPath.row + 1)
+        }
         
         return cell
     }
@@ -114,10 +118,12 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: ChannelDelegate
     
     func channel(_ channel: Channel, postedMessage message: ChannelMessage) {
-        if channel.channelID == self.channel.channelID {
-            messagesView.reloadData()
-            
-            scrollToBottom(animated: true)
+        if channel.channelID != self.channel.channelID {
+            return
+        }
+        DispatchQueue.main.async {
+            self.messagesView.reloadData()
+            self.scrollToBottom(animated: true)
         }
     }
     

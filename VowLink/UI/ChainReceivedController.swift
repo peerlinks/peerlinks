@@ -28,23 +28,9 @@ class ChainReceivedController : UIViewController {
         
         let app = (UIApplication.shared.delegate as! AppDelegate)
         do {
-            guard let publicKey = chain.channelPubKey else {
-                throw ChainReceivedError.invalidInvite
+            try app.network.queue.sync {
+                try app.network.confirm(invite: chain, withChannelName: descriptionField.text ?? "", andIdentity: app.identity!)
             }
-            
-            guard let root = chain.channelRoot else {
-                throw ChainReceivedError.invalidInvite
-            }
-            
-            let name = descriptionField.text!
-            
-            let channel = try Channel(context: app.context,
-                                      publicKey: publicKey,
-                                      name: name,
-                                      root: root)
-            try app.identity!.addChain(chain, for: channel)
-            
-            try app.channelList.add(channel)
         } catch {
             let alert = UIAlertController(title: "Subscription failed",
                                           message: "Error: \(error)",

@@ -2,34 +2,17 @@ import UIKit
 import Sodium
 import MultipeerConnectivity
 
-protocol ChainNotificationDelegate: AnyObject {
-    var boxPublicKey: Bytes? { get }
-    var boxSecretKey: Bytes? { get }
-    
-    func chain(received chain: Chain)
-}
-
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, ChannelDelegate, ChannelListDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate {
     var context: Context!
-    var channelList: ChannelList!
-    
-    var p2p: PeerToPeer!
+    var network: NetworkManager!
     var identity: Identity?
     var window: UIWindow?
     
-    weak var chainDelegate: ChainNotificationDelegate?
-    weak var channelDelegate: ChannelDelegate?
-    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         context = try! Context()
-        p2p = PeerToPeer(context: context, serviceType: "com-vowlink")
-        p2p.delegate = self
-        
-        channelList = ChannelList(context: context)
-        channelList.delegate = self
-        channelList.channelDelegate = self
-        
+        network = NetworkManager(context: context)
+
         return true
     }
     
@@ -54,157 +37,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
         // Saves changes in the application's managed object context before the application terminates.
-    }
-    
-    // MARK: Peer to Peer
-    
-    func peerToPeer(_ p2p: PeerToPeer, connectedTo peer: Peer) {
-        // no-op
-    }
-    
-    func peerToPeer(_ p2p: PeerToPeer, peerReady peer: Peer) {
-        debugPrint("[app] new peer \(peer), syncing and subscribing to channels.count=\(channelList.channels.count)")
-        for channel in channelList.channels {
-            do {
-                let _ = try peer.send(subscribeTo: channel.channelID)
-            } catch {
-                debugPrint("[app] failed to send subscribe to \(channel.channelID) due to error \(error)")
-            }
-            
-            DispatchQueue.main.async {
-                channel.sync(with: peer)
-            }
-        }
-    }
-    
-    func peerToPeer(_ p2p: PeerToPeer, didReceive packet: Proto_Packet, fromPeer peer: Peer) {
-        DispatchQueue.main.async {
-            debugPrint("[app] got packet \(packet) from peer \(peer)")
-            
-            switch packet.content {
-            case .some(.invite(let encryptedInvite)):
-                self.receive(encryptedInvite: encryptedInvite, from: peer)
-            case .some(.notification(let notification)):
-                self.receive(notification: notification, from: peer)
-            case .some(.query(let query)):
-                self.receive(query: query, from: peer)
-            case .some(.bulk(let bulk)):
-                self.receive(bulk: bulk, from: peer)
-            default:
-                debugPrint("[app] unhandled packet \(packet)")
-            }
-        }
-    }
-    
-    func receive(encryptedInvite proto: Proto_EncryptedInvite, from peer: Peer) {
-        guard let _ = self.identity else {
-            debugPrint("[app] no identity available, ignoring invite")
-            return
-        }
-        
-        guard let chainDelegate = chainDelegate else {
-            return
-        }
-        
-        do {
-            let chain = try Chain(proto,
-                                  withContext: context,
-                                  publicKey: chainDelegate.boxPublicKey!,
-                                  andSecretKey: chainDelegate.boxSecretKey!)
-            
-            chainDelegate.chain(received: chain)
-        } catch {
-            debugPrint("[app] failed to decrypt invite due to error \(error)")
-            peer.destroy(reason: "failed to decrypt invite due to error \(error)")
-        }
-    }
-    
-    func receive(notification proto: Proto_Notification, from peer: Peer) {
-        guard let channel = channelList.find(byChannelID: Bytes(proto.channelID)) else {
-            debugPrint("[app] channel \(proto.channelID) is unknown")
-            return
-        }
-
-        debugPrint("[app] notification for channel \(channel.channelDisplayID)")
-        channel.sync(with: peer)
-    }
-    
-    func receive(query proto: Proto_Query, from peer: Peer) {
-        let channelID = Bytes(proto.channelID)
-        
-        guard let channel = channelList.find(byChannelID: channelID) else {
-            debugPrint("[app] channel \(channelID) not found for query")
-            return
-        }
-        
-        do {
-            var response: Channel.QueryResponse?
-            
-            var cursor: Channel.Cursor?
-            switch proto.cursor {
-            case .some(.hash(let hash)):
-                cursor = .hash(Bytes(hash))
-            case .some(.height(let height)):
-                cursor = .height(height)
-            case .none:
-                return peer.destroy(reason: "invalid cursor in query response")
-            }
-            response = try channel.query(withCursor: cursor!,
-                                         isBackward: proto.isBackward,
-                                         andLimit: Int(proto.limit))
-            
-            let _ = try peer.send(queryResponse: response!, from: channel)
-        } catch {
-            return peer.destroy(reason: "channel query failed due to \(error)")
-        }
-    }
-    
-    func receive(bulk proto: Proto_Bulk, from peer: Peer) {
-        let channelID = Bytes(proto.channelID)
-        
-        guard let channel = channelList.find(byChannelID: channelID) else {
-            debugPrint("[app] channel \(channelID) not found for query")
-            return
-        }
-
-        do {
-            let response = try channel.bulk(withHashes: proto.hashes.map({ (hash) -> Bytes in
-                return Bytes(hash)
-            }))
-            
-            let _ = try peer.send(bulkResponse: response, from: channel)
-        } catch {
-            return peer.destroy(reason: "channel bulk failed due to error \(error)")
-        }
-    }
-    
-    // MARK: ChannelDelegate
-    
-    func channel(_ channel: Channel, postedMessage message: ChannelMessage) {
-        channelDelegate?.channel(channel, postedMessage: message)
-        
-        do {
-            try p2p.send(Proto_Packet.with({ (proto) in
-                proto.notification = Proto_Notification.with({ (proto) in
-                    proto.channelID = Data(channel.channelID)
-                })
-            }), to: p2p.readyPeers)
-        } catch {
-            debugPrint("[app] failed to broadcast message due to error \(error)")
-        }
-    }
-    
-    // MARK: ChannelListDelegate
-    
-    func channelList(added channel: Channel) {
-        for peer in p2p.readyPeers {
-            do {
-                let _ = try peer.send(subscribeTo: channel.channelID)
-            } catch {
-                debugPrint("[app] failed to send subscribe to new \(channel.channelID) due to error \(error)")
-            }
-            
-            channel.sync(with: peer)
-        }
     }
 }

@@ -15,6 +15,8 @@ protocol PeerDelegate : AnyObject {
 
 class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     let context: Context
+    let queue: DispatchQueue
+    
     let session: MCSession
     let remoteID: MCPeerID
     var hello: Proto_Hello?
@@ -30,8 +32,9 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     static let MAX_SUBSCRIPTIONS: Int = 1000
     static let MAX_PEER_ID_LENGTH: Int = 64
     
-    init(context: Context, localID: MCPeerID, remoteID: MCPeerID) {
+    init(context: Context, queue: DispatchQueue, localID: MCPeerID, andRemoteID remoteID: MCPeerID) {
         self.context = context
+        self.queue = queue
         self.remoteID = remoteID
         
         session = MCSession(peer: localID, securityIdentity: nil, encryptionPreference: .required)
@@ -224,13 +227,9 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             backwardHash = Bytes(proto.backwardHash)
         }
         
-        // NOTE: `closure` has to be invoked there because it interacts with UX
-        // TODO(indutny): reconsider doing it here
-        DispatchQueue.main.async {
-            closure(Channel.QueryResponse(abbreviatedMessages: messages,
-                                          forwardHash: forwardHash,
-                                          backwardHash: backwardHash))
-        }
+        closure(Channel.QueryResponse(abbreviatedMessages: messages,
+                                      forwardHash: forwardHash,
+                                      backwardHash: backwardHash))
     }
     
     private func handle(bulkResponse proto: Proto_BulkResponse) {
@@ -259,13 +258,8 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             return destroy(reason: "invalid message in bulk response, error \(error)")
         }
         
-        // NOTE: `closure` has to be invoked there because it interacts with UX
-        // TODO(indutny): reconsider doing it here
-        DispatchQueue.main.async {
-            closure(Channel.BulkResponse(messages: messages, forwardIndex: Int(proto.forwardIndex)))
-        }
+        closure(Channel.BulkResponse(messages: messages, forwardIndex: Int(proto.forwardIndex)))
     }
-
     
     // MARK: Session
     
@@ -273,69 +267,84 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
         if peerID != remoteID {
             return
         }
-        debugPrint("[peer] received from \(peerID.displayName) data \(data)")
         
-        do {
-            guard let packet = try receivePacket(data: data) else {
-                debugPrint("[peer] ignoring internal packet")
-                return
+        queue.async {
+            debugPrint("[peer] received from \(peerID.displayName) data \(data)")
+
+            do {
+                guard let packet = try self.receivePacket(data: data) else {
+                    debugPrint("[peer] ignoring internal packet")
+                    return
+                }
+                
+                debugPrint("[peer] packet \(packet)")
+                
+                self.delegate?.peer(self, receivedPacket: packet)
+            } catch {
+                debugPrint("[peer] id=\(self.remoteID.displayName) parsing error \(error)")
+                session.disconnect()
             }
-            
-            debugPrint("[peer] packet \(packet)")
-            
-            delegate?.peer(self, receivedPacket: packet)
-        } catch {
-            debugPrint("[peer] id=\(remoteID.displayName) parsing error \(error)")
-            session.disconnect()
         }
     }
     
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        switch state {
-        case .connecting:
-            debugPrint("[peer] id=\(remoteID.displayName) remote=\(peerID.displayName) connecting")
-            return
-        case .notConnected:
-            debugPrint("[peer] id=\(remoteID.displayName) remote=\(peerID.displayName) disconnected")
-            delegate?.peerDisconnected(self)
-            return
-        case .connected:
-            debugPrint("[peer] id=\(remoteID.displayName) remote=\(peerID.displayName) connected")
-        default:
-            debugPrint("[peer] id=\(remoteID.displayName) remote=\(peerID.displayName) unknown state transition")
-            return
-        }
-        
-        do {
-            try sendHello()
-        } catch {
-            debugPrint("[peer] id=\(remoteID.displayName) failed to send hello due to error \(error)")
-            session.disconnect()
+        queue.async {
+            let remoteID = self.remoteID
             
-            delegate?.peerDisconnected(self)
-            return
+            switch state {
+            case .connecting:
+                debugPrint("[peer] id=\(remoteID.displayName) remote=\(peerID.displayName) connecting")
+                return
+            case .notConnected:
+                debugPrint("[peer] id=\(remoteID.displayName) remote=\(peerID.displayName) disconnected")
+                self.delegate?.peerDisconnected(self)
+                return
+            case .connected:
+                debugPrint("[peer] id=\(remoteID.displayName) remote=\(peerID.displayName) connected")
+            default:
+                debugPrint("[peer] id=\(remoteID.displayName) remote=\(peerID.displayName) unknown state transition")
+                return
+            }
+            
+            do {
+                try self.sendHello()
+            } catch {
+                debugPrint("[peer] id=\(remoteID.displayName) failed to send hello due to error \(error)")
+                session.disconnect()
+                
+                self.delegate?.peerDisconnected(self)
+                return
+            }
+            
+            self.delegate?.peerConnected(self)
         }
-        
-        delegate?.peerConnected(self)
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
-        debugPrint("[peer] id=\(peerID.displayName) received stream, closing immediately")
+        queue.async {
+            debugPrint("[peer] id=\(peerID.displayName) received stream, closing immediately")
+        }
         stream.close()
     }
     
     func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
-        debugPrint("[peer] id=\(peerID.displayName) received resource \(resourceName), cancelling")
+        queue.async {
+            debugPrint("[peer] id=\(peerID.displayName) received resource \(resourceName), cancelling")
+        }
         progress.cancel()
     }
     
     func session(_ session: MCSession, didReceiveCertificate certificate: [Any]?, fromPeer peerID: MCPeerID, certificateHandler: @escaping (Bool) -> Void) {
-        debugPrint("[peer] id=\(peerID.displayName) received certificates \(String(describing: certificate))")
-        certificateHandler(true)
+        queue.async {
+            debugPrint("[peer] id=\(peerID.displayName) received certificates \(String(describing: certificate))")
+            certificateHandler(true)
+        }
     }
     
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {
-        debugPrint("[peer] id=\(peerID.displayName) finished receiving resource \(resourceName)")
+        queue.async {
+            debugPrint("[peer] id=\(peerID.displayName) finished receiving resource \(resourceName)")
+        }
     }
     
     // Mark: RemoteChannel

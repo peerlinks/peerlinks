@@ -1,7 +1,7 @@
 import UIKit
 import Sodium
 
-class ChainRequestController : UIViewController, ChainNotificationDelegate {
+class ChainRequestController : UIViewController, InviteNotificationDelegate {
     @IBOutlet weak var imageView: UIImageView!
     var sodium: Sodium!
     var boxPublicKey: Bytes?
@@ -22,7 +22,8 @@ class ChainRequestController : UIViewController, ChainNotificationDelegate {
         boxSecretKey = keyPair.secretKey
         
         let req = Proto_InviteRequest.with { (req) in
-            req.peerID = app.p2p.localID.displayName
+            // TODO(indutny): this is an internal property
+            req.peerID = app.network.p2p.localID.displayName
             req.trusteePubKey = Data(identity.publicKey)
             
             req.boxPubKey = Data(keyPair.publicKey)
@@ -48,7 +49,7 @@ class ChainRequestController : UIViewController, ChainNotificationDelegate {
         let qr = image.transformed(by: transform)
         imageView.image = UIImage(ciImage: qr)
         
-        app.chainDelegate = self
+        app.network.inviteDelegate = self
     }
     
     deinit {
@@ -66,8 +67,10 @@ class ChainRequestController : UIViewController, ChainNotificationDelegate {
     
     // MARK: ChainNotificationDelegate
     
-    func chain(received chain: Chain) {
-        self.chain = chain
-        performSegue(withIdentifier: "toReceivedLink", sender: self)
+    func invite(received chain: Chain) {
+        DispatchQueue.main.async {
+            self.chain = chain
+            self.performSegue(withIdentifier: "toReceivedLink", sender: self)
+        }
     }
 }

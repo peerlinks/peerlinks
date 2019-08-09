@@ -29,32 +29,16 @@ class InviteConfirmController : UITableViewController {
             return
         }
         
-        let peers = app.p2p.peers(byDisplayName: request.peerID)
-        if peers.isEmpty {
+        let sent = app.network.queue.sync {
+            return try! app.network.send(inviteWithRequest: request, andChannel: channel, withIdentity: id)
+        }
+        if !sent {
             let alert = UIAlertController(title: "Peer offline",
                                           message: "Make sure that invitee device is unlocked and running this application",
                                           preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Close", style: .cancel, handler: nil))
             present(alert, animated: true)
             return
-        }
-        
-        do {
-            let link = try id.issueLink(for: Bytes(request.trusteePubKey), andChannel: channel)
-            
-            guard let chain = try id.chain(for: channel)?.appendedLink(link) else {
-                fatalError("no chain available for the channel \(channel!)")
-            }
-            
-            let encryptedInvite = try chain.encrypt(withPublicKey: Bytes(request.boxPubKey), andChannel: channel)
-            
-            let packet = Proto_Packet.with { (packet) in
-                packet.invite = encryptedInvite
-            }
-            
-            try app.p2p.send(packet, to: peers)
-        } catch {
-            fatalError("failed to issue invite \(request) due to error \(error)")
         }
         
         if let nav = navigationController {

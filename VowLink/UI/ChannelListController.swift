@@ -1,13 +1,16 @@
 import UIKit
 
 class ChannelListController : UIViewController, UITableViewDataSource {
-    var app: AppDelegate!
+    var network: NetworkManager!
+    var channelList: ChannelList!
     @IBOutlet weak var tableView: UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        app = (UIApplication.shared.delegate as! AppDelegate)
+        let app = (UIApplication.shared.delegate as! AppDelegate)
+        network = app.network
+        channelList = network.channelList
         
         tableView.dataSource = self
     }
@@ -16,16 +19,23 @@ class ChannelListController : UIViewController, UITableViewDataSource {
         if let cell = sender as? UITableViewCell,
             let channelController = segue.destination as? ChannelController {
             let index = tableView.indexPath(for: cell)!
-            channelController.channel = app.channelList.channels[index.row]
+            
+            network.queue.sync {
+                channelController.channel = channelList.channels[index.row]
+            }
         }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-         return app.channelList.channels.count
+        return network.queue.sync {
+            return channelList.channels.count
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let name = app.channelList.channels[indexPath.row].name
+        let name = network.queue.sync {
+            return channelList.channels[indexPath.row].name
+        }
         let cell = tableView.dequeueReusableCell(withIdentifier: "channelCell")!
         cell.textLabel?.text = name
         return cell
