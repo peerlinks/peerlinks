@@ -77,7 +77,7 @@ extension Channel: RemoteChannel {
                         break
                     }
                 } catch {
-                    remote.destroy(reason: "lookup error \(error)")
+                    remote.destroy(reason: "parent lookup error \(error)")
                     return
                 }
             }
@@ -126,9 +126,14 @@ extension Channel: RemoteChannel {
     func query(withCursor cursor: Cursor, isBackward: Bool, andLimit limit: Int) throws -> QueryResponse {
         debugPrint("[channel] \(channelDisplayID) query isBackward=\(isBackward)")
         
+        var amendedCursor = cursor
+        if case .height(let height) = cursor {
+            amendedCursor = .height(min(height, minLeafHeight))
+        }
+        
         let enforcedLimit = min(limit, Channel.SYNC_LIMIT)
         
-        let response = try context.persistence.messages(startingFrom: cursor,
+        let response = try context.persistence.messages(startingFrom: amendedCursor,
                                                         isBackward: isBackward,
                                                         channelID: channelID,
                                                         andLimit: enforcedLimit)
@@ -186,7 +191,6 @@ extension Channel: RemoteChannel {
         
         return BulkResponse(messages: result, forwardIndex: limit)
     }
-    
     
     // MARK: RemoteChannel (mostly for testing)
     
