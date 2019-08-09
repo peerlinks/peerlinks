@@ -269,6 +269,9 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     // MARK: Session
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
+        if peerID != remoteID {
+            return
+        }
         debugPrint("[peer] received from \(peerID.displayName) data \(data)")
         
         do {
@@ -289,16 +292,16 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         switch state {
         case .connecting:
-            debugPrint("[peer] id=\(remoteID.displayName) connecting")
+            debugPrint("[peer] id=\(remoteID.displayName) remote=\(peerID.displayName) connecting")
             return
         case .notConnected:
-            debugPrint("[peer] id=\(remoteID.displayName) disconnected")
+            debugPrint("[peer] id=\(remoteID.displayName) remote=\(peerID.displayName) disconnected")
             delegate?.peerDisconnected(self)
             return
         case .connected:
-            debugPrint("[peer] id=\(remoteID.displayName) connected")
+            debugPrint("[peer] id=\(remoteID.displayName) remote=\(peerID.displayName) connected")
         default:
-            debugPrint("[peer] id=\(remoteID.displayName) unknown state transition")
+            debugPrint("[peer] id=\(remoteID.displayName) remote=\(peerID.displayName) unknown state transition")
             return
         }
         
