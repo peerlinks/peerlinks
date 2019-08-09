@@ -27,8 +27,6 @@ class Channel {
     let publicKey: Bytes
     var name: String
     
-    var messages = [ChannelMessage]()
-    var messagesByHash = [Bytes:ChannelMessage]()
     var leafs = [ChannelMessage]()
     
     weak var delegate: ChannelDelegate? = nil
@@ -49,6 +47,7 @@ class Channel {
     static let FUTURE: TimeInterval = 10.0 // seconds
     static let MAX_NAME_LENGTH = 128
     static let MAX_PARENT_DELTA: TimeInterval = 30 * 24 * 3600; // 30 days
+    static let LATEST_MESSAGES_COUNT = 1000
     
     init(context: Context, publicKey: Bytes, name: String, root: ChannelMessage) throws {
         // NOTE: Makes using `channel.root.hash!` very easy to use
@@ -118,8 +117,13 @@ class Channel {
         })
     }
     
-    func message(byHash hash: Bytes) -> ChannelMessage? {
-        return messagesByHash[hash]
+    // TODO(indutny): byHash => withHash
+    func message(byHash hash: Bytes) throws -> ChannelMessage? {
+        return try context.persistence.message(withHash: hash, andChannelID: channelID)
+    }
+    
+    func contains(messageWithHash hash: Bytes) throws -> Bool {
+        return try context.persistence.contains(messageWithHash: hash, andChannelID: channelID)
     }
     
     @discardableResult func post(message body: Proto_ChannelMessage.Body, by identity: Identity) throws -> ChannelMessage {
@@ -181,7 +185,7 @@ class Channel {
         var parentMinTimestamp: TimeInterval = 0.0
         var parentTimestamp: TimeInterval = 0.0
         for parentHash in decrypted.parents {
-            guard let parent = self.message(byHash: parentHash) else {
+            guard let parent = try self.message(byHash: parentHash) else {
                 throw ChannelError.parentNotFound(parentHash)
             }
             
@@ -207,7 +211,7 @@ class Channel {
             throw ChannelError.parentTooFarInThePast
         }
         
-        if let _ = message(byHash: encrypted.hash!) {
+        if try contains(messageWithHash: encrypted.hash!) {
             return decrypted
         }
         
@@ -216,6 +220,16 @@ class Channel {
         self.delegate?.channel(self, postedMessage: encrypted)
         
         return decrypted
+    }
+    
+    // TODO(indutny): this is lame, we should be doing it differently
+    func latestMessages() throws -> [ChannelMessage] {
+        let maxHeight = try context.persistence.maxHeight()
+        let response = try context.persistence.messages(startingFrom: .height(maxHeight + 1),
+                                                        isBackward: true,
+                                                        channelID: channelID,
+                                                        andLimit: Channel.LATEST_MESSAGES_COUNT)
+        return response.messages
     }
 
     // MARK: Utils
@@ -226,7 +240,8 @@ class Channel {
         }
         
         let encrypted = try decrypted.encrypted(withChannel: self)
-        if try context.persistence.contains(messageWithHash: encrypted.hash!, andChannelID: channelID) {
+        if try context.persistence.contains(messageWithHash: encrypted.hash!,
+                                            andChannelID: channelID) {
             return
         }
         
@@ -252,24 +267,6 @@ class Channel {
             return leafHashes.contains(leaf.hash!)
         })
         leafs.append(encrypted)
-        
-        // TODO(indutny): remove code below
-        messagesByHash[encrypted.hash!] = decrypted
-        
-        self.messages.append(decrypted)
-        try self.messages.sort { (a, b) -> Bool in
-            if a.height < b.height {
-                return true
-            } else if a.height > b.height {
-                return false
-            }
-            
-            // TODO(indutny): cache hashes in the storage, perhaps?
-            let encryptedA = try a.encrypted(withChannel: self)
-            let encryptedB = try b.encrypted(withChannel: self)
-            
-            return self.context.sodium.utils.compare(encryptedA.hash!, encryptedB.hash!) == -1
-        }
     }
     
     // MARK: Helpers

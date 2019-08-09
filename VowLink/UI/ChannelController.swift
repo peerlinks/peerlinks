@@ -10,6 +10,7 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     var channel: Channel!
     var keyboardWillShow: NSObjectProtocol!
     var keyboardWillHide: NSObjectProtocol!
+    var messages: [ChannelMessage]!
     
     static let AUTHOR_LENGTH = 6
     
@@ -25,6 +26,10 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
         messagesView.delegate = self
         
         scrollToBottom(animated: false)
+        
+        messages = (try? channel.latestMessages()) ?? []
+        
+        // View resize on keyboard open/close
         
         let center = NotificationCenter.default
         
@@ -91,12 +96,12 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: UITableViewDataSource
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return channel.messages.count
+        return messages.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "messageCell")!
-        let message = channel.messages[indexPath.row]
+        let message = messages[indexPath.row]
         
         guard let content = message.decryptedContent else {
             cell.textLabel?.text = "<encrypted>"
@@ -131,6 +136,7 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     func channel(_ channel: Channel, postedMessage message: ChannelMessage) {
         if channel.channelID == self.channel.channelID {
             messagesView.reloadData()
+            messages = (try? channel.latestMessages()) ?? []
             
             scrollToBottom(animated: true)
         }

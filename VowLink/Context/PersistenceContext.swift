@@ -14,12 +14,14 @@ class PersistenceContext {
     let db: Connection
     
     private let messageTable = Table("messages")
-    private let leafTable = Table("leafs")
     
     private let channelID = Expression<String>("channelID")
     private let hash = Expression<String>("hash")
     private let height = Expression<Int64>("height")
     private let protobuf = Expression<Blob>("protobuf")
+    
+    private let leafTable = Table("leafs")
+    private let leafHash = Expression<String>("leafHash")
     
     private static let DEBUG = false
     
@@ -43,6 +45,10 @@ class PersistenceContext {
         try createTables()
     }
     
+    func maxHeight() throws -> Int64 {
+        return try db.scalar(messageTable.select(height.max)) ?? 0
+    }
+    
     func append(encryptedMessage encrypted: ChannelMessage,
                 toChannelID channelID: Bytes,
                 withNewLeafs leafs: [Bytes] = []) throws {
@@ -61,14 +67,23 @@ class PersistenceContext {
             
             for leafHash in leafs {
                 let leafHashHex = context.sodium.utils.bin2hex(leafHash)!
-                try db.run(leafTable.insert(hash <- leafHashHex))
+                try db.run(leafTable.insert(self.leafHash <- leafHashHex))
             }
         }
     }
     
     func leafs(forChannelID channelID: Bytes) throws -> [ChannelMessage] {
-        // TODO(indutny): load leafs
-        return []
+        let query = leafTable.select(protobuf)
+            .join(messageTable, on: leafHash == hash)
+        
+        // TODO(indutny): DRY
+        var result = [ChannelMessage]()
+        for message in try db.prepare(query) {
+            let raw = try message.get(protobuf).bytes
+            let proto = try Proto_ChannelMessage(serializedData: Data(raw))
+            result.append(try ChannelMessage(context: context, proto: proto))
+        }
+        return result
     }
 
     // TODO(indutny): LRU cache
@@ -161,12 +176,23 @@ class PersistenceContext {
             result.append(try ChannelMessage(context: context, proto: proto))
         }
         
+        var hasExtraBackward = false
         if isBackward {
             result.reverse()
+            
+            // Only if the last message is inclusive - consider it to be the
+            // forward hash
+            let last = result.last!
+            switch cursor {
+            case .hash(let hash):
+                hasExtraBackward = last.hash! == hash
+            case .height(let height):
+                hasExtraBackward = last.height == height
+            }
         }
 
         var forwardHash: Bytes?
-        if result.count == fullLimit || isBackward {
+        if result.count == fullLimit || hasExtraBackward {
             forwardHash = result.last!.hash!
             result.removeLast()
         }
@@ -194,9 +220,9 @@ class PersistenceContext {
         try db.run(messageTable.createIndex(height, unique: false, ifNotExists: true))
         
         try db.run(leafTable.create(ifNotExists: true) { (t) in
-            t.column(hash)
+            t.column(leafHash)
         })
         
-        try db.run(leafTable.createIndex(hash, unique: true, ifNotExists: true))
+        try db.run(leafTable.createIndex(leafHash, unique: true, ifNotExists: true))
     }
 }

@@ -24,7 +24,8 @@ class VowLinkTests: XCTestCase {
     }
     
     func text(in channel: Channel) -> [String] {
-        return channel.messages.map({ (message) -> String in
+        let latest = try! channel.latestMessages()
+        return latest.map({ (message) -> String in
             guard let content = message.decryptedContent else {
                 return "<encrypted>"
             }
@@ -304,7 +305,7 @@ class VowLinkTests: XCTestCase {
             ], message: "1 in a, 2 in b")
     }
     
-    func testContextPersistence() {
+    func testContextPersistenceMessages() {
         let idA = try! Identity(context: context, name: "test:a")
         let channelA = try! Channel(idA)
         
@@ -366,5 +367,34 @@ class VowLinkTests: XCTestCase {
         XCTAssertEqual(empty.messages.count, 0)
         XCTAssertEqual(empty.backwardHash, nil)
         XCTAssertEqual(empty.forwardHash, first2.backwardHash)
+    }
+    
+    func testContextPersistenceLeafs() {
+        let idA = try! Identity(context: context, name: "test:a")
+        let channelA = try! Channel(idA)
+        
+        let fakeLeafs = [
+            try! channelA.post(message: Channel.text("1"), by: idA),
+            try! channelA.post(message: Channel.text("2"), by: idA),
+            try! channelA.post(message: Channel.text("3"), by: idA)
+        ]
+        
+        let main = try! channelA.post(message: Channel.text("4"), by: idA)
+        
+        try! context.persistence.removeAll()
+        
+        for leaf in fakeLeafs {
+            try! context.persistence.append(encryptedMessage: leaf, toChannelID: channelA.channelID)
+        }
+        
+        let fakeLeafHashes = fakeLeafs.map({ (leaf) -> Bytes in
+            return leaf.hash!
+        })
+        try! context.persistence.append(encryptedMessage: main,
+                                        toChannelID: channelA.channelID,
+                                        withNewLeafs: fakeLeafHashes)
+        
+        let leafs = try! context.persistence.leafs(forChannelID: channelA.channelID)
+        XCTAssertEqual(leafs.count, fakeLeafs.count)
     }
 }

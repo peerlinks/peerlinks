@@ -71,9 +71,14 @@ extension Channel: RemoteChannel {
         for abbr in response.abbreviatedMessages {
             var canCommit = true
             for parentHash in abbr.parents {
-                if !hashes.contains(parentHash) && message(byHash: parentHash) == nil {
-                    canCommit = false
-                    break
+                do {
+                    if !hashes.contains(parentHash), try message(byHash: parentHash) == nil {
+                        canCommit = false
+                        break
+                    }
+                } catch {
+                    remote.destroy(reason: "lookup error \(error)")
+                    return
                 }
             }
             
@@ -122,62 +127,19 @@ extension Channel: RemoteChannel {
         debugPrint("[channel] \(channelDisplayID) query isBackward=\(isBackward)")
         
         let enforcedLimit = min(limit, Channel.SYNC_LIMIT)
-        var index: (Int, ChannelMessage)?
         
-        switch cursor {
-        case .height(let height):
-            let requestHeight = min(height, minLeafHeight)
-            
-            // TODO(indutny): have some sort of height maps
-            index = messages.enumerated().first { (param) -> Bool in
-                let (_, message) = param
-                return message.height == requestHeight
-            }
-            
-        case .hash(let hash):
-            // NOTE: Reverse walk is more efficient since in the best
-            // case we are synchronizing just the tip
-            index = messages.enumerated().reversed().first { (param) -> Bool in
-                let (_, message) = param
-                let encrypted = try! message.encrypted(withChannel: self)
-                return context.sodium.utils.equals(encrypted.hash!, hash)
-            }
+        let response = try context.persistence.messages(startingFrom: cursor,
+                                                        isBackward: isBackward,
+                                                        channelID: channelID,
+                                                        andLimit: enforcedLimit)
+        
+        let abbreviated = response.messages.map { (message) -> Abbreviated in
+            return Abbreviated(parents: message.parents, hash: message.hash!)
         }
         
-        guard let (first, _) = index else {
-            debugPrint("[channel] \(channelDisplayID) query cursor not found")
-            return QueryResponse(abbreviatedMessages: [], forwardHash: nil, backwardHash: nil)
-        }
-        
-        var subset: ArraySlice<ChannelMessage>?
-        var forwardIndex: Int
-        if isBackward {
-            let start = max(0, first - enforcedLimit)
-            subset = messages[start..<first]
-            forwardIndex = first
-            
-            debugPrint("[channel] \(channelDisplayID) query result [\(start)..<\(first)] forwardIndex=\(forwardIndex)")
-        } else {
-            let end = min(messages.count, first + enforcedLimit)
-            subset = messages[first..<end]
-            forwardIndex = end
-            debugPrint("[channel] \(channelDisplayID) query result [\(first)..<\(end)] forwardIndex=\(forwardIndex)")
-        }
-        
-        var forwardHash: Bytes?
-        if forwardIndex < messages.count {
-            let encrypted = try! messages[forwardIndex].encrypted(withChannel: self)
-            forwardHash = encrypted.hash!
-        }
-        
-        let result = try subset!.map { (message) -> Abbreviated in
-            let encrypted = try message.encrypted(withChannel: self)
-            return Abbreviated(parents: encrypted.parents, hash: encrypted.hash!)
-        }
-        
-        return QueryResponse(abbreviatedMessages: result,
-                             forwardHash: forwardHash,
-                             backwardHash: result.first?.hash)
+        return QueryResponse(abbreviatedMessages: abbreviated,
+                             forwardHash: response.forwardHash,
+                             backwardHash: response.backwardHash)
     }
     
     func handle(bulkResponse response: BulkResponse, from remote: RemoteChannel, withHashes hashes: [Bytes]) {
@@ -208,12 +170,13 @@ extension Channel: RemoteChannel {
             self.handle(bulkResponse: response, from: remote, withHashes: remainingHashes)
         }
     }
-    
+
+    // TODO(indutny): implement bulk in persistence
     func bulk(withHashes hashes: [Bytes]) throws -> BulkResponse {
         let limit = min(hashes.count, Channel.SYNC_LIMIT)
         var result = [ChannelMessage]()
         for hash in hashes[..<limit] {
-            guard let decrypted = message(byHash: hash) else {
+            guard let decrypted = try message(byHash: hash) else {
                 continue
             }
             let encrypted = try decrypted.encrypted(withChannel: self)
