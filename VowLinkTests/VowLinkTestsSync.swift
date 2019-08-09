@@ -108,4 +108,16 @@ extension VowLinkTests {
             .syncBA
             ])
     }
+    
+    func testChannelSyncMergeInitialPostAndMergeBack() {
+        check([
+            .a("hello b"),
+            .a("how are you?"),
+            .syncBA,
+            
+            .b("I'm good"),
+            
+            .syncAB
+            ])
+    }
 }

@@ -58,7 +58,7 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     
     @IBAction func sendClicked(_ sender: Any) {
         // TODO(indutny): trim?
-        guard let text = messageText.text else {
+        guard let text = messageText.text, !text.isEmpty else {
             return
         }
         

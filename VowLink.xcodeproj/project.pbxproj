@@ -15,6 +15,10 @@
 		4D23EDF622EECBE5003A9C20 /* VowLinkUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EDF522EECBE5003A9C20 /* VowLinkUITests.swift */; };
 		4D23EE0422EECBFD003A9C20 /* PeerToPeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EE0322EECBFD003A9C20 /* PeerToPeer.swift */; };
 		4D23EE2D22EF1EBC003A9C20 /* messages.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EE2C22EF1EBC003A9C20 /* messages.pb.swift */; };
+		4D23EEB022EF2E13003A9C20 /* Sodium.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE7922EF2CEE003A9C20 /* Sodium.framework */; };
+		4D23EEB122EF2E13003A9C20 /* Sodium.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE7922EF2CEE003A9C20 /* Sodium.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4D23EEB422EF2E13003A9C20 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE9722EF2CEF003A9C20 /* SwiftProtobuf.framework */; };
+		4D23EEB522EF2E13003A9C20 /* SwiftProtobuf.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4D23EE9722EF2CEF003A9C20 /* SwiftProtobuf.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4D23EEBA22EF3517003A9C20 /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23EEB922EF3517003A9C20 /* Peer.swift */; };
 		4D339E4022F0E36300EABA71 /* NewIdentityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E3F22F0E36300EABA71 /* NewIdentityController.swift */; };
 		4D339E5222F0EDD500EABA71 /* ChainRequestController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E5122F0EDD500EABA71 /* ChainRequestController.swift */; };
@@ -28,9 +32,13 @@
 		4D339E6822F6507100EABA71 /* ChannelMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E6722F6507100EABA71 /* ChannelMessage.swift */; };
 		4D339E6A22F74DB900EABA71 /* Chain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D339E6922F74DB900EABA71 /* Chain.swift */; };
 		4D465DF322FC2C03006E4D8E /* Sync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D465DF222FC2C03006E4D8E /* Sync.swift */; };
+		4D465E6722FCA29A006E4D8E /* SQLite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D465E5A22FCA28C006E4D8E /* SQLite.framework */; };
+		4D465E6822FCA29A006E4D8E /* SQLite.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4D465E5A22FCA28C006E4D8E /* SQLite.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4D465E6D22FCA575006E4D8E /* PersistenceContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D465E6C22FCA575006E4D8E /* PersistenceContext.swift */; };
-		4D465E6F22FD283D006E4D8E /* VowLinkTestsSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D465E6E22FD283D006E4D8E /* VowLinkTestsSync.swift */; };
+		4D46600D22FD3111006E4D8E /* VowLinkTestsSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D465FF422FD3111006E4D8E /* VowLinkTestsSync.swift */; };
 		4DD3FF6822F906E700FFA8BD /* Validation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD3FF6722F906E700FFA8BD /* Validation.swift */; };
+		4DF7CB0B22EF409900CD1C33 /* KeychainAccess.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF7CB0622EF409500CD1C33 /* KeychainAccess.framework */; };
+		4DF7CB0C22EF40C600CD1C33 /* KeychainAccess.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4DF7CB0622EF409500CD1C33 /* KeychainAccess.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4DF7CB0E22EF4C4500CD1C33 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7CB0D22EF4C4500CD1C33 /* Identity.swift */; };
 		4DF7CB1022EFB63F00CD1C33 /* Context.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7CB0F22EFB63F00CD1C33 /* Context.swift */; };
 		4DF7CB1222F05CC800CD1C33 /* Link.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF7CB1122F05CC800CD1C33 /* Link.swift */; };
@@ -52,180 +60,187 @@
 			remoteGlobalIDString = 4D23EDCE22EECBE4003A9C20;
 			remoteInfo = VowLink;
 		};
-		4D465E7B22FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE7822EF2CEE003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E7022FD28A9006E4D8E /* Sodium.xcodeproj */;
+			containerPortal = 4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 09A943C71A4EB5F500C8A04F;
 			remoteInfo = Sodium_iOS;
 		};
-		4D465E7D22FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE7A22EF2CEE003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E7022FD28A9006E4D8E /* Sodium.xcodeproj */;
+			containerPortal = 4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 09A943D21A4EB5F500C8A04F;
 			remoteInfo = SodiumTests;
 		};
-		4D465E7F22FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE7C22EF2CEE003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E7022FD28A9006E4D8E /* Sodium.xcodeproj */;
+			containerPortal = 4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 90C75E941AE3571900F1E749;
 			remoteInfo = Sodium_OSX;
 		};
-		4D465E8122FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE7E22EF2CEE003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E7022FD28A9006E4D8E /* Sodium.xcodeproj */;
+			containerPortal = 4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D891FE9421642CB40092AA84;
 			remoteInfo = Sodium_watchOS;
 		};
-		4D465E8322FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE8022EF2CEE003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E7022FD28A9006E4D8E /* Sodium.xcodeproj */;
+			containerPortal = 4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 901644B61AE36EA700163E3E;
 			remoteInfo = "Example iOS";
 		};
-		4D465E8522FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE8222EF2CEE003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E7022FD28A9006E4D8E /* Sodium.xcodeproj */;
+			containerPortal = 4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 901644DC1AE36F2D00163E3E;
 			remoteInfo = "Example OSX";
 		};
-		4D465E8722FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE8422EF2CEE003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E7022FD28A9006E4D8E /* Sodium.xcodeproj */;
+			containerPortal = 4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D87D515521647597006D2C03;
 			remoteInfo = "Example Watch";
 		};
-		4D465E8922FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE8622EF2CEE003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E7022FD28A9006E4D8E /* Sodium.xcodeproj */;
+			containerPortal = 4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D87D516121647598006D2C03;
 			remoteInfo = "Example Watch Extension";
 		};
-		4D465E9122FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE9222EF2CEF003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E8B22FD28A9006E4D8E /* KeychainAccess.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 140F195C1A49D79400B0016A;
-			remoteInfo = KeychainAccess;
-		};
-		4D465E9322FD28A9006E4D8E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E8B22FD28A9006E4D8E /* KeychainAccess.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 140F19671A49D79500B0016A;
-			remoteInfo = KeychainAccessTests;
-		};
-		4D465E9522FD28A9006E4D8E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E8B22FD28A9006E4D8E /* KeychainAccess.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 14A630151D3293C700809B3F;
-			remoteInfo = TestHost;
-		};
-		4D465EA122FD28A9006E4D8E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E9722FD28A9006E4D8E /* SwiftProtobuf.xcodeproj */;
+			containerPortal = 4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = "_____Product_Protobuf_macOS";
 			remoteInfo = SwiftProtobuf_macOS;
 		};
-		4D465EA322FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE9422EF2CEF003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E9722FD28A9006E4D8E /* SwiftProtobuf.xcodeproj */;
+			containerPortal = 4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = "_____Product_ProtobufTestSuite_macOS";
 			remoteInfo = SwiftProtobufTestSuite_macOS;
 		};
-		4D465EA522FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE9622EF2CEF003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E9722FD28A9006E4D8E /* SwiftProtobuf.xcodeproj */;
+			containerPortal = 4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = "_____Product_Protobuf_iOS";
 			remoteInfo = SwiftProtobuf_iOS;
 		};
-		4D465EA722FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE9822EF2CEF003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E9722FD28A9006E4D8E /* SwiftProtobuf.xcodeproj */;
+			containerPortal = 4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = "_____Product_ProtobufTestSuite_iOS";
 			remoteInfo = SwiftProtobufTestSuite_iOS;
 		};
-		4D465EA922FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE9A22EF2CEF003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E9722FD28A9006E4D8E /* SwiftProtobuf.xcodeproj */;
+			containerPortal = 4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = F44F936F1DAEA53900BC5B85;
 			remoteInfo = SwiftProtobuf_tvOS;
 		};
-		4D465EAB22FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE9C22EF2CEF003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E9722FD28A9006E4D8E /* SwiftProtobuf.xcodeproj */;
+			containerPortal = 4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = F44F939F1DAEA7C500BC5B85;
 			remoteInfo = SwiftProtobufTestSuite_tvOS;
 		};
-		4D465EAD22FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D23EE9E22EF2CEF003A9C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465E9722FD28A9006E4D8E /* SwiftProtobuf.xcodeproj */;
+			containerPortal = 4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = F44F93FE1DAEB13F00BC5B85;
 			remoteInfo = SwiftProtobuf_watchOS;
 		};
-		4D465EB922FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D465E5922FCA28C006E4D8E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465EAF22FD28A9006E4D8E /* SQLite.xcodeproj */;
+			containerPortal = 4D465E4F22FCA28C006E4D8E /* SQLite.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = EE247AD31C3F04ED00AE3E12;
 			remoteInfo = "SQLite iOS";
 		};
-		4D465EBB22FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D465E5B22FCA28C006E4D8E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465EAF22FD28A9006E4D8E /* SQLite.xcodeproj */;
+			containerPortal = 4D465E4F22FCA28C006E4D8E /* SQLite.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = EE247ADD1C3F04ED00AE3E12;
 			remoteInfo = "SQLiteTests iOS";
 		};
-		4D465EBD22FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D465E5D22FCA28C006E4D8E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465EAF22FD28A9006E4D8E /* SQLite.xcodeproj */;
+			containerPortal = 4D465E4F22FCA28C006E4D8E /* SQLite.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = EE247B3C1C3F3ED000AE3E12;
 			remoteInfo = "SQLite Mac";
 		};
-		4D465EBF22FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D465E5F22FCA28C006E4D8E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465EAF22FD28A9006E4D8E /* SQLite.xcodeproj */;
+			containerPortal = 4D465E4F22FCA28C006E4D8E /* SQLite.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = EE247B451C3F3ED000AE3E12;
 			remoteInfo = "SQLiteTests Mac";
 		};
-		4D465EC122FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D465E6122FCA28C006E4D8E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465EAF22FD28A9006E4D8E /* SQLite.xcodeproj */;
+			containerPortal = 4D465E4F22FCA28C006E4D8E /* SQLite.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 03A65E5A1C6BB0F50062603F;
 			remoteInfo = "SQLite tvOS";
 		};
-		4D465EC322FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D465E6322FCA28C006E4D8E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465EAF22FD28A9006E4D8E /* SQLite.xcodeproj */;
+			containerPortal = 4D465E4F22FCA28C006E4D8E /* SQLite.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 03A65E631C6BB0F60062603F;
 			remoteInfo = "SQLiteTests tvOS";
 		};
-		4D465EC522FD28A9006E4D8E /* PBXContainerItemProxy */ = {
+		4D465E6522FCA28C006E4D8E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4D465EAF22FD28A9006E4D8E /* SQLite.xcodeproj */;
+			containerPortal = 4D465E4F22FCA28C006E4D8E /* SQLite.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = A121AC451CA35C79005A31D1;
 			remoteInfo = "SQLite watchOS";
+		};
+		4D465E6922FCA29A006E4D8E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4D465E4F22FCA28C006E4D8E /* SQLite.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = EE247AD21C3F04ED00AE3E12;
+			remoteInfo = "SQLite iOS";
+		};
+		4DF7CB0522EF409500CD1C33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 140F195C1A49D79400B0016A;
+			remoteInfo = KeychainAccess;
+		};
+		4DF7CB0722EF409500CD1C33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 140F19671A49D79500B0016A;
+			remoteInfo = KeychainAccessTests;
+		};
+		4DF7CB0922EF409500CD1C33 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 14A630151D3293C700809B3F;
+			remoteInfo = TestHost;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -245,6 +260,10 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				4DF7CB0C22EF40C600CD1C33 /* KeychainAccess.framework in Embed Frameworks */,
+				4D23EEB122EF2E13003A9C20 /* Sodium.framework in Embed Frameworks */,
+				4D465E6822FCA29A006E4D8E /* SQLite.framework in Embed Frameworks */,
+				4D23EEB522EF2E13003A9C20 /* SwiftProtobuf.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -266,6 +285,8 @@
 		4D23EDF722EECBE5003A9C20 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4D23EE0322EECBFD003A9C20 /* PeerToPeer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerToPeer.swift; sourceTree = "<group>"; };
 		4D23EE2C22EF1EBC003A9C20 /* messages.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = messages.pb.swift; sourceTree = "<group>"; };
+		4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Sodium.xcodeproj; path = deps/Sodium/Sodium.xcodeproj; sourceTree = SOURCE_ROOT; };
+		4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SwiftProtobuf.xcodeproj; path = deps/SwiftProtobuf/SwiftProtobuf.xcodeproj; sourceTree = SOURCE_ROOT; };
 		4D23EEB922EF3517003A9C20 /* Peer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Peer.swift; sourceTree = "<group>"; };
 		4D339E3F22F0E36300EABA71 /* NewIdentityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewIdentityController.swift; sourceTree = "<group>"; };
 		4D339E5122F0EDD500EABA71 /* ChainRequestController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainRequestController.swift; sourceTree = "<group>"; };
@@ -279,13 +300,11 @@
 		4D339E6722F6507100EABA71 /* ChannelMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelMessage.swift; sourceTree = "<group>"; };
 		4D339E6922F74DB900EABA71 /* Chain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chain.swift; sourceTree = "<group>"; };
 		4D465DF222FC2C03006E4D8E /* Sync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sync.swift; sourceTree = "<group>"; };
+		4D465E4F22FCA28C006E4D8E /* SQLite.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SQLite.xcodeproj; path = deps/SQLite.swift/SQLite.xcodeproj; sourceTree = SOURCE_ROOT; };
 		4D465E6C22FCA575006E4D8E /* PersistenceContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceContext.swift; sourceTree = "<group>"; };
-		4D465E6E22FD283D006E4D8E /* VowLinkTestsSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VowLinkTestsSync.swift; sourceTree = "<group>"; };
-		4D465E7022FD28A9006E4D8E /* Sodium.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Sodium.xcodeproj; path = deps/Sodium/Sodium.xcodeproj; sourceTree = "<group>"; };
-		4D465E8B22FD28A9006E4D8E /* KeychainAccess.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = KeychainAccess.xcodeproj; path = deps/KeychainAccess/Lib/KeychainAccess.xcodeproj; sourceTree = "<group>"; };
-		4D465E9722FD28A9006E4D8E /* SwiftProtobuf.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SwiftProtobuf.xcodeproj; path = deps/SwiftProtobuf/SwiftProtobuf.xcodeproj; sourceTree = "<group>"; };
-		4D465EAF22FD28A9006E4D8E /* SQLite.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SQLite.xcodeproj; path = deps/SQLite.swift/SQLite.xcodeproj; sourceTree = "<group>"; };
+		4D465FF422FD3111006E4D8E /* VowLinkTestsSync.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VowLinkTestsSync.swift; sourceTree = "<group>"; };
 		4DD3FF6722F906E700FFA8BD /* Validation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Validation.swift; sourceTree = "<group>"; };
+		4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = KeychainAccess.xcodeproj; path = deps/KeychainAccess/Lib/KeychainAccess.xcodeproj; sourceTree = SOURCE_ROOT; };
 		4DF7CB0D22EF4C4500CD1C33 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
 		4DF7CB0F22EFB63F00CD1C33 /* Context.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Context.swift; sourceTree = "<group>"; };
 		4DF7CB1122F05CC800CD1C33 /* Link.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Link.swift; sourceTree = "<group>"; };
@@ -297,6 +316,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4DF7CB0B22EF409900CD1C33 /* KeychainAccess.framework in Frameworks */,
+				4D23EEB022EF2E13003A9C20 /* Sodium.framework in Frameworks */,
+				4D465E6722FCA29A006E4D8E /* SQLite.framework in Frameworks */,
+				4D23EEB422EF2E13003A9C20 /* SwiftProtobuf.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -351,6 +374,10 @@
 				4D23EE2C22EF1EBC003A9C20 /* messages.pb.swift */,
 				4DD3FF6722F906E700FFA8BD /* Validation.swift */,
 				4D23EDDC22EECBE5003A9C20 /* Assets.xcassets */,
+				4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */,
+				4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */,
+				4D465E4F22FCA28C006E4D8E /* SQLite.xcodeproj */,
+				4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */,
 				4D465DE122FC2BEF006E4D8E /* Channel */,
 				4D465E6B22FCA564006E4D8E /* Context */,
 				4D23EDDE22EECBE5003A9C20 /* LaunchScreen.storyboard */,
@@ -365,7 +392,7 @@
 			isa = PBXGroup;
 			children = (
 				4D23EDEA22EECBE5003A9C20 /* VowLinkTests.swift */,
-				4D465E6E22FD283D006E4D8E /* VowLinkTestsSync.swift */,
+				4D465FF422FD3111006E4D8E /* VowLinkTestsSync.swift */,
 				4D23EDEC22EECBE5003A9C20 /* Info.plist */,
 			);
 			path = VowLinkTests;
@@ -383,12 +410,37 @@
 		4D23EE2A22EF1DD1003A9C20 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				4D465E8B22FD28A9006E4D8E /* KeychainAccess.xcodeproj */,
-				4D465E7022FD28A9006E4D8E /* Sodium.xcodeproj */,
-				4D465EAF22FD28A9006E4D8E /* SQLite.xcodeproj */,
-				4D465E9722FD28A9006E4D8E /* SwiftProtobuf.xcodeproj */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4D23EE6E22EF2CEE003A9C20 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4D23EE7922EF2CEE003A9C20 /* Sodium.framework */,
+				4D23EE7B22EF2CEE003A9C20 /* SodiumTests.xctest */,
+				4D23EE7D22EF2CEE003A9C20 /* Sodium.framework */,
+				4D23EE7F22EF2CEE003A9C20 /* Sodium.framework */,
+				4D23EE8122EF2CEE003A9C20 /* Example iOS.app */,
+				4D23EE8322EF2CEE003A9C20 /* Example OSX.app */,
+				4D23EE8522EF2CEE003A9C20 /* Example Watch.app */,
+				4D23EE8722EF2CEE003A9C20 /* Example Watch Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4D23EE8922EF2CEE003A9C20 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4D23EE9322EF2CEF003A9C20 /* SwiftProtobuf.framework */,
+				4D23EE9522EF2CEF003A9C20 /* SwiftProtobufTests.xctest */,
+				4D23EE9722EF2CEF003A9C20 /* SwiftProtobuf.framework */,
+				4D23EE9922EF2CEF003A9C20 /* SwiftProtobufTests.xctest */,
+				4D23EE9B22EF2CEF003A9C20 /* SwiftProtobuf.framework */,
+				4D23EE9D22EF2CEF003A9C20 /* SwiftProtobufTests.xctest */,
+				4D23EE9F22EF2CEF003A9C20 /* SwiftProtobuf.framework */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		4D465DE122FC2BEF006E4D8E /* Channel */ = {
@@ -424,6 +476,20 @@
 			path = Network;
 			sourceTree = "<group>";
 		};
+		4D465E5022FCA28C006E4D8E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4D465E5A22FCA28C006E4D8E /* SQLite.framework */,
+				4D465E5C22FCA28C006E4D8E /* SQLiteTests iOS.xctest */,
+				4D465E5E22FCA28C006E4D8E /* SQLite.framework */,
+				4D465E6022FCA28C006E4D8E /* SQLiteTests Mac.xctest */,
+				4D465E6222FCA28C006E4D8E /* SQLite.framework */,
+				4D465E6422FCA28C006E4D8E /* SQLiteTests tvOS.xctest */,
+				4D465E6622FCA28C006E4D8E /* SQLite.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		4D465E6B22FCA564006E4D8E /* Context */ = {
 			isa = PBXGroup;
 			children = (
@@ -433,55 +499,12 @@
 			path = Context;
 			sourceTree = "<group>";
 		};
-		4D465E7122FD28A9006E4D8E /* Products */ = {
+		4DF7CB0022EF409500CD1C33 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4D465E7C22FD28A9006E4D8E /* Sodium.framework */,
-				4D465E7E22FD28A9006E4D8E /* SodiumTests.xctest */,
-				4D465E8022FD28A9006E4D8E /* Sodium.framework */,
-				4D465E8222FD28A9006E4D8E /* Sodium.framework */,
-				4D465E8422FD28A9006E4D8E /* Example iOS.app */,
-				4D465E8622FD28A9006E4D8E /* Example OSX.app */,
-				4D465E8822FD28A9006E4D8E /* Example Watch.app */,
-				4D465E8A22FD28A9006E4D8E /* Example Watch Extension.appex */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		4D465E8C22FD28A9006E4D8E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				4D465E9222FD28A9006E4D8E /* KeychainAccess.framework */,
-				4D465E9422FD28A9006E4D8E /* KeychainAccessTests.xctest */,
-				4D465E9622FD28A9006E4D8E /* TestHost.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		4D465E9822FD28A9006E4D8E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				4D465EA222FD28A9006E4D8E /* SwiftProtobuf.framework */,
-				4D465EA422FD28A9006E4D8E /* SwiftProtobufTests.xctest */,
-				4D465EA622FD28A9006E4D8E /* SwiftProtobuf.framework */,
-				4D465EA822FD28A9006E4D8E /* SwiftProtobufTests.xctest */,
-				4D465EAA22FD28A9006E4D8E /* SwiftProtobuf.framework */,
-				4D465EAC22FD28A9006E4D8E /* SwiftProtobufTests.xctest */,
-				4D465EAE22FD28A9006E4D8E /* SwiftProtobuf.framework */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		4D465EB022FD28A9006E4D8E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				4D465EBA22FD28A9006E4D8E /* SQLite.framework */,
-				4D465EBC22FD28A9006E4D8E /* SQLiteTests iOS.xctest */,
-				4D465EBE22FD28A9006E4D8E /* SQLite.framework */,
-				4D465EC022FD28A9006E4D8E /* SQLiteTests Mac.xctest */,
-				4D465EC222FD28A9006E4D8E /* SQLite.framework */,
-				4D465EC422FD28A9006E4D8E /* SQLiteTests tvOS.xctest */,
-				4D465EC622FD28A9006E4D8E /* SQLite.framework */,
+				4DF7CB0622EF409500CD1C33 /* KeychainAccess.framework */,
+				4DF7CB0822EF409500CD1C33 /* KeychainAccessTests.xctest */,
+				4DF7CB0A22EF409500CD1C33 /* TestHost.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -502,6 +525,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				4D465E6A22FCA29A006E4D8E /* PBXTargetDependency */,
 			);
 			name = VowLink;
 			productName = VowLink;
@@ -585,20 +609,20 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 4D465E8C22FD28A9006E4D8E /* Products */;
-					ProjectRef = 4D465E8B22FD28A9006E4D8E /* KeychainAccess.xcodeproj */;
+					ProductGroup = 4DF7CB0022EF409500CD1C33 /* Products */;
+					ProjectRef = 4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */;
 				},
 				{
-					ProductGroup = 4D465E7122FD28A9006E4D8E /* Products */;
-					ProjectRef = 4D465E7022FD28A9006E4D8E /* Sodium.xcodeproj */;
+					ProductGroup = 4D23EE6E22EF2CEE003A9C20 /* Products */;
+					ProjectRef = 4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */;
 				},
 				{
-					ProductGroup = 4D465EB022FD28A9006E4D8E /* Products */;
-					ProjectRef = 4D465EAF22FD28A9006E4D8E /* SQLite.xcodeproj */;
+					ProductGroup = 4D465E5022FCA28C006E4D8E /* Products */;
+					ProjectRef = 4D465E4F22FCA28C006E4D8E /* SQLite.xcodeproj */;
 				},
 				{
-					ProductGroup = 4D465E9822FD28A9006E4D8E /* Products */;
-					ProjectRef = 4D465E9722FD28A9006E4D8E /* SwiftProtobuf.xcodeproj */;
+					ProductGroup = 4D23EE8922EF2CEE003A9C20 /* Products */;
+					ProjectRef = 4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -611,179 +635,179 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		4D465E7C22FD28A9006E4D8E /* Sodium.framework */ = {
+		4D23EE7922EF2CEE003A9C20 /* Sodium.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = Sodium.framework;
-			remoteRef = 4D465E7B22FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE7822EF2CEE003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465E7E22FD28A9006E4D8E /* SodiumTests.xctest */ = {
+		4D23EE7B22EF2CEE003A9C20 /* SodiumTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = SodiumTests.xctest;
-			remoteRef = 4D465E7D22FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE7A22EF2CEE003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465E8022FD28A9006E4D8E /* Sodium.framework */ = {
+		4D23EE7D22EF2CEE003A9C20 /* Sodium.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = Sodium.framework;
-			remoteRef = 4D465E7F22FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE7C22EF2CEE003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465E8222FD28A9006E4D8E /* Sodium.framework */ = {
+		4D23EE7F22EF2CEE003A9C20 /* Sodium.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = Sodium.framework;
-			remoteRef = 4D465E8122FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE7E22EF2CEE003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465E8422FD28A9006E4D8E /* Example iOS.app */ = {
+		4D23EE8122EF2CEE003A9C20 /* Example iOS.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
 			path = "Example iOS.app";
-			remoteRef = 4D465E8322FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE8022EF2CEE003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465E8622FD28A9006E4D8E /* Example OSX.app */ = {
+		4D23EE8322EF2CEE003A9C20 /* Example OSX.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
 			path = "Example OSX.app";
-			remoteRef = 4D465E8522FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE8222EF2CEE003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465E8822FD28A9006E4D8E /* Example Watch.app */ = {
+		4D23EE8522EF2CEE003A9C20 /* Example Watch.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
 			path = "Example Watch.app";
-			remoteRef = 4D465E8722FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE8422EF2CEE003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465E8A22FD28A9006E4D8E /* Example Watch Extension.appex */ = {
+		4D23EE8722EF2CEE003A9C20 /* Example Watch Extension.appex */ = {
 			isa = PBXReferenceProxy;
 			fileType = "wrapper.app-extension";
 			path = "Example Watch Extension.appex";
-			remoteRef = 4D465E8922FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE8622EF2CEE003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465E9222FD28A9006E4D8E /* KeychainAccess.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = KeychainAccess.framework;
-			remoteRef = 4D465E9122FD28A9006E4D8E /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D465E9422FD28A9006E4D8E /* KeychainAccessTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = KeychainAccessTests.xctest;
-			remoteRef = 4D465E9322FD28A9006E4D8E /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D465E9622FD28A9006E4D8E /* TestHost.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = TestHost.app;
-			remoteRef = 4D465E9522FD28A9006E4D8E /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4D465EA222FD28A9006E4D8E /* SwiftProtobuf.framework */ = {
+		4D23EE9322EF2CEF003A9C20 /* SwiftProtobuf.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = SwiftProtobuf.framework;
-			remoteRef = 4D465EA122FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE9222EF2CEF003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EA422FD28A9006E4D8E /* SwiftProtobufTests.xctest */ = {
+		4D23EE9522EF2CEF003A9C20 /* SwiftProtobufTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = SwiftProtobufTests.xctest;
-			remoteRef = 4D465EA322FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE9422EF2CEF003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EA622FD28A9006E4D8E /* SwiftProtobuf.framework */ = {
+		4D23EE9722EF2CEF003A9C20 /* SwiftProtobuf.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = SwiftProtobuf.framework;
-			remoteRef = 4D465EA522FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE9622EF2CEF003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EA822FD28A9006E4D8E /* SwiftProtobufTests.xctest */ = {
+		4D23EE9922EF2CEF003A9C20 /* SwiftProtobufTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = SwiftProtobufTests.xctest;
-			remoteRef = 4D465EA722FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE9822EF2CEF003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EAA22FD28A9006E4D8E /* SwiftProtobuf.framework */ = {
+		4D23EE9B22EF2CEF003A9C20 /* SwiftProtobuf.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = SwiftProtobuf.framework;
-			remoteRef = 4D465EA922FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE9A22EF2CEF003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EAC22FD28A9006E4D8E /* SwiftProtobufTests.xctest */ = {
+		4D23EE9D22EF2CEF003A9C20 /* SwiftProtobufTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = SwiftProtobufTests.xctest;
-			remoteRef = 4D465EAB22FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE9C22EF2CEF003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EAE22FD28A9006E4D8E /* SwiftProtobuf.framework */ = {
+		4D23EE9F22EF2CEF003A9C20 /* SwiftProtobuf.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = SwiftProtobuf.framework;
-			remoteRef = 4D465EAD22FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D23EE9E22EF2CEF003A9C20 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EBA22FD28A9006E4D8E /* SQLite.framework */ = {
+		4D465E5A22FCA28C006E4D8E /* SQLite.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = SQLite.framework;
-			remoteRef = 4D465EB922FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D465E5922FCA28C006E4D8E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EBC22FD28A9006E4D8E /* SQLiteTests iOS.xctest */ = {
+		4D465E5C22FCA28C006E4D8E /* SQLiteTests iOS.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = "SQLiteTests iOS.xctest";
-			remoteRef = 4D465EBB22FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D465E5B22FCA28C006E4D8E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EBE22FD28A9006E4D8E /* SQLite.framework */ = {
+		4D465E5E22FCA28C006E4D8E /* SQLite.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = SQLite.framework;
-			remoteRef = 4D465EBD22FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D465E5D22FCA28C006E4D8E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EC022FD28A9006E4D8E /* SQLiteTests Mac.xctest */ = {
+		4D465E6022FCA28C006E4D8E /* SQLiteTests Mac.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = "SQLiteTests Mac.xctest";
-			remoteRef = 4D465EBF22FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D465E5F22FCA28C006E4D8E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EC222FD28A9006E4D8E /* SQLite.framework */ = {
+		4D465E6222FCA28C006E4D8E /* SQLite.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = SQLite.framework;
-			remoteRef = 4D465EC122FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D465E6122FCA28C006E4D8E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EC422FD28A9006E4D8E /* SQLiteTests tvOS.xctest */ = {
+		4D465E6422FCA28C006E4D8E /* SQLiteTests tvOS.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = "SQLiteTests tvOS.xctest";
-			remoteRef = 4D465EC322FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D465E6322FCA28C006E4D8E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4D465EC622FD28A9006E4D8E /* SQLite.framework */ = {
+		4D465E6622FCA28C006E4D8E /* SQLite.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = SQLite.framework;
-			remoteRef = 4D465EC522FD28A9006E4D8E /* PBXContainerItemProxy */;
+			remoteRef = 4D465E6522FCA28C006E4D8E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		4DF7CB0622EF409500CD1C33 /* KeychainAccess.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = KeychainAccess.framework;
+			remoteRef = 4DF7CB0522EF409500CD1C33 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		4DF7CB0822EF409500CD1C33 /* KeychainAccessTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = KeychainAccessTests.xctest;
+			remoteRef = 4DF7CB0722EF409500CD1C33 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		4DF7CB0A22EF409500CD1C33 /* TestHost.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = TestHost.app;
+			remoteRef = 4DF7CB0922EF409500CD1C33 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -850,7 +874,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D23EDEB22EECBE5003A9C20 /* VowLinkTests.swift in Sources */,
-				4D465E6F22FD283D006E4D8E /* VowLinkTestsSync.swift in Sources */,
+				4D46600D22FD3111006E4D8E /* VowLinkTestsSync.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -874,6 +898,11 @@
 			isa = PBXTargetDependency;
 			target = 4D23EDCE22EECBE4003A9C20 /* VowLink */;
 			targetProxy = 4D23EDF222EECBE5003A9C20 /* PBXContainerItemProxy */;
+		};
+		4D465E6A22FCA29A006E4D8E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "SQLite iOS";
+			targetProxy = 4D465E6922FCA29A006E4D8E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

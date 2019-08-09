@@ -161,7 +161,7 @@ class VowLinkTests: XCTestCase {
         
         try! idB.addChain(chain, for: channelCopy)
         
-        let root = channelA.leafs[0]
+        let root = channelA.leaves[0]
         let encryptedRoot = try! root.encrypted(withChannel: channelA)
         XCTAssertEqual(encryptedRoot.hash, channelA.root.hash)
         
@@ -325,7 +325,7 @@ class VowLinkTests: XCTestCase {
                                         toChannelID: channelA.channelID,
                                         withNewLeaves: fakeLeafHashes)
         
-        let leaves = try! context.persistence.leafs(forChannelID: channelA.channelID)
-        XCTAssertEqual(leave.count, fakeLeaves.count)
+        let leaves = try! context.persistence.leaves(forChannelID: channelA.channelID)
+        XCTAssertEqual(leaves.count, fakeLeaves.count)
     }
 }
