@@ -135,6 +135,10 @@ class Channel {
         let parents = try leaves.map({ (leaf) -> Bytes in
             return try leaf.encrypted(withChannel: self).hash!
         })
+        if parents.isEmpty {
+            throw ChannelError.invalidParentCount
+        }
+
         let height = leaves.reduce(0) { (acc, leaf) -> Int64 in
             return max(acc, leaf.height)
         } + 1
