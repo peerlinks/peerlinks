@@ -1,41 +1,37 @@
 import UIKit
 
-class ChannelListController : UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
-    @IBOutlet weak var channelPicker: UIPickerView!
-    @IBOutlet weak var selectButton: UIButton!
+class ChannelListController : UIViewController, UITableViewDataSource {
     var app: AppDelegate!
+    @IBOutlet weak var tableView: UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         app = (UIApplication.shared.delegate as! AppDelegate)
         
-        channelPicker.delegate = self
-        channelPicker.dataSource = self
-        
-        selectButton.isEnabled = !app.channelList.channels.isEmpty
+        tableView.dataSource = self
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let channelController = segue.destination as? ChannelController {
-            let row = channelPicker.selectedRow(inComponent: 0)
-            channelController.channel = app.channelList.channels[row]
+        if let cell = sender as? UITableViewCell,
+            let channelController = segue.destination as? ChannelController {
+            let index = tableView.indexPath(for: cell)!
+            channelController.channel = app.channelList.channels[index.row]
         }
     }
     
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+         return app.channelList.channels.count
     }
     
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return app.channelList.channels.count
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let name = app.channelList.channels[indexPath.row].name
+        let cell = tableView.dequeueReusableCell(withIdentifier: "channelCell")!
+        cell.textLabel?.text = name
+        return cell
     }
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return app.channelList.channels[row].name
-    }
-    
+
     func reloadChannels() {
-        channelPicker.reloadAllComponents()
+        tableView.reloadData()
     }
 }

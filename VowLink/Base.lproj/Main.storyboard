@@ -91,26 +91,40 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9Oc-mx-Tg1">
-                                <rect key="frame" x="0.0" y="298" width="375" height="216"/>
-                            </pickerView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eQY-ac-9mi">
-                                <rect key="frame" x="0.0" y="522" width="375" height="41"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
-                                <state key="normal" title="Select Channel"/>
-                                <connections>
-                                    <segue destination="AC4-Jh-zDQ" kind="show" id="Cp5-Nt-ehl"/>
-                                </connections>
-                            </button>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="KHl-k7-bd3">
+                                <rect key="frame" x="0.0" y="88" width="375" height="690"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="channelCell" textLabel="Omh-dn-Kdg" style="IBUITableViewCellStyleDefault" id="YCe-iE-X2W">
+                                        <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="YCe-iE-X2W" id="i6a-3H-xKB">
+                                            <rect key="frame" x="0.0" y="0.0" width="342" height="43.666666666666664"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Omh-dn-Kdg">
+                                                    <rect key="frame" x="15" y="0.0" width="325" height="43.666666666666664"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <segue destination="AC4-Jh-zDQ" kind="show" id="wG6-u8-v21"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
+                                <sections/>
+                            </tableView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="9Oc-mx-Tg1" firstAttribute="trailing" secondItem="UYK-z3-7rn" secondAttribute="trailing" id="3pn-SJ-naf"/>
-                            <constraint firstItem="eQY-ac-9mi" firstAttribute="top" secondItem="9Oc-mx-Tg1" secondAttribute="bottom" constant="8" id="5Ny-79-HUq"/>
-                            <constraint firstItem="eQY-ac-9mi" firstAttribute="trailing" secondItem="UYK-z3-7rn" secondAttribute="trailing" id="HL7-6Q-wX8"/>
-                            <constraint firstItem="9Oc-mx-Tg1" firstAttribute="leading" secondItem="UYK-z3-7rn" secondAttribute="leading" id="K3x-HA-YYA"/>
-                            <constraint firstItem="eQY-ac-9mi" firstAttribute="leading" secondItem="UYK-z3-7rn" secondAttribute="leading" id="e6x-J1-ALD"/>
-                            <constraint firstItem="9Oc-mx-Tg1" firstAttribute="centerY" secondItem="jFf-aX-SlV" secondAttribute="centerY" id="gdR-de-hcO"/>
+                            <constraint firstItem="UYK-z3-7rn" firstAttribute="trailing" secondItem="KHl-k7-bd3" secondAttribute="trailing" id="IAj-NT-mqS"/>
+                            <constraint firstItem="KHl-k7-bd3" firstAttribute="top" secondItem="UYK-z3-7rn" secondAttribute="top" id="JmV-aQ-4JA"/>
+                            <constraint firstItem="KHl-k7-bd3" firstAttribute="leading" secondItem="UYK-z3-7rn" secondAttribute="leading" id="nRF-q8-1aO"/>
+                            <constraint firstItem="UYK-z3-7rn" firstAttribute="bottom" secondItem="KHl-k7-bd3" secondAttribute="bottom" id="ySR-AI-zYC"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="UYK-z3-7rn"/>
                     </view>
@@ -122,8 +136,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="channelPicker" destination="9Oc-mx-Tg1" id="RBl-wQ-4qD"/>
-                        <outlet property="selectButton" destination="eQY-ac-9mi" id="ytI-uy-8Ox"/>
+                        <outlet property="tableView" destination="KHl-k7-bd3" id="8Dj-pH-zit"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Byv-vn-x71" userLabel="First Responder" sceneMemberID="firstResponder"/>
