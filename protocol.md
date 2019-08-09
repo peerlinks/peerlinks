@@ -301,8 +301,8 @@ message EncryptedInvite {
 }
 ```
 
-The `encrypted_invite.box` can be decrypted `box_priv_key` that the issuer of
-`InviteRequest` MUST know from the moment the generated `InviteRequest`. When
+The `encrypted_invite.box` can be decrypted with `box_priv_key` that the issuer
+of `InviteRequest` MUST know from the moment the generated `InviteRequest`. When
 decrypted `encrypted_invite.box` becomes:
 ```proto
 message Invite {
