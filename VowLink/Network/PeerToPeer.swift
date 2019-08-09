@@ -159,17 +159,19 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         
         if let peer = self.connect(to: peerID) {
             debugPrint("[p2p] inviting peer \(peerID.displayName) into session")
-            browser.invitePeer(peerID, to: peer.session, withContext: nil, timeout: 300.0)
+            browser.invitePeer(peerID, to: peer.session, withContext: nil, timeout: 10.0)
         }
     }
     
     // MARK: Peer
     
     func peerConnected(_ peer: Peer) {
+        debugPrint("[p2p] peer connected \(peer.remoteID.displayName)")
         self.delegate?.peerToPeer(self, connectedTo: peer)
     }
     
     func peerReady(_ peer: Peer) {
+        debugPrint("[p2p] peer ready \(peer.remoteID.displayName)")
         self.delegate?.peerToPeer(self, peerReady: peer)
     }
     

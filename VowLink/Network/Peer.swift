@@ -147,6 +147,7 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
             let _ = try? send(data)
         }
         debugPrint("[peer] id=\(remoteID.displayName) destroying due to error: \(reason)")
+        delegate?.peerDisconnected(self)
         session.disconnect()
     }
     
