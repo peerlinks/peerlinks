@@ -368,23 +368,17 @@
 			children = (
 				4D23EDE122EECBE5003A9C20 /* Info.plist */,
 				4D23EDD222EECBE4003A9C20 /* AppDelegate.swift */,
-				4D339E6922F74DB900EABA71 /* Chain.swift */,
-				4D339E5722F31EC800EABA71 /* ChannelList.swift */,
-				4D339E6722F6507100EABA71 /* ChannelMessage.swift */,
-				4DF7CB0D22EF4C4500CD1C33 /* Identity.swift */,
-				4DF7CB1122F05CC800CD1C33 /* Link.swift */,
 				4D23EE2C22EF1EBC003A9C20 /* messages.pb.swift */,
-				4DD3FF6722F906E700FFA8BD /* Validation.swift */,
 				4D23EDDC22EECBE5003A9C20 /* Assets.xcassets */,
 				4DF7CAFF22EF409500CD1C33 /* KeychainAccess.xcodeproj */,
 				4D23EE6D22EF2CEE003A9C20 /* Sodium.xcodeproj */,
 				4D465E4F22FCA28C006E4D8E /* SQLite.xcodeproj */,
 				4D23EE8822EF2CEE003A9C20 /* SwiftProtobuf.xcodeproj */,
-				4D465DE122FC2BEF006E4D8E /* Channel */,
 				4D465E6B22FCA564006E4D8E /* Context */,
 				4D23EDDE22EECBE5003A9C20 /* LaunchScreen.storyboard */,
 				4D23EDD622EECBE5003A9C20 /* Main.storyboard */,
 				4D465E3422FC2EE5006E4D8E /* Network */,
+				4D46603022FDE8C3006E4D8E /* Protocol */,
 				4D465E3322FC2EC9006E4D8E /* UI */,
 			);
 			path = VowLink;
@@ -472,9 +466,11 @@
 		4D465E3422FC2EE5006E4D8E /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				4D339E5722F31EC800EABA71 /* ChannelList.swift */,
 				4D23EEB922EF3517003A9C20 /* Peer.swift */,
 				4D23EE0322EECBFD003A9C20 /* PeerToPeer.swift */,
 				4D46602E22FDDD41006E4D8E /* NetworkManager.swift */,
+				4DD3FF6722F906E700FFA8BD /* Validation.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -500,6 +496,18 @@
 				4D465E6C22FCA575006E4D8E /* PersistenceContext.swift */,
 			);
 			path = Context;
+			sourceTree = "<group>";
+		};
+		4D46603022FDE8C3006E4D8E /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				4D465DE122FC2BEF006E4D8E /* Channel */,
+				4D339E6922F74DB900EABA71 /* Chain.swift */,
+				4D339E6722F6507100EABA71 /* ChannelMessage.swift */,
+				4DF7CB0D22EF4C4500CD1C33 /* Identity.swift */,
+				4DF7CB1122F05CC800CD1C33 /* Link.swift */,
+			);
+			path = Protocol;
 			sourceTree = "<group>";
 		};
 		4DF7CB0022EF409500CD1C33 /* Products */ = {
