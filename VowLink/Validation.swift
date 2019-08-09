@@ -26,6 +26,8 @@ enum ValidationError : Error {
     
     case invalidBulkChannelIDSize(Int)
     case invalidBulkHashSize(Int)
+    
+    case invalidNotificationChannelIDSize(Int)
 }
 
 protocol Proto_Validation {
@@ -242,6 +244,14 @@ extension Proto_BulkResponse : Proto_Validation {
     }
 }
 
+extension Proto_Notification : Proto_Validation {
+    func validate(context: Context) throws {
+        if channelID.count != Channel.CHANNEL_ID_LENGTH {
+            throw ValidationError.invalidNotificationChannelIDSize(channelID.count)
+        }
+    }
+}
+
 extension Proto_Packet : Proto_Validation {
     func validate(context: Context) throws {
         switch content {
@@ -249,8 +259,6 @@ extension Proto_Packet : Proto_Validation {
             break
         case .some(.invite(let invite)):
             try invite.validate(context: context)
-        case .some(.message(let message)):
-            try message.validate(context: context)
         case .some(.query(let query)):
             try query.validate(context: context)
         case .some(.queryResponse(let response)):
@@ -261,6 +269,8 @@ extension Proto_Packet : Proto_Validation {
             try bulk.validate(context: context)
         case .some(.bulkResponse(let response)):
             try response.validate(context: context)
+        case .some(.notification(let notification)):
+            try notification.validate(context: context)
         case .none:
             break
         }

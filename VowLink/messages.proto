@@ -140,18 +140,24 @@ message Subscribe {
   bytes channel_id = 1;
 }
 
+message Notification {
+  bytes channel_id = 1;
+}
+
 message Packet {
   oneof content {
     EncryptedInvite invite = 1;
-    ChannelMessage message = 2;
-    Error error = 3;
-    Subscribe subscribe = 4;
+    Error error = 2;
+    Subscribe subscribe = 3;
 
     // Synchronization
-    Query query = 5;
-    QueryResponse query_response = 6;
-    Bulk bulk = 7;
-    BulkResponse bulk_response = 8;
+    Query query = 4;
+    QueryResponse query_response = 5;
+    Bulk bulk = 6;
+    BulkResponse bulk_response = 7;
+
+    // Request synchronization on new messages
+    Notification notification = 8;
   }
 }
 

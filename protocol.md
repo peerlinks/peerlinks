@@ -61,14 +61,17 @@ Further communication between peers happens using:
 message Packet {
   oneof content {
     EncryptedInvite invite = 1;
-    ChannelMessage message = 2;
-    Error error = 3;
-    Subscribe subscribe = 4;
+    Error error = 2;
+    Subscribe subscribe = 3;
 
-    Query query = 5;
-    QueryResponse query_response = 6;
-    Bulk bulk = 7;
-    BulkResponse bulk_response = 8;
+    // Synchronization
+    Query query = 4;
+    QueryResponse query_response = 5;
+    Bulk bulk = 6;
+    BulkResponse bulk_response = 7;
+
+    // Request synchronization on new messages
+    Notification notification = 8;
   }
 }
 ```
@@ -405,22 +408,16 @@ the messages.
 
 _(TODO(indutny): does 30 day delta mechanism help here?)_
 
-## DHT
+### New messages
 
-WIP
-
-DHT uses a form of rendezvous hashing:
+On either received or posted message the peer MUST send:
+```proto
+message Notification {
+  bytes channel_id = 1;
+}
 ```
-content_hash = HASH(peer_id ++ channel_id, 'vowlink-dht')
-```
-is computed for each peer and message. `content_hash` is interpreted as a
-network order integer. `DHT_SCALE = 7` peers with lowest `content_hash` receive
-the message. Even if the message is transferred to other peer, the copy of it
-kept in the public pool or subscribed feeds according to their respective
-eviction policies defined below.
-
-The peer SHOULD attempt to store in DHT their own messages and SHOULD redirect
-the remote stores according the rendezvous hashing algorithm above.
+to notify ALL connected peers that new data is available for the channel. The
+subscribed peers SHOULD attempt to do a synchronization.
 
 ## Storage and eviction policies
 
