@@ -88,6 +88,11 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     }
     
     private func connect(to remoteID: MCPeerID) -> Peer? {
+        if remoteID.displayName <= localID.displayName {
+            debugPrint("[p2p] waiting to be invited by peer \(remoteID.displayName) into session")
+            return nil
+        }
+        
         if peers[remoteID] != nil || remoteID == self.localID {
             debugPrint("[p2p] ignoring peer \(remoteID.displayName)")
             return nil
@@ -137,7 +142,10 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
         debugPrint("[p2p] lost peer \(peerID.displayName)")
-        self.availablePeers.remove(peerID)
+        availablePeers.remove(peerID)
+        if let peer = peers[peerID] {
+            peer.destroy(reason: "Peer lost")
+        }
     }
     
     func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error) {
@@ -148,11 +156,6 @@ class PeerToPeer: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
         debugPrint("[p2p] found peer \(peerID.displayName) with info \(String(describing: info))")
         self.availablePeers.insert(peerID)
-        
-        if peerID.displayName <= self.localID.displayName {
-            debugPrint("[p2p] waiting to be invited by peer \(peerID.displayName) into session")
-            return
-        }
         
         if let peer = self.connect(to: peerID) {
             debugPrint("[p2p] inviting peer \(peerID.displayName) into session")

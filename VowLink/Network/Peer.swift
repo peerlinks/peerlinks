@@ -20,7 +20,6 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     var hello: Proto_Hello?
     var isReady: Bool = false
     
-    var state: MCSessionState = .notConnected
     var subscriptions = Set<Bytes>()
     var queryResponses = [Bytes:[(Channel.QueryResponse) -> Void]]()
     var bulkResponses = [Bytes:[(Channel.BulkResponse) -> Void]]()
@@ -288,12 +287,6 @@ class Peer: NSObject, MCSessionDelegate, RemoteChannel {
     }
     
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        if state == self.state {
-            debugPrint("[peer] id=\(remoteID.displayName) state changed ignored")
-            return
-        }
-        self.state = state
-        
         switch state {
         case .connecting:
             debugPrint("[peer] id=\(remoteID.displayName) connecting")

@@ -147,5 +147,69 @@
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "VowLink/Channel/Channel.swift"
+            timestampString = "587020226.415385"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "135"
+            endingLineNumber = "135"
+            landmarkName = "post(message:by:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "VowLink.Channel.post(message: VowLink.Proto_ChannelMessage.Body, by: VowLink.Identity) throws -&gt; VowLink.ChannelMessage"
+                  moduleName = "VowLink"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/findutnyy/Code/indutny/VowLink/VowLink/Channel/Channel.swift"
+                  timestampString = "587019459.224121"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "135"
+                  endingLineNumber = "135"
+                  offsetFromSymbolStart = "144">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (VowLink.ChannelMessage) throws -&gt; Swift.Array&lt;Swift.UInt8&gt; in VowLink.Channel.post(message: VowLink.Proto_ChannelMessage.Body, by: VowLink.Identity) throws -&gt; VowLink.ChannelMessage"
+                  moduleName = "VowLink"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/findutnyy/Code/indutny/VowLink/VowLink/Channel/Channel.swift"
+                  timestampString = "587019459.227771"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "136"
+                  endingLineNumber = "136"
+                  offsetFromSymbolStart = "40">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "VowLink/Channel/Channel.swift"
+            timestampString = "587020226.415471"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "264"
+            endingLineNumber = "264"
+            landmarkName = "append(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

@@ -21,6 +21,7 @@ class PersistenceContext {
     private let protobuf = Expression<Blob>("protobuf")
     
     private let leafTable = Table("leaves")
+    private let leafChannelID = Expression<String>("leafChannelID")
     private let leafHash = Expression<String>("leafHash")
     
     private static let DEBUG = false
@@ -54,9 +55,10 @@ class PersistenceContext {
     func append(encryptedMessage encrypted: ChannelMessage,
                 toChannelID channelID: Bytes,
                 withNewLeaves leaves: [Bytes] = []) throws {
-        // TODO(indutny): store leafs
+        let channelIDHex = context.sodium.utils.bin2hex(channelID)!
+        
         let insertMessage = messageTable.insert(
-            self.channelID <- context.sodium.utils.bin2hex(channelID)!,
+            self.channelID <- channelIDHex,
             hash <- encrypted.displayHash!,
 
             height <- Int64(encrypted.height),
@@ -69,13 +71,17 @@ class PersistenceContext {
             
             for leafHash in leaves {
                 let leafHashHex = context.sodium.utils.bin2hex(leafHash)!
-                try db.run(leafTable.insert(self.leafHash <- leafHashHex))
+                try db.run(leafTable.insert(
+                    self.leafHash <- leafHashHex,
+                    leafChannelID <- channelIDHex)
+                )
             }
         }
     }
     
     func leaves(forChannelID channelID: Bytes) throws -> [ChannelMessage] {
         let query = leafTable.select(protobuf)
+            .filter(leafChannelID == context.sodium.utils.bin2hex(channelID)!)
             .join(messageTable, on: leafHash == hash)
         
         // TODO(indutny): DRY
@@ -238,9 +244,11 @@ class PersistenceContext {
         try db.run(messageTable.createIndex(height, unique: false, ifNotExists: true))
         
         try db.run(leafTable.create(ifNotExists: true) { (t) in
+            t.column(leafChannelID)
             t.column(leafHash)
         })
-        
+
+        try db.run(leafTable.createIndex(leafChannelID, unique: false, ifNotExists: true))
         try db.run(leafTable.createIndex(leafHash, unique: true, ifNotExists: true))
     }
 }
