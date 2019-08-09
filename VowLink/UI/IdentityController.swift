@@ -68,8 +68,21 @@ class IdentityController : UIViewController, UIPickerViewDelegate, UIPickerViewD
     
     // MARK: - Identity Manager
     
+    func isAllowed(name: String) -> Bool {
+        if name.isEmpty {
+            return false
+        }
+        
+        let exists = identities.first(where: { (id) -> Bool in
+            return id.name == name
+        }) != nil
+        if exists {
+            return false
+        }
+        return true
+    }
+    
     func createIdentity(name: String) throws {
-        // TODO(indutny): avoid duplicates by throwing
         let id = try Identity(context: context, name: name)
         identities.append(id)
         selectButton.isEnabled = true
