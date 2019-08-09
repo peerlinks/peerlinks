@@ -78,7 +78,9 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
         }
         
         do {
-            let _ = try channel.post(message: body, by: app.identity!)
+            let _ = try app.network.queue.sync {
+                try channel.post(message: body, by: app.identity!)
+            }
         } catch {
             debugPrint("[channel-controller] failed to post message due to error \(error)")
             return
