@@ -71,7 +71,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PeerToPeerDelegate, Chann
                 debugPrint("[app] failed to send subscribe to \(channel.channelID) due to error \(error)")
             }
             
-            channel.sync(with: peer)
+            DispatchQueue.main.async {
+                channel.sync(with: peer)
+            }
         }
     }
     
