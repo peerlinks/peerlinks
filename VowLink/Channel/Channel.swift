@@ -43,7 +43,7 @@ class Channel {
     
     var messageCount: Int {
         get {
-            return (try? context.persistence.messageCount()) ?? 0
+            return (try? context.persistence.messageCount(forChannelID: channelID)) ?? 0
         }
     }
     

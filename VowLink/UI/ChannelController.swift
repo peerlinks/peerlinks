@@ -93,37 +93,14 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: UITableViewDataSource
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return channel.messageCount
+        return max(0, channel.messageCount - 1)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "messageCell")!
-        let decrypted = try? channel.message(atOffset: indexPath.row)
         
-        guard let content = decrypted?.decryptedContent else {
-            cell.textLabel?.text = "<encrypted>"
-            return cell
-        }
-        
-        let leafKey = content.chain.leafKey(withChannel: channel)
-        let sodium = app.context.sodium
-        let fullAuthor = sodium.utils.bin2hex(leafKey)!
-        let author = fullAuthor.prefix(ChannelController.AUTHOR_LENGTH)
-        
-        var text = ""
-        switch content.body.body {
-        case .some(.root(_)):
-            text = "(root)"
-            break
-        case .some(.text(let body)):
-            text = body.text
-            break
-        default:
-            text = "<unknown>"
-            break
-        }
-        
-        cell.textLabel?.text = author + ": " + text
+        // NOTE: Skip root
+        cell.textLabel?.text = messageText(atOffset: indexPath.row + 1)
         
         return cell
     }
@@ -136,5 +113,37 @@ class ChannelController : UIViewController, UITableViewDataSource, UITableViewDe
             
             scrollToBottom(animated: true)
         }
+    }
+    
+    // MARK: Utils
+    
+    func messageText(atOffset offset: Int) -> String {
+        var maybeDecrypted: ChannelMessage?
+        do {
+            maybeDecrypted = try channel.message(atOffset: offset)
+        } catch {
+            return "<error: \(error)>"
+        }
+        
+        guard let decrypted = maybeDecrypted else {
+            return "<not found: \(offset)>"
+        }
+        
+        let content = decrypted.decryptedContent!
+        
+        let leafKey = content.chain.leafKey(withChannel: channel)
+        let sodium = app.context.sodium
+        let fullAuthor = sodium.utils.bin2hex(leafKey)!
+        let author = fullAuthor.prefix(ChannelController.AUTHOR_LENGTH)
+        
+        switch content.body.body {
+        case .some(.root(_)):
+            return "(root)"
+        case .some(.text(let body)):
+            return "\(author): \(body.text)"
+        case .none:
+            return "\(author): (none)"
+        }
+        
     }
 }

@@ -45,12 +45,10 @@ class PersistenceContext {
         try createTables()
     }
     
-    func maxHeight() throws -> Int64 {
-        return try db.scalar(messageTable.select(height.max)) ?? 0
-    }
-    
-    func messageCount() throws -> Int {
-        return try db.scalar(messageTable.count)
+    func messageCount(forChannelID channelID: Bytes) throws -> Int {
+        return try db.scalar(messageTable
+            .filter(self.channelID == context.sodium.utils.bin2hex(channelID)!)
+            .count)
     }
     
     func append(encryptedMessage encrypted: ChannelMessage,
@@ -119,6 +117,7 @@ class PersistenceContext {
         return try ChannelMessage(context: context, proto: proto)
     }
     
+    // TODO(indutny): LRU
     func message(atOffset offset: Int, andChannelID channelID: Bytes) throws -> ChannelMessage? {
         let query = messageTable
             .select(protobuf)
