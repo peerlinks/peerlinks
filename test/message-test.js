@@ -47,5 +47,17 @@ describe('Link', () => {
     copy.decrypt(channel);
 
     assert.strictEqual(copy.content.body.text.text, 'okay');
+    assert.strictEqual(copy.hash.toString('hex'), message.hash.toString('hex'));
+
+    const invalid = new Message({
+      channelId: channel.id,
+      parents: [],
+      height: 0,
+      // NOTE: Random nonce here
+      nonce: null,
+      encryptedContent: message.encryptedContent,
+    });
+
+    assert.throws(() => invalid.decrypt(channel));
   });
 });
