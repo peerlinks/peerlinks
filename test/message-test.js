@@ -28,14 +28,12 @@ describe('Message', () => {
       });
 
     const message = new Message({
-      channelId: channel.id,
+      channel,
       parents: [],
       height: 0,
       content,
     });
     assert.ok(message.verify(channel));
-
-    message.encrypt(channel);
 
     const copy = new Message({
       channelId: channel.id,
@@ -80,7 +78,7 @@ describe('Message', () => {
       });
 
     const message = new Message({
-      channelId: channel.id,
+      channel,
       parents: [],
       height: 0,
       content,
