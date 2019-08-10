@@ -23,7 +23,7 @@ describe('MemoryStorage', () => {
       channelId,
       hash: Buffer.from(hash),
       height,
-      parents,
+      parents: parents.map((hash) => Buffer.from(hash)),
     };
   };
 
@@ -34,6 +34,11 @@ describe('MemoryStorage', () => {
   const at = async (offset) => {
     const message = await storage.getMessageAtOffset(channelId, offset);
     return str(message);
+  };
+
+  const leaves = async () => {
+    const result = await storage.getLeaves(channelId);
+    return result.map((hash) => hash.toString()).sort();
   };
 
   it('should store and retrieve messages', async () => {
@@ -138,5 +143,21 @@ describe('MemoryStorage', () => {
       assert.strictEqual(result.backwardHash.toString(), 'd');
       assert.strictEqual(result.forwardHash, null);
     }
+  });
+
+  it('should compute leaves through parent hashes', async () => {
+    assert.deepStrictEqual(await leaves(), []);
+
+    await storage.addMessage(msg('a', 0, []));
+    assert.deepStrictEqual(await leaves(), [ 'a' ]);
+
+    await storage.addMessage(msg('c', 1, [ 'a' ]));
+    assert.deepStrictEqual(await leaves(), [ 'c' ]);
+
+    await storage.addMessage(msg('b', 1, [ 'a' ]));
+    assert.deepStrictEqual(await leaves(), [ 'b', 'c' ]);
+
+    await storage.addMessage(msg('d', 2, [ 'b', 'c' ]));
+    assert.deepStrictEqual(await leaves(), [ 'd' ]);
   });
 });
