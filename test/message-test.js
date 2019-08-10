@@ -33,6 +33,7 @@ describe('Link', () => {
       height: 0,
       content,
     });
+    assert.ok(message.verify(channel));
 
     message.encrypt(channel);
 
@@ -45,6 +46,7 @@ describe('Link', () => {
     });
 
     copy.decrypt(channel);
+    assert.ok(copy.verify(channel));
 
     assert.strictEqual(copy.content.body.text.text, 'okay');
     assert.strictEqual(copy.hash.toString('hex'), message.hash.toString('hex'));
