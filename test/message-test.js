@@ -19,7 +19,7 @@ describe('Message', () => {
   });
 
   it('should be encrypted/decrypted', () => {
-    const content = id.signMessageContent(
+    const content = id.signMessageBody(
       Message.text('okay'),
       channel,
       {
@@ -69,7 +69,7 @@ describe('Message', () => {
 
     second.addChain(channel, chain);
 
-    const content = second.signMessageContent(
+    const content = second.signMessageBody(
       Message.text('okay'),
       channel,
       {
