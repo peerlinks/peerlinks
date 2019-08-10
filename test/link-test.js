@@ -40,8 +40,8 @@ describe('Link', () => {
       trusteePubKey: trustee.publicKey,
     });
 
-    const proto = link.serialize();
-    const deserialized = Link.deserialize(proto);
+    const proto = link.serializeData();
+    const deserialized = Link.deserializeData(proto);
 
     assert.ok(deserialized.verify(channel, issuer.publicKey));
   });

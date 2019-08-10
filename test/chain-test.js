@@ -39,7 +39,7 @@ describe('Chain', () => {
     ];
 
     assert.throws(() => {
-      const chain = new Chain(channelA, links);
+      const chain = new Chain(links);
     });
   });
 
@@ -50,7 +50,7 @@ describe('Chain', () => {
       idC.issueLink(channelA, { trusteePubKey: idD.publicKey }),
     ];
 
-    const chain = new Chain(channelA, links);
+    const chain = new Chain(links);
 
     assert.ok(chain.verify(channelA));
     assert.ok(!chain.verify(channelB));
@@ -69,7 +69,7 @@ describe('Chain', () => {
       idC.issueLink(channelA, { trusteePubKey: idD.publicKey }),
     ];
 
-    const chain = new Chain(channelA, links);
+    const chain = new Chain(links);
 
     assert.ok(!chain.verify(channelA));
   });
