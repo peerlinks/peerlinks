@@ -62,4 +62,32 @@ describe('Link', () => {
 
     assert.throws(() => invalid.decrypt(channel));
   });
+
+  it('should be signed/verified', () => {
+    const second = new Identity('second');
+    const chain = new Chain([
+      id.issueLink(channel, { trusteePubKey: second.publicKey }),
+    ]);
+
+    second.addChain(channel, chain);
+
+    const content = second.signMessageContent(
+      Message.text('okay'),
+      channel,
+      {
+        height: 0,
+        parents: [],
+      });
+
+    const message = new Message({
+      channelId: channel.id,
+      parents: [],
+      height: 0,
+      content,
+    });
+    assert.ok(message.verify(channel));
+
+    assert.strictEqual(message.chain.getLeafKey(channel).toString('hex'),
+      second.publicKey.toString('hex'));
+  });
 });
