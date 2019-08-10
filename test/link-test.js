@@ -1,5 +1,4 @@
 import * as assert from 'assert';
-import * as sodium from 'sodium-universal';
 
 import { Channel, Identity } from '../';
 
@@ -19,8 +18,7 @@ describe('Link', () => {
 
     const trustee = new Identity('trustee');
 
-    const link = issuer.issueLink({
-      channel,
+    const link = issuer.issueLink(channel, {
       trusteePubKey: trustee.publicKey,
     });
 
