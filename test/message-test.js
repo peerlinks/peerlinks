@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Chain, Channel, Identity, Link, Message } from '../';
 
-describe('Link', () => {
+describe('Message', () => {
   let id = null;
   let channel = null;
 
