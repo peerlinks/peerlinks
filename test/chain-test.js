@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 
 import { Chain, Channel, Identity } from '../';
+import { now } from '../lib/utils';
 
 describe('Chain', () => {
   let idA = null;
@@ -64,7 +65,7 @@ describe('Chain', () => {
       idA.issueLink(channelA, { trusteePubKey: idB.publicKey }),
       idB.issueLink(channelA, {
         trusteePubKey: idC.publicKey,
-        expiration: Date.now() - 1000,
+        expiration: now() - 1,
       }),
       idC.issueLink(channelA, { trusteePubKey: idD.publicKey }),
     ];
