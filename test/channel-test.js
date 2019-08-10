@@ -32,14 +32,17 @@ describe('Channel', () => {
     assert.strictEqual(await channel.getMessageCount(), 2);
     assert.strictEqual(await at(0), '<root>');
     assert.strictEqual(await at(1), 'hello');
+    assert.ok(first.verify(channel));
 
     const second = await channel.post(Message.text('world'), id);
     assert.strictEqual(await channel.getMessageCount(), 3);
     assert.strictEqual(await at(0), '<root>');
     assert.strictEqual(await at(1), 'hello');
     assert.strictEqual(await at(2), 'world');
+    assert.ok(second.verify(channel));
 
     const root = channel.root;
+    assert.ok(root.verify(channel));
     assert.strictEqual(root.parents.length, 0);
     assert.strictEqual(root.height, 0);
 
@@ -52,5 +55,24 @@ describe('Channel', () => {
       first.hash.toString('hex')
     ]);
     assert.strictEqual(second.height, 2);
+  });
+
+  it('should post messages concurrently', async () => {
+    assert.strictEqual(await channel.getMessageCount(), 1);
+    assert.strictEqual(await at(0), '<root>');
+
+    const middle = await Promise.all([
+      channel.post(Message.text('hello'), id),
+      channel.post(Message.text('hi'), id),
+    ]);
+
+    assert.strictEqual(await channel.getMessageCount(), 3);
+
+    const last = await channel.post(Message.text('world'), id);
+    assert.strictEqual(await channel.getMessageCount(), 4);
+    assert.strictEqual(await at(3), 'world');
+    assert.ok(last.height > 1);
+    assert.ok(last.parents.length >= 1);
+    assert.ok(last.verify(channel));
   });
 });
