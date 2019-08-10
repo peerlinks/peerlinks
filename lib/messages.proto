@@ -1,0 +1,187 @@
+syntax = "proto3";
+
+//
+// Network
+//
+
+message Hello {
+  uint32 version = 1;
+}
+
+message Link {
+  message TBS {
+    bytes trustee_pub_key = 1;
+    double expiration = 2;
+
+    // NOTE: This MUST be filled either by sender/recipient before
+    // generating/verifying the signature below.
+    bytes channel_id = 3;
+  }
+
+  TBS tbs = 1;
+  bytes signature = 2;
+}
+
+message Invite {
+  bytes channel_pub_key = 1;
+  string channel_name = 2;
+  ChannelMessage channel_root = 3;
+
+  repeated Link chain = 4;
+}
+
+message EncryptedInvite {
+  bytes box = 1;
+}
+
+// QR Code
+message InviteRequest {
+  string peer_id = 1;
+  bytes trustee_pub_key = 2;
+  bytes box_pub_key = 3;
+}
+
+message ChannelMessage {
+  // First message on any channel
+  message Root {
+  }
+
+  message Text {
+    string text = 1;
+  }
+
+  message Body {
+    oneof body {
+      Root root = 1;
+      Text text = 2;
+    }
+  }
+
+  message Content {
+    message TBS {
+      repeated Link chain = 1;
+      double timestamp = 2;
+      Body body = 3;
+
+      // NOTE: Despite these fields being outside of content they have to be
+      // included here to prevent replay attacks
+      repeated bytes parents = 4;
+      int64 height = 5;
+    }
+
+    // Link chain that leads from the channel's public key to the signer of
+    // this message
+    repeated Link chain = 1;
+
+    // Floating point unix time
+    double timestamp = 2;
+
+    // body of the message
+    Body body = 3;
+
+    bytes signature = 4;
+  }
+
+  bytes channel_id = 1;
+
+  // NOTE: can be empty only in the root message
+  repeated bytes parents = 2;
+
+  // height = max(p.height for p in parents)
+  int64 height = 3;
+
+  // Encryption nonce for Sodium
+  bytes nonce = 4;
+
+  // NOTE: encryption key = HASH(channelPubKey, 'vowlink-symmetric')
+  bytes encrypted_content = 5;
+}
+
+message Query {
+  bytes channel_id = 1;
+  oneof cursor {
+    int64 height = 2;
+    bytes hash = 3;
+  }
+  bool is_backward = 4;
+  uint32 limit = 5;
+}
+
+message QueryResponse {
+  message Abbreviated {
+    repeated bytes parents = 1;
+    bytes hash = 2;
+  }
+
+  bytes channel_id = 1;
+  repeated Abbreviated abbreviated_messages = 2;
+  bytes forward_hash = 3;
+  bytes backward_hash = 4;
+}
+
+message Bulk {
+  bytes channel_id = 1;
+  repeated bytes hashes = 2;
+}
+
+message BulkResponse {
+  bytes channel_id = 1;
+  repeated ChannelMessage messages = 2;
+  uint32 forward_index = 3;
+}
+
+message Error {
+  string reason = 1;
+}
+
+message Subscribe {
+  // TODO(indutny): Make it an array?
+  bytes channel_id = 1;
+}
+
+message Notification {
+  bytes channel_id = 1;
+}
+
+message Packet {
+  oneof content {
+    EncryptedInvite invite = 1;
+    Error error = 2;
+    Subscribe subscribe = 3;
+
+    // Synchronization
+    Query query = 4;
+    QueryResponse query_response = 5;
+    Bulk bulk = 6;
+    BulkResponse bulk_response = 7;
+
+    // Request synchronization on new messages
+    Notification notification = 8;
+  }
+}
+
+//
+// Storage
+//
+
+message Identity {
+  message ChannelChain {
+    bytes channel_id = 1;
+    repeated Link links = 2;
+  }
+
+  bytes public_key = 1;
+  bytes secret_key = 2;
+
+  repeated ChannelChain channel_chains = 3;
+}
+
+message Channel {
+  bytes public_key = 1;
+  string name = 2;
+  ChannelMessage root = 3;
+}
+
+message ChannelList {
+  repeated Channel channels = 1;
+}

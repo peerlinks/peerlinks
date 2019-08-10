@@ -1,0 +1,33 @@
+{
+  "name": "vowlink-protocol",
+  "version": "1.0.0",
+  "description": "VowLink Protocol implementation",
+  "main": "lib/protocol.js",
+  "scripts": {
+    "compile-proto": "pbjs --es6 -w es6 -t static-module lib/messages.proto -o lib/messages.js",
+    "test": "mocha -r esm --reporter=spec test/*-test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/indutny/vowlink-protocol.git"
+  },
+  "keywords": [
+    "vowlink",
+    "protocol",
+    "p2p"
+  ],
+  "author": "Fedor Indutny <fedor@indutny.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/indutny/vowlink-protocol/issues"
+  },
+  "homepage": "https://github.com/indutny/vowlink-protocol#readme",
+  "dependencies": {
+    "esm": "^3.2.25",
+    "protobufjs": "^6.8.8",
+    "sodium-universal": "^2.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.2.0"
+  }
+}
