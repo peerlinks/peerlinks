@@ -144,6 +144,17 @@ describe('MemoryStorage', () => {
       assert.strictEqual(result.backwardHash.toString(), 'd');
       assert.strictEqual(result.forwardHash, null);
     }
+
+    {
+      const result = await storage.query(
+        channelId,
+        { hash: Buffer.from('x') },
+        false,
+        2);
+      assert.strictEqual(result.messages.length, 0);
+      assert.strictEqual(result.backwardHash, null);
+      assert.strictEqual(result.forwardHash, null);
+    }
   });
 
   it('should compute leaves through parent hashes', async () => {

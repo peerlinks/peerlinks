@@ -154,7 +154,7 @@ describe('Channel', () => {
 
       await assert.rejects(channel.receive(wrong), {
         name: 'Error',
-        message: /Message: .* not found/,
+        message: /Message parent: .* not found/,
       });
     });
 
