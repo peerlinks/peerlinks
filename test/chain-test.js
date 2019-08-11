@@ -1,3 +1,4 @@
+/* eslint-env node, mocha */
 import * as assert from 'assert';
 
 import { Chain, Channel, Identity } from '../';
@@ -40,7 +41,7 @@ describe('Chain', () => {
     ];
 
     assert.throws(() => {
-      const chain = new Chain(links);
+      new Chain(links);
     }, {
       name: 'Error',
       message: 'Chain length overflow: 4',

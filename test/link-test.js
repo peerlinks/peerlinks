@@ -1,3 +1,4 @@
+/* eslint-env node, mocha */
 import * as assert from 'assert';
 
 import { Channel, Identity, Link } from '../';

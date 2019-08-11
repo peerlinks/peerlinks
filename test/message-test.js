@@ -1,6 +1,7 @@
+/* eslint-env node, mocha */
 import * as assert from 'assert';
 
-import { Chain, Channel, Identity, Link, Message } from '../';
+import { Chain, Channel, Identity, Message } from '../';
 
 describe('Message', () => {
   let id = null;

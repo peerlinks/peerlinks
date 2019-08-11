@@ -1,8 +1,9 @@
+/* eslint-env node, mocha */
 import * as assert from 'assert';
 import { Buffer } from 'buffer';
 import * as sodium from 'sodium-universal';
 
-import { Chain, Channel, Identity, Message } from '../';
+import { Channel, Identity, Message } from '../';
 import { now } from '../lib/utils';
 
 describe('Channel', () => {
@@ -81,7 +82,7 @@ describe('Channel', () => {
       assert.strictEqual(await channel.getMessageCount(), 1);
       assert.strictEqual(await at(0), '<root>');
 
-      const middle = await Promise.all([
+      await Promise.all([
         channel.post(Message.text('hello'), id),
         channel.post(Message.text('hi'), id),
       ]);
