@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/indutny/vowlink-protocol#readme",
   "dependencies": {
+    "debug": "^4.1.1",
     "esm": "^3.2.25",
     "protobufjs": "^6.8.8",
     "sodium-universal": "^2.0.0"
