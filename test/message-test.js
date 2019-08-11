@@ -88,4 +88,31 @@ describe('Message', () => {
     assert.strictEqual(message.chain.getLeafKey(channel).toString('hex'),
       second.publicKey.toString('hex'));
   });
+
+  it('should be serialized/deserialized', () => {
+    const content = id.signMessageBody(
+      Message.text('okay'),
+      channel,
+      {
+        height: 0,
+        parents: [],
+      });
+
+    const message = new Message({
+      channel,
+      parents: [],
+      height: 1,
+      content,
+    });
+
+    const data = message.serializeData();
+    const copy = Message.deserializeData(data);
+    assert.strictEqual(copy.channelId.toString('hex'),
+      message.channelId.toString('hex'));
+    assert.strictEqual(copy.height, message.height);
+    assert.strictEqual(copy.parents.length, message.parents.length);
+
+    // Should not throw
+    copy.decrypt(channel);
+  });
 });
