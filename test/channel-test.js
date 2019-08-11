@@ -27,6 +27,19 @@ describe('Channel', () => {
     return message.content.body.text.text;
   };
 
+  const msg = (text, parents, height, timestamp) => {
+    return new Message({
+      channel,
+      parents: parents.map((p) => p.hash),
+      height,
+      content: id.signMessageBody(Message.text(text), channel, {
+        height,
+        parents: parents.map((p) => p.hash),
+        timestamp,
+      }),
+    });
+  };
+
   describe('.post()', () => {
     it('should post messages and set parents appropriately', async () => {
       assert.strictEqual(await channel.getMessageCount(), 1);
@@ -141,64 +154,40 @@ describe('Channel', () => {
     });
 
     it('should check height', async () => {
-      const left = new Message({
-        channel,
-        parents: [ channel.root.hash ],
-        height: 1,
-        content: id.signMessageBody(Message.text('left'), channel, {
-          height: 1,
-          parents: [ channel.root.hash ],
-        }),
-      });
-      const right = new Message({
-        channel,
-        parents: [ channel.root.hash ],
-        height: 1,
-        content: id.signMessageBody(Message.text('right'), channel, {
-          height: 1,
-          parents: [ channel.root.hash ],
-        }),
-      });
-      const grand = new Message({
-        channel,
-        parents: [ right.hash ],
-        height: 2,
-        content: id.signMessageBody(Message.text('grand'), channel, {
-          height: 2,
-          parents: [ right.hash ],
-        }),
-      });
+      const left = msg('left', [ channel.root ], 1);
+      const right = msg('right', [ channel.root ], 1);
+      const grand = msg('grand', [ right ], 2);
 
       await channel.receive(left);
       await channel.receive(right);
       await channel.receive(grand);
 
-      const wrong = new Message({
-        channel,
-        parents: [ left.hash, grand.hash ],
-        height: 1,
-        content: id.signMessageBody(Message.text('right'), channel, {
-          height: 1,
-          parents: [ left.hash, grand.hash ],
-        }),
-      });
+      const wrong = msg('wrong', [ left, grand ], 1);
 
       await assert.rejects(channel.receive(wrong), {
         name: 'Error',
         message: 'Invalid received message height: 1, expected: 3',
       });
 
-      const correct = new Message({
-        channel,
-        parents: [ left.hash, grand.hash ],
-        height: 3,
-        content: id.signMessageBody(Message.text('right'), channel, {
-          height: 1,
-          parents: [ left.hash, grand.hash ],
-        }),
+      const correct = msg('correct', [ left, grand ], 3);
+
+      await channel.receive(correct);
+    });
+
+    it('should check timestamp', async () => {
+      const future = msg('future', [ channel.root ], 1, now() + 3600);
+
+      await assert.rejects(channel.receive(future), {
+        name: 'Error',
+        message: 'Received message is in the future',
       });
 
-      channel.receive(correct);
+      const past = msg('future', [ channel.root ], 1, now() - 3600);
+
+      await assert.rejects(channel.receive(past), {
+        name: 'Error',
+        message: 'Received message is in the past',
+      });
     });
   });
 });
