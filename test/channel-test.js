@@ -44,12 +44,14 @@ describe('Channel', () => {
     it('should post messages and set parents appropriately', async () => {
       assert.strictEqual(await channel.getMessageCount(), 1);
       assert.strictEqual(await at(0), '<root>');
+      assert.strictEqual(await channel.getMinLeafHeight(), 0);
 
       const first = await channel.post(Message.text('hello'), id);
       assert.strictEqual(await channel.getMessageCount(), 2);
       assert.strictEqual(await at(0), '<root>');
       assert.strictEqual(await at(1), 'hello');
       assert.ok(first.verify(channel));
+      assert.strictEqual(await channel.getMinLeafHeight(), 1);
 
       const second = await channel.post(Message.text('world'), id);
       assert.strictEqual(await channel.getMessageCount(), 3);
@@ -57,6 +59,7 @@ describe('Channel', () => {
       assert.strictEqual(await at(1), 'hello');
       assert.strictEqual(await at(2), 'world');
       assert.ok(second.verify(channel));
+      assert.strictEqual(await channel.getMinLeafHeight(), 2);
 
       const root = channel.root;
       assert.ok(root.verify(channel));
@@ -91,6 +94,7 @@ describe('Channel', () => {
       assert.ok(last.height > 1);
       assert.ok(last.parents.length >= 1);
       assert.ok(last.verify(channel));
+      assert.ok((await channel.getMinLeafHeight()) >= 1);
     });
   });
 
@@ -98,6 +102,7 @@ describe('Channel', () => {
     it('should receive root', async () => {
       const clone = new Channel('test-clone', channel.publicKey);
       await clone.receive(channel.root);
+      assert.strictEqual(await clone.getMinLeafHeight(), 0);
     });
 
     it('should ignore duplicate', async () => {
@@ -161,6 +166,9 @@ describe('Channel', () => {
       await channel.receive(left);
       await channel.receive(right);
       await channel.receive(grand);
+
+      // minLeafHeight=1, because left branch is of height=1
+      assert.strictEqual(await channel.getMinLeafHeight(), 1);
 
       const wrong = msg('wrong', [ left, grand ], 1);
 
