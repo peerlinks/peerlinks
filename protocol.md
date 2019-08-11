@@ -362,16 +362,24 @@ The synchronization process is following:
 2. Recipient of `Query` with `cursor.height` computes the starting `height` as
    `min(min_leaf_height, cursor.height)`
 3. Recipient replies with a slice of the list of abbreviated messages (see CRDT
-   Order below)    starting from the first message of `message.height == height`
+   Order below) starting from the first message of `message.height == height`
    and either up to the latest message or up to `query.limit` messages total
-4. For abbreviated messages the recipient can either:
-  4.1. Bulk fetch and commit those of messages that have known parent (and are
-       thus verifiable) and issue a query with
-       `cursor.hash = response.backward_hash` and `is_backward = true`
-  4.2. If all messages have known parents - the recipient issues a query with
-       `is_backward = false` and `cursor.hash = reponse.forward_hash`
+4. The recipient walks over received messages sequentially, `Bulk`-requesting
+   the messages with known parents and messages with parents in the
+   `QueryResponse`
+5. The recipient SHOULD keep the list of unknown parents seen so far, and in
+   case if the list does not overflow should proceed to loop below:
+  1. If the count of unknown parents is non-zero - issue a query with
+     `cursor.hash = response.backward_hash` and `is_backward = true`
+  2. Once there are no more unknown parents - the recipient repeatedly issues a
+     query with `is_backward = false` and `cursor.hash = reponse.forward_hash`
 5. The synchronization is complete when the response the response with
    `forward_hash == nil` is fully processed and has no missing parents.
+
+Malicious nodes or DAGs with divergent branches may overflow the list of
+unknown parents. In this case, `cursor.hash` has to be set to `root.hash`, and
+`is_backward` should be set to `false`. In other words, the sync has to start
+from the very first message. This is called "Full Sync".
 
 ### Bulk fetch
 
