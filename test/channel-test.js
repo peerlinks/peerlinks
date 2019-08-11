@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Channel, Identity, Message } from '../';
+import { Chain, Channel, Identity, Message } from '../';
 
 describe('Channel', () => {
   let id = null;
@@ -84,7 +84,11 @@ describe('Channel', () => {
       await clone.receive(channel.root);
     });
 
-    it('should receive root', async () => {
+    it('should ignore duplicate', async () => {
+      await channel.receive(channel.root);
+    });
+
+    it('should throw on invalid root', async () => {
       const alt = await Channel.create(id, 'test-alt-channel');
 
       let exception = undefined;
@@ -94,7 +98,7 @@ describe('Channel', () => {
         exception = error;
       }
       if (!exception) {
-        throw new Error('Expected error');
+        throw new Error('Expected receive() to fail');
       }
     });
   });
