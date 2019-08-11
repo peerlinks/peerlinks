@@ -1,6 +1,8 @@
 import * as assert from 'assert';
+import { Buffer } from 'buffer';
 
 import { Chain, Channel, Identity, Message } from '../';
+import { now } from '../lib/utils';
 
 describe('Channel', () => {
   let id = null;
@@ -91,15 +93,31 @@ describe('Channel', () => {
     it('should throw on invalid root', async () => {
       const alt = await Channel.create(id, 'test-alt-channel');
 
-      let exception = undefined;
-      try {
-        await channel.receive(alt.root);
-      } catch (error) {
-        exception = error;
-      }
-      if (!exception) {
-        throw new Error('Expected receive() to fail');
-      }
+      await assert.rejects(channel.receive(alt.root), {
+        name: 'Error',
+        message: 'Received invalid root',
+      });
+    });
+
+    it('should throw on invalid signature', async () => {
+      const wrong = new Message({
+        channel,
+        parents: [ channel.root.hash ],
+        height: 1,
+        content: {
+          chain: [],
+          timestamp: now(),
+          body: {
+            text: { text: 'wrong' },
+          },
+          signature: Buffer.alloc(64),
+        },
+      });
+
+      await assert.rejects(channel.receive(wrong), {
+        name: 'Error',
+        message: 'Invalid message signature, or invalid chain',
+      });
     });
   });
 });

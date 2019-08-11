@@ -41,6 +41,9 @@ describe('Chain', () => {
 
     assert.throws(() => {
       const chain = new Chain(links);
+    }, {
+      name: 'Error',
+      message: 'Chain length overflow: 4',
     });
   });
 

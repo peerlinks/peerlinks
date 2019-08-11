@@ -58,7 +58,10 @@ describe('Message', () => {
       encryptedContent: message.encryptedContent,
     });
 
-    assert.throws(() => invalid.decrypt(channel));
+    assert.throws(() => invalid.decrypt(channel), {
+      name: 'Error',
+      message: 'Failed to decrypt message content',
+    });
   });
 
   it('should be signed/verified', () => {
