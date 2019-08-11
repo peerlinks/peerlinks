@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import { Buffer } from 'buffer';
+import * as sodium from 'sodium-universal';
 
 import { Chain, Channel, Identity, Message } from '../';
 import { now } from '../lib/utils';
@@ -110,13 +111,32 @@ describe('Channel', () => {
           body: {
             text: { text: 'wrong' },
           },
-          signature: Buffer.alloc(64),
+          signature: Buffer.alloc(sodium.crypto_sign_BYTES),
         },
       });
 
       await assert.rejects(channel.receive(wrong), {
         name: 'Error',
         message: 'Invalid message signature, or invalid chain',
+      });
+    });
+
+    it('should throw on unknown parents', async () => {
+      const alt = await Channel.create(id, 'test-alt');
+
+      const wrong = new Message({
+        channel,
+        parents: [ alt.root.hash ],
+        height: 1,
+        content: id.signMessageBody(Message.text('wrong'), channel, {
+          height: 1,
+          parents: [ alt.root.hash ],
+        }),
+      });
+
+      await assert.rejects(channel.receive(wrong), {
+        name: 'Error',
+        message: /Message: .* not found/,
       });
     });
   });
