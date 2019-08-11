@@ -24,55 +24,78 @@ describe('Channel', () => {
     return message.content.body.text.text;
   };
 
-  it('should post messages and set parents appropriately', async () => {
-    assert.strictEqual(await channel.getMessageCount(), 1);
-    assert.strictEqual(await at(0), '<root>');
+  describe('.post()', () => {
+    it('should post messages and set parents appropriately', async () => {
+      assert.strictEqual(await channel.getMessageCount(), 1);
+      assert.strictEqual(await at(0), '<root>');
 
-    const first = await channel.post(Message.text('hello'), id);
-    assert.strictEqual(await channel.getMessageCount(), 2);
-    assert.strictEqual(await at(0), '<root>');
-    assert.strictEqual(await at(1), 'hello');
-    assert.ok(first.verify(channel));
+      const first = await channel.post(Message.text('hello'), id);
+      assert.strictEqual(await channel.getMessageCount(), 2);
+      assert.strictEqual(await at(0), '<root>');
+      assert.strictEqual(await at(1), 'hello');
+      assert.ok(first.verify(channel));
 
-    const second = await channel.post(Message.text('world'), id);
-    assert.strictEqual(await channel.getMessageCount(), 3);
-    assert.strictEqual(await at(0), '<root>');
-    assert.strictEqual(await at(1), 'hello');
-    assert.strictEqual(await at(2), 'world');
-    assert.ok(second.verify(channel));
+      const second = await channel.post(Message.text('world'), id);
+      assert.strictEqual(await channel.getMessageCount(), 3);
+      assert.strictEqual(await at(0), '<root>');
+      assert.strictEqual(await at(1), 'hello');
+      assert.strictEqual(await at(2), 'world');
+      assert.ok(second.verify(channel));
 
-    const root = channel.root;
-    assert.ok(root.verify(channel));
-    assert.strictEqual(root.parents.length, 0);
-    assert.strictEqual(root.height, 0);
+      const root = channel.root;
+      assert.ok(root.verify(channel));
+      assert.strictEqual(root.parents.length, 0);
+      assert.strictEqual(root.height, 0);
 
-    assert.deepStrictEqual(first.parents.map((p) => p.toString('hex')), [
-      root.hash.toString('hex')
-    ]);
-    assert.strictEqual(first.height, 1);
+      assert.deepStrictEqual(first.parents.map((p) => p.toString('hex')), [
+        root.hash.toString('hex')
+      ]);
+      assert.strictEqual(first.height, 1);
 
-    assert.deepStrictEqual(second.parents.map((p) => p.toString('hex')), [
-      first.hash.toString('hex')
-    ]);
-    assert.strictEqual(second.height, 2);
+      assert.deepStrictEqual(second.parents.map((p) => p.toString('hex')), [
+        first.hash.toString('hex')
+      ]);
+      assert.strictEqual(second.height, 2);
+    });
+
+    it('should post messages concurrently', async () => {
+      assert.strictEqual(await channel.getMessageCount(), 1);
+      assert.strictEqual(await at(0), '<root>');
+
+      const middle = await Promise.all([
+        channel.post(Message.text('hello'), id),
+        channel.post(Message.text('hi'), id),
+      ]);
+
+      assert.strictEqual(await channel.getMessageCount(), 3);
+
+      const last = await channel.post(Message.text('world'), id);
+      assert.strictEqual(await channel.getMessageCount(), 4);
+      assert.strictEqual(await at(3), 'world');
+      assert.ok(last.height > 1);
+      assert.ok(last.parents.length >= 1);
+      assert.ok(last.verify(channel));
+    });
   });
 
-  it('should post messages concurrently', async () => {
-    assert.strictEqual(await channel.getMessageCount(), 1);
-    assert.strictEqual(await at(0), '<root>');
+  describe('.receive()', () => {
+    it('should receive root', async () => {
+      const clone = new Channel('test-clone', channel.publicKey);
+      await clone.receive(channel.root);
+    });
 
-    const middle = await Promise.all([
-      channel.post(Message.text('hello'), id),
-      channel.post(Message.text('hi'), id),
-    ]);
+    it('should receive root', async () => {
+      const alt = await Channel.create(id, 'test-alt-channel');
 
-    assert.strictEqual(await channel.getMessageCount(), 3);
-
-    const last = await channel.post(Message.text('world'), id);
-    assert.strictEqual(await channel.getMessageCount(), 4);
-    assert.strictEqual(await at(3), 'world');
-    assert.ok(last.height > 1);
-    assert.ok(last.parents.length >= 1);
-    assert.ok(last.verify(channel));
+      let exception = undefined;
+      try {
+        await channel.receive(alt.root);
+      } catch (error) {
+        exception = error;
+      }
+      if (!exception) {
+        throw new Error('Expected error');
+      }
+    });
   });
 });
