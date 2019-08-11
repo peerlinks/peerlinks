@@ -139,5 +139,66 @@ describe('Channel', () => {
         message: /Message: .* not found/,
       });
     });
+
+    it('should check height', async () => {
+      const left = new Message({
+        channel,
+        parents: [ channel.root.hash ],
+        height: 1,
+        content: id.signMessageBody(Message.text('left'), channel, {
+          height: 1,
+          parents: [ channel.root.hash ],
+        }),
+      });
+      const right = new Message({
+        channel,
+        parents: [ channel.root.hash ],
+        height: 1,
+        content: id.signMessageBody(Message.text('right'), channel, {
+          height: 1,
+          parents: [ channel.root.hash ],
+        }),
+      });
+      const grand = new Message({
+        channel,
+        parents: [ right.hash ],
+        height: 2,
+        content: id.signMessageBody(Message.text('grand'), channel, {
+          height: 2,
+          parents: [ right.hash ],
+        }),
+      });
+
+      await channel.receive(left);
+      await channel.receive(right);
+      await channel.receive(grand);
+
+      const wrong = new Message({
+        channel,
+        parents: [ left.hash, grand.hash ],
+        height: 1,
+        content: id.signMessageBody(Message.text('right'), channel, {
+          height: 1,
+          parents: [ left.hash, grand.hash ],
+        }),
+      });
+
+      await assert.rejects(channel.receive(wrong), {
+        name: 'Error',
+        message: 'Invalid received message height: 1, expected: 3',
+      });
+
+      const correct = new Message({
+        channel,
+        parents: [ left.hash, grand.hash ],
+        height: 3,
+        content: id.signMessageBody(Message.text('right'), channel, {
+          height: 1,
+          parents: [ left.hash, grand.hash ],
+        }),
+      });
+
+      channel.receive(correct);
+    });
   });
 });
