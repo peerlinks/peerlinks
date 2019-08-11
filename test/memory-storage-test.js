@@ -38,7 +38,7 @@ describe('MemoryStorage', () => {
 
   const leaves = async () => {
     const result = await storage.getLeaves(channelId);
-    return result.map((hash) => hash.toString()).sort();
+    return result.map((message) => message.hash.toString()).sort();
   };
 
   it('should store and retrieve messages', async () => {
@@ -58,7 +58,8 @@ describe('MemoryStorage', () => {
 
     const leaves = await storage.getLeaves(channelId);
     assert.strictEqual(leaves.length, 1);
-    assert.strictEqual(leaves[0].toString('hex'), fake.hash.toString('hex'));
+    assert.strictEqual(leaves[0].hash.toString('hex'),
+      fake.hash.toString('hex'));
 
     assert.ok(await storage.hasMessage(channelId, fake.hash));
     const getFake = await storage.getMessage(channelId, fake.hash);
