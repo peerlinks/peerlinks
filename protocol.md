@@ -315,6 +315,9 @@ message Invite {
 }
 ```
 
+NOTE: `encryptedInvite.box = nonce + ciphertext + mac`. See
+`sodium.crypto_box_seal_open`.
+
 The `channel_name` is a suggested name for the channel and MUST have no more
 than `128` UTF-8 characters. `channel_root` MUST be decryptable using
 `symmetric_key`, MUST have empty `content.chain`, and MUST be signed by
