@@ -7,6 +7,7 @@
     "compile-proto": "pbjs --es6 -w es6 -t static-module lib/messages.proto -o lib/messages.js",
     "lint": "eslint lib/**/*.js test/**/*.js",
     "mocha": "mocha -r esm --reporter=spec test/*-test.js",
+    "coverage": "nyc --require esm npm run mocha",
     "test": "npm run mocha && npm run lint"
   },
   "repository": {
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "eslint": "^6.1.0",
-    "mocha": "^6.2.0"
+    "mocha": "^6.2.0",
+    "nyc": "^14.1.1"
   }
 }

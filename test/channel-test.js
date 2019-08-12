@@ -256,5 +256,23 @@ describe('Channel', () => {
       await final.sync(clone);
       assert.strictEqual(await final.getMessageCount(), 32);
     });
+
+    it('should resort to full sync', async () => {
+      const clone = new Channel('test-clone', channel.publicKey, {
+        // Force low limits to trigger more branches
+        maxQueryLimit: 5,
+        maxUnresolvedCount: 0,
+        maxBulkCount: 2,
+      });
+      await clone.receive(channel.root);
+
+      // Post three time the query limit
+      for (let i = 0; i < 15; i++) {
+        await clone.post(Message.text(`message: ${i}`), id);
+      }
+
+      await channel.sync(clone);
+      assert.strictEqual(await channel.getMessageCount(), 15 + 1);
+    });
   });
 });
