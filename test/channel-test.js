@@ -278,4 +278,12 @@ describe('Channel', () => {
       assert.strictEqual(await clone.getMessageCount(), 15 + 15 + 1);
     });
   });
+
+  it('should serialize/deserialize', async () => {
+    const copy = await Channel.deserializeData(channel.serializeData());
+    assert.strictEqual(copy.root.hash.toString('hex'),
+      channel.root.hash.toString('hex'));
+
+    await copy.post(Message.text('hello'), id);
+  });
 });
