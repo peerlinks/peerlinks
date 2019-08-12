@@ -209,7 +209,7 @@ describe('Channel', () => {
       });
       await clone.receive(channel.root);
 
-      // Post three time the query limit
+      // Post three times the query limit
       for (let i = 0; i < 15; i++) {
         await clone.post(Message.text(`message: ${i}`), id);
       }
@@ -226,7 +226,7 @@ describe('Channel', () => {
       });
       await clone.receive(channel.root);
 
-      // Post three time the query limit
+      // Post three times the query limit
       for (let i = 0; i < 15; i++) {
         await channel.post(Message.text(`original: ${i}`), id);
       }
@@ -266,13 +266,16 @@ describe('Channel', () => {
       });
       await clone.receive(channel.root);
 
-      // Post three time the query limit
+      // Post three times the query limit
+      for (let i = 0; i < 15; i++) {
+        await channel.post(Message.text(`original: ${i}`), id);
+      }
       for (let i = 0; i < 15; i++) {
         await clone.post(Message.text(`message: ${i}`), id);
       }
 
-      await channel.sync(clone);
-      assert.strictEqual(await channel.getMessageCount(), 15 + 1);
+      await clone.sync(channel);
+      assert.strictEqual(await clone.getMessageCount(), 15 + 15 + 1);
     });
   });
 });
