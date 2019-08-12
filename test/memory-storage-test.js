@@ -173,4 +173,30 @@ describe('MemoryStorage', () => {
     await storage.addMessage(msg('d', 2, [ 'b', 'c' ]));
     assert.deepStrictEqual(await leaves(), [ 'd' ]);
   });
+
+  it('should store and retrieve entities', async () => {
+    class Fake {
+      constructor(text) {
+        this.text = text;
+      }
+
+      serializeData() {
+        return Buffer.from(this.text);
+      }
+
+      static deserializeData(data) {
+        return new Fake(data.toString());
+      }
+    }
+
+    const id = randomBytes(32);
+    assert.ok(!await storage.retrieveEntity('fake', id, Fake));
+    await storage.storeEntity('fake', id, new Fake('hello'));
+
+    const retrieve = await storage.retrieveEntity('fake', id, Fake);
+    assert.strictEqual(retrieve.text, 'hello');
+
+    const missing = await storage.retrieveEntity('fake', randomBytes(32), Fake);
+    assert.ok(!missing);
+  });
 });
