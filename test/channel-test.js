@@ -218,7 +218,7 @@ describe('Channel', () => {
       assert.strictEqual(await channel.getMessageCount(), 15 + 1);
     });
 
-    it('should synchronize diverging', async () => {
+    it('should synchronize diverging branches', async () => {
       const clone = new Channel('test-clone', channel.publicKey, {
         // Force low limits to trigger more branches
         maxQueryLimit: 5,
@@ -244,6 +244,17 @@ describe('Channel', () => {
 
       const last = await channel.getMessageAtOffset(31);
       assert.strictEqual(last.hash.toString('hex'), merge.hash.toString('hex'));
+
+      // Do a final clone
+
+      const final = new Channel('test-final', channel.publicKey, {
+        maxQueryLimit: 5,
+        maxBulkCount: 2,
+      });
+      await final.receive(channel.root);
+
+      await final.sync(clone);
+      assert.strictEqual(await final.getMessageCount(), 32);
     });
   });
 });
