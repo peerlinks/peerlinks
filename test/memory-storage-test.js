@@ -189,11 +189,12 @@ describe('MemoryStorage', () => {
       }
     }
 
-    const id = randomBytes(32);
-    assert.ok(!await storage.retrieveEntity('fake', id, Fake));
-    await storage.storeEntity('fake', id, new Fake('hello'));
+    assert.ok(!await storage.retrieveEntity('fake', 'id', Fake));
+    await storage.storeEntity('fake', 'id', new Fake('hello'));
 
-    const retrieve = await storage.retrieveEntity('fake', id, Fake);
+    assert.deepStrictEqual(await storage.getEntityKeys('fake'), [ 'id' ]);
+
+    const retrieve = await storage.retrieveEntity('fake', 'id', Fake);
     assert.strictEqual(retrieve.text, 'hello');
 
     const missing = await storage.retrieveEntity('fake', randomBytes(32), Fake);
