@@ -199,4 +199,51 @@ describe('Channel', () => {
       });
     });
   });
+
+  describe('sync()', () => {
+    it('should synchronize channel lagging behind the other', async () => {
+      const clone = new Channel('test-clone', channel.publicKey, {
+        // Force low limits to trigger more branches
+        maxQueryLimit: 5,
+        maxBulkCount: 2,
+      });
+      await clone.receive(channel.root);
+
+      // Post three time the query limit
+      for (let i = 0; i < 15; i++) {
+        await clone.post(Message.text(`message: ${i}`), id);
+      }
+
+      await channel.sync(clone);
+      assert.strictEqual(await channel.getMessageCount(), 15 + 1);
+    });
+
+    it('should synchronize diverging', async () => {
+      const clone = new Channel('test-clone', channel.publicKey, {
+        // Force low limits to trigger more branches
+        maxQueryLimit: 5,
+        maxBulkCount: 2,
+      });
+      await clone.receive(channel.root);
+
+      // Post three time the query limit
+      for (let i = 0; i < 15; i++) {
+        await channel.post(Message.text(`original: ${i}`), id);
+      }
+      for (let i = 0; i < 15; i++) {
+        await clone.post(Message.text(`clone: ${i}`), id);
+      }
+
+      await channel.sync(clone);
+      assert.strictEqual(await channel.getMessageCount(), 31);
+
+      const merge = await channel.post(Message.text('merge'), id);
+
+      await clone.sync(channel);
+      assert.strictEqual(await channel.getMessageCount(), 32);
+
+      const last = await channel.getMessageAtOffset(31);
+      assert.strictEqual(last.hash.toString('hex'), merge.hash.toString('hex'));
+    });
+  });
 });
