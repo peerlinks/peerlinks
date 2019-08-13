@@ -1,13 +1,15 @@
-export default class Socket {
+import { SocketBase } from '../../';
+
+export default class Socket extends SocketBase {
   constructor(name) {
+    super();
+
     this.id = name;
     this.remote = null;
 
     this.closed = false;
     this.queue = [];
     this.receiveQueue = [];
-
-    this.timers = new Set();
   }
 
   async send(data) {
@@ -30,31 +32,8 @@ export default class Socket {
     });
   }
 
-  timeout(ms) {
-    let timer;
-
-    const promise = new Promise((_, reject) => {
-      timer = setTimeout(() => {
-        reject(new Error('Timed out'));
-      }, ms);
-    });
-
-    this.timers.add(timer);
-
-    return {
-      promise,
-      cancel: () => {
-        clearTimeout(timer);
-        this.timers.delete(timer);
-      },
-    };
-  }
-
   async close() {
-    while (this.receiveQueue.length !== 0) {
-      const elem = this.receiveQueue.shift();
-      return elem.reject(new Error('Closed'));
-    }
+    super.close();
 
     for (const timer of this.timers) {
       clearTimeout(timer);
