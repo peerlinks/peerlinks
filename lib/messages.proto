@@ -32,7 +32,10 @@ message Invite {
 }
 
 message EncryptedInvite {
-  bytes box = 1;
+  // NOTE: `request_id = req.box_pub_key`
+  bytes request_id = 1;
+
+  bytes box = 2;
 }
 
 // QR Code

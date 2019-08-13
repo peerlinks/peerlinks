@@ -1,7 +1,7 @@
 /* eslint-env node, mocha */
 import * as assert from 'assert';
 
-import Protocol from '../';
+import Protocol, { Channel } from '../';
 
 import Socket from './fixtures/socket';
 
@@ -41,9 +41,21 @@ describe('Protocol', () => {
     const idB = await b.createIdentity('b');
 
     const run = async () => {
-      const { request, decrypt } = idA.requestInvite(a.id);
+      // Generate invite request
+      const { requestId, request, decrypt } = idA.requestInvite(a.id);
+      const invitePromise = a.waitForInvite(requestId).promise;
 
-      await b.approveInviteRequest(idB, b.getChannel('b'), request);
+      // Issue invite
+      const channel = b.getChannel('b');
+      const { encryptedInvite, peerId } = idB.issueInvite(channel, request);
+
+      // Send it back
+      const peer = await b.waitForPeer(peerId).promise;
+      await peer.sendInvite(encryptedInvite);
+
+      const invite = decrypt(await invitePromise);
+
+      const channelForA = await a.channelFromInvite(invite, idA);
     };
 
     await Promise.race([
