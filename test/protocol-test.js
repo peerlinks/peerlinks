@@ -60,11 +60,12 @@ describe('Protocol', () => {
       const invitePromise = a.waitForInvite(requestId).promise;
 
       // Issue invite
-      const channel = b.getChannel('b');
-      const { encryptedInvite, peerId } = idB.issueInvite(channel, request);
+      const channelB = b.getChannel('b');
+      const { encryptedInvite, peerId } = idB.issueInvite(channelB, request);
 
       // Post a message
-      await channel.post(Message.text('ohai'), idB);
+      await channelB.post(Message.text('ohai'), idB);
+      b.onNewMessage(channelB);
 
       // Send it back
       const peer = await b.waitForPeer(peerId).promise;
@@ -74,6 +75,15 @@ describe('Protocol', () => {
       const invite = decrypt(await invitePromise);
       const channelForA = await Channel.fromInvite(invite, idA);
       await a.addChannel(channelForA);
+
+      assert.strictEqual(await channelForA.getMessageCount(), 1);
+
+      // Wait for sync to complete
+      await new Promise((resolve) => setImmediate(resolve));
+
+      assert.strictEqual(await channelForA.getMessageCount(), 2);
+      const last = await channelForA.getMessageAtOffset(1);
+      assert.strictEqual(last.content.body.text.text, 'ohai');
     };
 
     await Promise.race([
