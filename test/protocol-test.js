@@ -40,9 +40,17 @@ describe('Protocol', () => {
     const idA = await a.createIdentity('a');
     const idB = await b.createIdentity('b');
 
-    await Promise.all([
+    const run = async () => {
+      const inviteRequest = idA.requestInvite(socketA.id);
+    };
+
+    await Promise.race([
       a.connect(socketA),
       b.connect(socketB),
+      run(),
     ]);
+
+    await a.close();
+    await b.close();
   });
 });
