@@ -183,6 +183,8 @@ Maximum text length in `json` is:
 * `256` for `chain.length == 3`
 in UTF-8 characters and MUST be enforced.
 
+`message.content.body` MUST be `json` for non-root messages.
+
 `message.height` is a number of edges between the `message` and the
 `channel.root`. `channel.root` naturally MUST have `height = 0`, and in general
 any message MUST have:

@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Buffer } from 'buffer';
 import * as sodium from 'sodium-universal';
 
-import { Channel, Identity, Message } from '../';
+import { Chain, Channel, Identity, Message } from '../';
 import { now } from '../lib/utils';
 
 describe('Channel', () => {
@@ -28,12 +28,12 @@ describe('Channel', () => {
     return message.content.body.json;
   };
 
-  const msg = (text, parents, height, timestamp) => {
+  const msg = (text, parents, height, timestamp, identity = id) => {
     return new Message({
       channel,
       parents: parents.map((p) => p.hash),
       height,
-      content: id.signMessageBody(Message.json(text), channel, {
+      content: identity.signMessageBody(Message.json(text), channel, {
         height,
         parents: parents.map((p) => p.hash),
         timestamp,
@@ -96,6 +96,13 @@ describe('Channel', () => {
       assert.ok(last.parents.length >= 1);
       assert.ok(last.verify(channel));
       assert.ok((await channel.getMinLeafHeight()) >= 1);
+    });
+
+    it('should disallow posting root', async () => {
+      await assert.rejects(channel.post(Message.root(), id), {
+        name: 'Error',
+        message: 'Posting root is not allowed',
+      });
     });
   });
 
@@ -198,6 +205,32 @@ describe('Channel', () => {
         message: 'Received message is in the past',
       });
     });
+
+    it('should disallow receiving root from non-root', async () => {
+      const trustee = new Identity('trustee');
+      const link = id.issueLink(channel, {
+        trusteePubKey: trustee.publicKey,
+      });
+
+      const chain = new Chain([ link ]);
+      trustee.addChain(channel, chain);
+
+      const invalid = new Message({
+        channel,
+        parents: [ channel.root.hash ],
+        height: 1,
+        content: id.signMessageBody(Message.root(), channel, {
+          height: 1,
+          parents: [ channel.root.hash ],
+          timestamp: now(),
+        }),
+      });
+
+      await assert.rejects(channel.receive(invalid), {
+        name: 'Error',
+        message: 'Invalid non-root content',
+      });
+    });
   });
 
   describe('sync()', () => {
@@ -276,6 +309,56 @@ describe('Channel', () => {
 
       await clone.sync(channel);
       assert.strictEqual(await clone.getMessageCount(), 15 + 15 + 1);
+    });
+  });
+
+  describe('json limit', () => {
+    let trustee = null;
+    beforeEach(() => {
+      trustee = new Identity('trustee');
+
+      const link = id.issueLink(channel, {
+        trusteePubKey: trustee.publicKey,
+      });
+
+      const chain = new Chain([ link ]);
+      trustee.addChain(channel, chain);
+    });
+
+    afterEach(() => {
+      trustee = null;
+    });
+
+    describe('post()', () => {
+      it('should be unlimited for root\'s messages', async () => {
+        await channel.post(Message.json('x'.repeat(1024 * 1024)), id);
+      });
+
+      it('should be limited for non-root\'s messages', async () => {
+        const body = Message.json('x'.repeat(1024 * 1024));
+        await assert.rejects(channel.post(body, trustee), {
+          name: 'Error',
+          message: 'Message body length overflow. Expected less or equal to: ' +
+            '262144. Got: 1048576'
+        });
+      });
+    });
+
+    describe('receive()', () => {
+      it('should be unlimited for root\'s messages', async () => {
+        const big = msg('x'.repeat(1024 * 1024), [ channel.root ], 1);
+        await channel.receive(big);
+      });
+
+      it('should be limited for non-root\'s messages', async () => {
+        const invalid = msg('x'.repeat(1024 * 1024), [ channel.root ], 1,
+          now(), trustee);
+        await assert.rejects(channel.receive(invalid), {
+          name: 'Error',
+          message: 'Message body length overflow. Expected less or equal to: ' +
+            '262144. Got: 1048576'
+        });
+      });
     });
   });
 
