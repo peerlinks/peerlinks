@@ -61,9 +61,9 @@ Further communication between peers happens using:
 ```proto
 message Packet {
   oneof content {
-    EncryptedInvite invite = 1;
+    Subscribe subscribe = 1;
     Error error = 2;
-    Subscribe subscribe = 3;
+    EncryptedInvite invite = 3;
 
     // Synchronization
     Query query = 4;
