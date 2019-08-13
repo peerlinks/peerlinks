@@ -116,14 +116,10 @@ message ChannelMessage {
   message Root {
   }
 
-  message Text {
-    string text = 1;
-  }
-
   message Body {
     oneof body {
       Root root = 1;
-      Text text = 2;
+      string json = 2;
     }
   }
 
@@ -180,7 +176,12 @@ The hash of the message is computed as:
 hash = HASH(Content)[:32]
 ```
 
-Maximum text length in `Text` is `256` UTF-8 characters and MUST be enforced.
+Maximum text length in `json` is:
+* Unlimited for `chain.length == 0`
+* `262144` for `chain.length == 1`
+* `8192` for `chain.length == 2`
+* `256` for `chain.length == 3`
+in UTF-8 characters and MUST be enforced.
 
 `message.height` is a number of edges between the `message` and the
 `channel.root`. `channel.root` naturally MUST have `height = 0`, and in general

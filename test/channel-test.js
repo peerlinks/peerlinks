@@ -25,7 +25,7 @@ describe('Channel', () => {
     if (message.content.body.root) {
       return '<root>';
     }
-    return message.content.body.text.text;
+    return message.content.body.json;
   };
 
   const msg = (text, parents, height, timestamp) => {
@@ -33,7 +33,7 @@ describe('Channel', () => {
       channel,
       parents: parents.map((p) => p.hash),
       height,
-      content: id.signMessageBody(Message.text(text), channel, {
+      content: id.signMessageBody(Message.json(text), channel, {
         height,
         parents: parents.map((p) => p.hash),
         timestamp,
@@ -47,14 +47,14 @@ describe('Channel', () => {
       assert.strictEqual(await at(0), '<root>');
       assert.strictEqual(await channel.getMinLeafHeight(), 0);
 
-      const first = await channel.post(Message.text('hello'), id);
+      const first = await channel.post(Message.json('hello'), id);
       assert.strictEqual(await channel.getMessageCount(), 2);
       assert.strictEqual(await at(0), '<root>');
       assert.strictEqual(await at(1), 'hello');
       assert.ok(first.verify(channel));
       assert.strictEqual(await channel.getMinLeafHeight(), 1);
 
-      const second = await channel.post(Message.text('world'), id);
+      const second = await channel.post(Message.json('world'), id);
       assert.strictEqual(await channel.getMessageCount(), 3);
       assert.strictEqual(await at(0), '<root>');
       assert.strictEqual(await at(1), 'hello');
@@ -83,13 +83,13 @@ describe('Channel', () => {
       assert.strictEqual(await at(0), '<root>');
 
       await Promise.all([
-        channel.post(Message.text('hello'), id),
-        channel.post(Message.text('hi'), id),
+        channel.post(Message.json('hello'), id),
+        channel.post(Message.json('hi'), id),
       ]);
 
       assert.strictEqual(await channel.getMessageCount(), 3);
 
-      const last = await channel.post(Message.text('world'), id);
+      const last = await channel.post(Message.json('world'), id);
       assert.strictEqual(await channel.getMessageCount(), 4);
       assert.strictEqual(await at(3), 'world');
       assert.ok(last.height > 1);
@@ -128,7 +128,7 @@ describe('Channel', () => {
           chain: [],
           timestamp: now(),
           body: {
-            text: { text: 'wrong' },
+            json: 'wrong',
           },
           signature: Buffer.alloc(sodium.crypto_sign_BYTES),
         },
@@ -147,7 +147,7 @@ describe('Channel', () => {
         channel,
         parents: [ alt.root.hash ],
         height: 1,
-        content: id.signMessageBody(Message.text('wrong'), channel, {
+        content: id.signMessageBody(Message.json('wrong'), channel, {
           height: 1,
           parents: [ alt.root.hash ],
         }),
@@ -211,7 +211,7 @@ describe('Channel', () => {
 
       // Post three times the query limit
       for (let i = 0; i < 15; i++) {
-        await clone.post(Message.text(`message: ${i}`), id);
+        await clone.post(Message.json(`message: ${i}`), id);
       }
 
       await channel.sync(clone);
@@ -228,16 +228,16 @@ describe('Channel', () => {
 
       // Post three times the query limit
       for (let i = 0; i < 15; i++) {
-        await channel.post(Message.text(`original: ${i}`), id);
+        await channel.post(Message.json(`original: ${i}`), id);
       }
       for (let i = 0; i < 15; i++) {
-        await clone.post(Message.text(`clone: ${i}`), id);
+        await clone.post(Message.json(`clone: ${i}`), id);
       }
 
       await channel.sync(clone);
       assert.strictEqual(await channel.getMessageCount(), 31);
 
-      const merge = await channel.post(Message.text('merge'), id);
+      const merge = await channel.post(Message.json('merge'), id);
 
       await clone.sync(channel);
       assert.strictEqual(await channel.getMessageCount(), 32);
@@ -268,10 +268,10 @@ describe('Channel', () => {
 
       // Post three times the query limit
       for (let i = 0; i < 15; i++) {
-        await channel.post(Message.text(`original: ${i}`), id);
+        await channel.post(Message.json(`original: ${i}`), id);
       }
       for (let i = 0; i < 15; i++) {
-        await clone.post(Message.text(`message: ${i}`), id);
+        await clone.post(Message.json(`message: ${i}`), id);
       }
 
       await clone.sync(channel);
@@ -284,6 +284,6 @@ describe('Channel', () => {
     assert.strictEqual(copy.root.hash.toString('hex'),
       channel.root.hash.toString('hex'));
 
-    await copy.post(Message.text('hello'), id);
+    await copy.post(Message.json('hello'), id);
   });
 });

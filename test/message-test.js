@@ -21,7 +21,7 @@ describe('Message', () => {
 
   it('should be encrypted/decrypted', () => {
     const content = id.signMessageBody(
-      Message.text('okay'),
+      Message.json('okay'),
       channel,
       {
         height: 0,
@@ -47,7 +47,7 @@ describe('Message', () => {
     copy.decrypt(channel);
     assert.ok(copy.verify(channel));
 
-    assert.strictEqual(copy.content.body.text.text, 'okay');
+    assert.strictEqual(copy.content.body.json, 'okay');
     assert.strictEqual(copy.hash.toString('hex'), message.hash.toString('hex'));
 
     const invalid = new Message({
@@ -74,7 +74,7 @@ describe('Message', () => {
     second.addChain(channel, chain);
 
     const content = second.signMessageBody(
-      Message.text('okay'),
+      Message.json('okay'),
       channel,
       {
         height: 0,
@@ -95,7 +95,7 @@ describe('Message', () => {
 
   it('should be serialized/deserialized', () => {
     const content = id.signMessageBody(
-      Message.text('okay'),
+      Message.json('okay'),
       channel,
       {
         height: 0,

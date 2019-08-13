@@ -50,14 +50,10 @@ message ChannelMessage {
   message Root {
   }
 
-  message Text {
-    string text = 1;
-  }
-
   message Body {
     oneof body {
       Root root = 1;
-      Text text = 2;
+      string json = 2;
     }
   }
 

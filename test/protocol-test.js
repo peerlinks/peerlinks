@@ -64,7 +64,7 @@ describe('Protocol', () => {
       const { encryptedInvite, peerId } = idB.issueInvite(channelB, request);
 
       // Post a message
-      await channelB.post(Message.text('ohai'), idB);
+      await channelB.post(Message.json('ohai'), idB);
       b.onNewMessage(channelB);
 
       // Send it back
@@ -83,7 +83,7 @@ describe('Protocol', () => {
 
       assert.strictEqual(await channelForA.getMessageCount(), 2);
       const last = await channelForA.getMessageAtOffset(1);
-      assert.strictEqual(last.content.body.text.text, 'ohai');
+      assert.strictEqual(last.content.body.json, 'ohai');
     };
 
     await Promise.race([

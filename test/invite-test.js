@@ -34,7 +34,7 @@ describe('Invite', () => {
     const copy = await Channel.fromInvite(invite, invitee);
 
     // Try posting a message
-    const posted = await copy.post(Message.text('hello world'), invitee);
+    const posted = await copy.post(Message.json('hello world'), invitee);
 
     // And receiving it on original chnanel
     await channel.receive(posted);

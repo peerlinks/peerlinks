@@ -21,6 +21,6 @@ describe('Identity', () => {
     assert.strictEqual(copy.publicKey.toString('hex'),
       trustee.publicKey.toString('hex'));
 
-    await channel.post(Message.text('test'), copy);
+    await channel.post(Message.json('test'), copy);
   });
 });
