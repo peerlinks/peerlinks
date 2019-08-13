@@ -1,6 +1,6 @@
 # vowlink-protocol
 
-WIP
+Implementation of VowLink [Protocol][] in JavaScript.
 
 ## Protocol
 
