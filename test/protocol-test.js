@@ -41,7 +41,9 @@ describe('Protocol', () => {
     const idB = await b.createIdentity('b');
 
     const run = async () => {
-      const inviteRequest = idA.requestInvite(socketA.id);
+      const { request, decrypt } = idA.requestInvite(a.id);
+
+      await b.approveInviteRequest(idB, b.getChannel('b'), request);
     };
 
     await Promise.race([

@@ -45,8 +45,11 @@ The first message over any wire protocol MUST be:
 ```proto
 message Hello {
   uint32 version = 1;
+  string peer_id = 2;
 }
 ```
+
+NOTE: `peer_id.length` MUST be checked to be equal to 32 bytes.
 
 The `hello.version` specifies the protocol version and MUST be checked by the
 recipient. In case of the mismatch and/or other errors `Error` SHOULD be sent:
@@ -56,6 +59,8 @@ message Error {
 }
 ```
 and connection MUST be closed.
+
+NOTE: `reason.length` MUST be checked to be less than 1024 utf-8 characters.
 
 Further communication between peers happens using:
 ```proto
@@ -301,6 +306,9 @@ message EncryptedInvite {
   bytes box = 1;
 }
 ```
+
+NOTE: `peer_id.length` MUST be checked to be equal to 32 bytes.
+`trustee_pub_key` and `box_pub_key` lengths MUST be checked.
 
 The `encrypted_invite.box` can be decrypted with `box_priv_key` that the issuer
 of `InviteRequest` MUST know from the moment the generated `InviteRequest`. When

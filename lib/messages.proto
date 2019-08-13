@@ -6,6 +6,7 @@ syntax = "proto3";
 
 message Hello {
   uint32 version = 1;
+  bytes peer_id = 2;
 }
 
 message Link {
@@ -36,7 +37,7 @@ message EncryptedInvite {
 
 // QR Code
 message InviteRequest {
-  string peer_id = 1;
+  bytes peer_id = 1;
   bytes trustee_pub_key = 2;
   bytes box_pub_key = 3;
 }
