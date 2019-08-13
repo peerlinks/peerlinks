@@ -25,5 +25,12 @@ describe('Protocol', () => {
     assert.strictEqual(test.name, 'test');
 
     await a.save();
+
+    const copy = await a.getIdentity('test');
+    assert.strictEqual(copy.publicKey.toString('hex'),
+      test.publicKey.toString('hex'));
+
+    const missing = await a.getIdentity('unknown');
+    assert.ok(!missing);
   });
 });
