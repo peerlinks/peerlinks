@@ -170,18 +170,15 @@ message Identity {
     repeated Link links = 2;
   }
 
-  bytes public_key = 1;
-  bytes secret_key = 2;
+  string name = 1;
+  bytes public_key = 2;
+  bytes secret_key = 3;
 
-  repeated ChannelChain channel_chains = 3;
+  repeated ChannelChain channel_chains = 4;
 }
 
 message Channel {
   bytes public_key = 1;
   string name = 2;
   ChannelMessage root = 3;
-}
-
-message ChannelList {
-  repeated Channel channels = 1;
 }
