@@ -1,7 +1,7 @@
 /* eslint-env node, mocha */
 import * as assert from 'assert';
 
-import Protocol, { Channel } from '../';
+import Protocol, { Channel, Message } from '../';
 
 import Socket from './fixtures/socket';
 
@@ -62,6 +62,9 @@ describe('Protocol', () => {
       // Issue invite
       const channel = b.getChannel('b');
       const { encryptedInvite, peerId } = idB.issueInvite(channel, request);
+
+      // Post a message
+      await channel.post(Message.text('ohai'), idB);
 
       // Send it back
       const peer = await b.waitForPeer(peerId).promise;

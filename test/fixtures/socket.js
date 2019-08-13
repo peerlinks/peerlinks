@@ -3,21 +3,26 @@ export default class Socket {
     this.id = name;
     this.remote = null;
 
+    this.closed = false;
     this.queue = [];
     this.receiveQueue = [];
+
+    this.timers = new Set();
   }
 
   async send(data) {
+    if (this.closed) {
+      throw new Error('Socket closed');
+    }
     this.remote.push(data);
   }
 
   async receive() {
+    if (this.closed) {
+      throw new Error('Socket closed');
+    }
     if (this.queue.length !== 0) {
-      const elem = this.queue.shift();
-      if (elem.resolve !== null) {
-        return elem.resolve;
-      }
-      throw new Error('Closed');
+      return this.queue.shift();
     }
 
     return await new Promise((resolve, reject) => {
@@ -25,13 +30,35 @@ export default class Socket {
     });
   }
 
+  timeout(ms) {
+    let timer;
+
+    const promise = new Promise((_, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error('Timed out'));
+      }, ms);
+    });
+
+    this.timers.add(timer);
+
+    return {
+      promise,
+      cancel: () => {
+        clearTimeout(timer);
+        this.timers.delete(timer);
+      },
+    };
+  }
+
   async close() {
-    if (this.receiveQueue.length !== 0) {
+    while (this.receiveQueue.length !== 0) {
       const elem = this.receiveQueue.shift();
       return elem.reject(new Error('Closed'));
     }
 
-    this.queue.push({ resolve: null, reject: true });
+    for (const timer of this.timers) {
+      clearTimeout(timer);
+    }
   }
 
   // Internal
@@ -41,7 +68,7 @@ export default class Socket {
       return this.receiveQueue.shift().resolve(data);
     }
 
-    this.queue.push({ resolve: data, reject: null });
+    this.queue.push(data);
   }
 
   static pair() {
