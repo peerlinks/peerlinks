@@ -9,10 +9,10 @@ describe('Protocol', () => {
 
   beforeEach(async () => {
     a = new Protocol();
-    await a.init();
+    await a.load();
 
     b = new Protocol();
-    await b.init();
+    await b.load();
   });
 
   afterEach(() => {
@@ -23,5 +23,7 @@ describe('Protocol', () => {
   it('should create new identity with a channel', async () => {
     const test = await a.createIdentity('test');
     assert.strictEqual(test.name, 'test');
+
+    await a.save();
   });
 });
