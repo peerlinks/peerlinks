@@ -30,10 +30,24 @@ describe('Protocol', () => {
     const test = await a.createIdentity('test');
     assert.strictEqual(test.name, 'test');
 
-    await a.save();
-
     assert.strictEqual(a.identities.length, 1);
     assert.strictEqual(a.channels.length, 1);
+  });
+
+  it('should reload identities/channels from a storage', async () => {
+    const id2 = await a.createIdentity('2');
+    const id1 = await a.createIdentity('1');
+
+    assert.strictEqual(id1.name, '1');
+    assert.strictEqual(id2.name, '2');
+
+    const clone = new Protocol({ storage: a.storage });
+    await clone.load();
+
+    assert.deepStrictEqual(clone.channels.map((channel) => channel.name),
+      [ '1', '2' ]);
+    assert.deepStrictEqual(clone.identities.map((id) => id.name),
+      [ '1', '2' ]);
   });
 
   it('should connect peers', async () => {
@@ -53,9 +67,10 @@ describe('Protocol', () => {
       const peer = await b.waitForPeer(peerId).promise;
       await peer.sendInvite(encryptedInvite);
 
+      // Decrypt and create channel
       const invite = decrypt(await invitePromise);
-
-      const channelForA = await a.channelFromInvite(invite, idA);
+      const channelForA = await Channel.fromInvite(invite, idA);
+      await a.addChannel(channelForA);
     };
 
     await Promise.race([
