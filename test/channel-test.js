@@ -50,15 +50,15 @@ describe('Channel', () => {
       const first = await channel.post(Message.json('hello'), id);
       assert.strictEqual(await channel.getMessageCount(), 2);
       assert.strictEqual(await at(0), '<root>');
-      assert.strictEqual(await at(1), 'hello');
+      assert.strictEqual(await at(1), '"hello"');
       assert.ok(first.verify(channel));
       assert.strictEqual(await channel.getMinLeafHeight(), 1);
 
       const second = await channel.post(Message.json('world'), id);
       assert.strictEqual(await channel.getMessageCount(), 3);
       assert.strictEqual(await at(0), '<root>');
-      assert.strictEqual(await at(1), 'hello');
-      assert.strictEqual(await at(2), 'world');
+      assert.strictEqual(await at(1), '"hello"');
+      assert.strictEqual(await at(2), '"world"');
       assert.ok(second.verify(channel));
       assert.strictEqual(await channel.getMinLeafHeight(), 2);
 
@@ -91,7 +91,7 @@ describe('Channel', () => {
 
       const last = await channel.post(Message.json('world'), id);
       assert.strictEqual(await channel.getMessageCount(), 4);
-      assert.strictEqual(await at(3), 'world');
+      assert.strictEqual(await at(3), '"world"');
       assert.ok(last.height > 1);
       assert.ok(last.parents.length >= 1);
       assert.ok(last.verify(channel));
@@ -111,7 +111,7 @@ describe('Channel', () => {
         channel.post(Message.json('hello'), id),
       ]);
 
-      assert.strictEqual(message.content.body.json, 'hello');
+      assert.strictEqual(message.content.body.json, '"hello"');
     });
   });
 
@@ -252,7 +252,7 @@ describe('Channel', () => {
         channel.receive(remote),
       ]);
 
-      assert.strictEqual(message.content.body.json, 'okay');
+      assert.strictEqual(message.content.body.json, '"okay"');
     });
   });
 
@@ -362,7 +362,7 @@ describe('Channel', () => {
         await assert.rejects(channel.post(body, trustee), {
           name: 'Error',
           message: 'Message body length overflow. Expected less or equal to: ' +
-            '262144. Got: 1048576'
+            '262144. Got: 1048578'
         });
       });
     });
@@ -379,7 +379,7 @@ describe('Channel', () => {
         await assert.rejects(channel.receive(invalid), {
           name: 'Error',
           message: 'Message body length overflow. Expected less or equal to: ' +
-            '262144. Got: 1048576'
+            '262144. Got: 1048578'
         });
       });
     });

@@ -47,7 +47,7 @@ describe('Message', () => {
     copy.decrypt(channel);
     assert.ok(copy.verify(channel));
 
-    assert.strictEqual(copy.content.body.json, 'okay');
+    assert.strictEqual(copy.content.body.json, '"okay"');
     assert.strictEqual(copy.hash.toString('hex'), message.hash.toString('hex'));
 
     const invalid = new Message({
@@ -118,5 +118,32 @@ describe('Message', () => {
 
     // Should not throw
     copy.decrypt(channel);
+  });
+
+  it('should throw on decrypting bad JSON', () => {
+    const content = id.signMessageBody(
+      { body: { json: 'not-json' } },
+      channel,
+      {
+        height: 0,
+        parents: [],
+      });
+
+    const message = new Message({
+      channel,
+      parents: [],
+      height: 1,
+      content,
+    });
+
+    const data = message.serializeData();
+    const copy = Message.deserializeData(data);
+
+    assert.throws(() => {
+      copy.decrypt(channel);
+    }, {
+      name: 'Error',
+      message: 'Invalid JSON content. Unexpected end of JSON input',
+    });
   });
 });

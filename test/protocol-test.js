@@ -82,7 +82,7 @@ describe('Protocol', () => {
 
       assert.strictEqual(await channelForA.getMessageCount(), 2);
       const last = await channelForA.getMessageAtOffset(1);
-      assert.strictEqual(last.content.body.json, 'ohai');
+      assert.strictEqual(last.content.body.json, '"ohai"');
     };
 
     await Promise.race([
