@@ -134,29 +134,23 @@ message Error {
   string reason = 1;
 }
 
-message Subscribe {
-  // TODO(indutny): Make it an array?
-  bytes channel_id = 1;
-}
-
 message Notification {
   bytes channel_id = 1;
 }
 
 message Packet {
   oneof content {
-    Subscribe subscribe = 1;
-    Error error = 2;
-    EncryptedInvite invite = 3;
+    Error error = 1;
+    EncryptedInvite invite = 2;
 
     // Synchronization
-    Query query = 4;
-    QueryResponse query_response = 5;
-    Bulk bulk = 6;
-    BulkResponse bulk_response = 7;
+    Query query = 3;
+    QueryResponse query_response = 4;
+    Bulk bulk = 5;
+    BulkResponse bulk_response = 6;
 
     // Request synchronization on new messages
-    Notification notification = 8;
+    Notification notification = 7;
   }
 }
 

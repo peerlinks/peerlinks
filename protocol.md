@@ -66,18 +66,17 @@ Further communication between peers happens using:
 ```proto
 message Packet {
   oneof content {
-    Subscribe subscribe = 1;
-    Error error = 2;
-    EncryptedInvite invite = 3;
+    Error error = 1;
+    EncryptedInvite invite = 2;
 
     // Synchronization
-    Query query = 4;
-    QueryResponse query_response = 5;
-    Bulk bulk = 6;
-    BulkResponse bulk_response = 7;
+    Query query = 3;
+    QueryResponse query_response = 4;
+    Bulk bulk = 5;
+    BulkResponse bulk_response = 6;
 
     // Request synchronization on new messages
-    Notification notification = 8;
+    Notification notification = 7;
   }
 }
 ```
@@ -86,15 +85,6 @@ Particular packet sub-types are described below.
 _(TODO(indutny): find a mechanism to deter peers from spamming each other.
 Rate limit does not work, because the peer cannot be identified consistently
 in `MultipeerConnectivity`)_
-
-Each peer has a list of `Channel`s that they "follow". In order to receive
-channel updates they sent several `Subscribe` packets after `Hello`:
-```proto
-message Subscribe {
-  bytes channel_id = 1;
-}
-```
-The recipient MUST validate the length of `channel_id`.
 
 ## Channels, messages, and identities
 
