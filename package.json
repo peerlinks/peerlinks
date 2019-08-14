@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/indutny/vowlink-protocol.git"
+    "url": "git+ssh://git@github.com/vowlink/vowlink-protocol.git"
   },
   "keywords": [
     "vowlink",
@@ -22,9 +22,9 @@
   "author": "Fedor Indutny <fedor@indutny.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/indutny/vowlink-protocol/issues"
+    "url": "https://github.com/vowlink/vowlink-protocol/issues"
   },
-  "homepage": "https://github.com/indutny/vowlink-protocol#readme",
+  "homepage": "https://github.com/vowlink/vowlink-protocol#readme",
   "dependencies": {
     "debug": "^4.1.1",
     "esm": "^3.2.25",
