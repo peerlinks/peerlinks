@@ -33,7 +33,8 @@ using:
 symmetric_key = HASH(EncryptionKeyInput, 'vowlink-symmetric')[:sodium.secretBox.keySize]
 ```
 Each separate level (with different height) of Direct Acyclic Graph (DAG) of
-messages gets its own encryption key.
+messages gets its own encryption key. This is called
+["Derived unique key per transaction"][DUKPT]
 
 The protocol below is transport-agnostic in a sense that it could be run using
 any available transport: [MultipeerConnectivity][], https, ...
@@ -482,3 +483,4 @@ Ideas:
 [git]: https://git-scm.com/
 [Public Key Infrastructure]: https://en.wikipedia.org/wiki/Public_key_infrastructure
 [CRDT]: https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type
+[DUKPT]: https://en.wikipedia.org/wiki/Derived_unique_key_per_transaction
