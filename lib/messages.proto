@@ -84,7 +84,6 @@ message ChannelMessage {
 
   message EncryptionKeyInput {
     bytes channel_pub_key = 1;
-    int64 height = 2;
   }
 
   bytes channel_id = 1;
