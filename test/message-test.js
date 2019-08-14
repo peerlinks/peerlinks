@@ -121,11 +121,24 @@ describe('Message', () => {
   });
 
   it('should use different encryption keys for different levels', () => {
-    const rootKey = Message.encryptionKeyFor(channel, 0);
-    const rootKey2 = Message.encryptionKeyFor(channel, 0);
-    assert.strictEqual(rootKey.toString('hex'), rootKey2.toString('hex'));
+    const keys = [];
+    Message.encryptionKeyFor(channel, 0, (rootKey) => {
+      keys.push(rootKey);
 
-    const nonRoot = Message.encryptionKeyFor(channel, 1);
-    assert.notStrictEqual(rootKey.toString('hex'), nonRoot.toString('hex'));
+      Message.encryptionKeyFor(channel, 0, (rootKey2) => {
+        keys.push(rootKey2);
+        assert.strictEqual(rootKey.toString('hex'), rootKey2.toString('hex'));
+      });
+
+      Message.encryptionKeyFor(channel, 1, (nonRoot) => {
+        keys.push(nonRoot);
+        assert.notStrictEqual(rootKey.toString('hex'), nonRoot.toString('hex'));
+      });
+    });
+
+    // Keys should be zeroed after use
+    assert.strictEqual(keys[0].toString('hex'), '0'.repeat(64));
+    assert.strictEqual(keys[0].toString('hex'), keys[1].toString('hex'));
+    assert.strictEqual(keys[0].toString('hex'), keys[2].toString('hex'));
   });
 });
