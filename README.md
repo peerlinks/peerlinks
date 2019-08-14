@@ -1,4 +1,4 @@
-# VowLink
+# vowlink-protocol
 
 Implementation of VowLink [Protocol][] in JavaScript.
 
