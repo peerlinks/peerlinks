@@ -49,24 +49,25 @@ export default class Chat {
 
     this.decryptInvite = decrypt;
 
+    const request64 = JSON.stringify(request.toString('base64'));
+
     console.log('Ask you peer to run:');
-    console.log('issueInvite(' +
-      JSON.stringify(request.toString('base64')) +
-      ')');
+    console.log(`issueInvite(${request64},${JSON.stringify(this.id.name)})`);
     return '(generated invite request)';
   }
 
-  async issueInvite(request) {
+  async issueInvite(request, inviteeName) {
     if (!this.identity) {
       throw new Error('`iam()` must be called first');
     }
-    if (!request) {
-      throw new Error('Usage: issueInvite([ base64 request string])');
+    if (!request || !displayName) {
+      throw new Error(
+        'Usage: issueInvite([ base64 request string], inviteeName)');
     }
 
     request = Buffer.from(request, 'base64');
     const { encryptedInvite } = this.identity.issueInvite(
-      this.channel, request);
+      this.channel, request, inviteeName);
     const json = JSON.stringify({
       requestId: encryptedInvite.requestId.toString('base64'),
       box: encryptedInvite.box.toString('base64'),
