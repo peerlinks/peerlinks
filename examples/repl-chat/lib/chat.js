@@ -61,7 +61,7 @@ export default class Chat {
     if (!this.identity) {
       throw new Error('`iam()` must be called first');
     }
-    if (!request || !displayName) {
+    if (!request || !inviteeName) {
       throw new Error(
         'Usage: issueInvite([ base64 request string], inviteeName)');
     }
