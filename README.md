@@ -1,4 +1,5 @@
 # vowlink-protocol
+[![Build Status](https://travis-ci.org/vowlink/vowlink-protocol.svg?branch=master)](http://travis-ci.org/vowlink/vowlink-protocol)
 
 Implementation of VowLink [Protocol][] in JavaScript.
 
