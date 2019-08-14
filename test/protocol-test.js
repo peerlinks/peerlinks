@@ -65,7 +65,6 @@ describe('Protocol', () => {
 
       // Post a message
       await channelB.post(Message.json('ohai'), idB);
-      b.onNewMessage(channelB);
 
       // Send it back
       const peer = await b.waitForPeer(peerId).promise;

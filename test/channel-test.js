@@ -104,6 +104,15 @@ describe('Channel', () => {
         message: 'Posting root is not allowed',
       });
     });
+
+    it('should notify message waiters', async () => {
+      const [ message, _ ] = await Promise.all([
+        channel.waitForOutgoingMessage().promise,
+        channel.post(Message.json('hello'), id),
+      ]);
+
+      assert.strictEqual(message.content.body.json, 'hello');
+    });
   });
 
   describe('.receive()', () => {
@@ -230,6 +239,20 @@ describe('Channel', () => {
         name: 'Error',
         message: 'Invalid non-root content',
       });
+    });
+
+    it('should notify message waiters', async () => {
+      const clone = new Channel('test-clone', channel.publicKey);
+      await clone.receive(channel.root);
+
+      const remote = await clone.post(Message.json('okay'), id);
+
+      const [ message, _ ] = await Promise.all([
+        channel.waitForIncomingMessage().promise,
+        channel.receive(remote),
+      ]);
+
+      assert.strictEqual(message.content.body.json, 'okay');
     });
   });
 

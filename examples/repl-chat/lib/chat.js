@@ -8,12 +8,20 @@ const DISPLAY_COUNT = 10;
 
 export default class Chat {
   constructor(repl) {
+    this.repl = repl;
+    this.repl.setPrompt('> ');
+    this.repl.displayPrompt();
+
     this.swarm = hyperswarm();
     this.protocol = new Protocol();
     this.identity = null;
     this.channel = null;
 
     this.decryptInvite = null;
+
+    this.swarm.on('connection', (socket) => {
+      this.onConnection(socket);
+    });
   }
 
   async iam(name) {
@@ -21,23 +29,14 @@ export default class Chat {
       throw new Error('Usage: iam([ name ])');
     }
     this.identity = await this.protocol.createIdentity(name);
-    this.channel = this.protocol.getChannel(name);
-
-    this.swarm.join(this.channel.id, {
-      lookup: true,
-      announce: true,
-    });
-
-    this.swarm.on('connection', (socket) => {
-      this.onConnection(socket);
-    });
+    this.setChannel(this.protocol.getChannel(name));
 
     return `Created identity: "${name}"`;
   }
 
   async requestInvite() {
     if (!this.identity) {
-      throw new Error('`.iam()` must be called first');
+      throw new Error('`iam()` must be called first');
     }
 
     const { request, decrypt } = this.identity.requestInvite(
@@ -54,7 +53,7 @@ export default class Chat {
 
   async issueInvite(request) {
     if (!this.identity) {
-      throw new Error('`.iam()` must be called first');
+      throw new Error('`iam()` must be called first');
     }
     if (!request) {
       throw new Error('Usage: issueInvite([ base64 request string])');
@@ -76,7 +75,7 @@ export default class Chat {
 
   async join(invite) {
     if (!this.identity) {
-      throw new Error('`.iam()` must be called first');
+      throw new Error('`iam()` must be called first');
     }
     if (!invite || !invite.requestId || !invite.box || !this.decryptInvite) {
       throw new Error(
@@ -92,29 +91,20 @@ export default class Chat {
     await this.protocol.addChannel(channel);
 
     // Join channel's swarm to start synchronization
-    this.swarm.leave(this.channel.id);
-    for (const socket of this.swarm.connections) {
-      socket.destroy();
-    }
-
-    this.channel = channel;
-    this.swarm.join(this.channel.id, {
-      lookup: true,
-      announce: true,
-    });
+    this.setChannel(channel);
 
     return `Joined channel: "${this.channel.name}"`;
   }
 
   async post(text) {
     if (!this.identity) {
-      throw new Error('`.iam()` must be called first');
+      throw new Error('`iam()` must be called first');
     }
 
     const body = Message.json(JSON.stringify({ text }));
     const message = await this.channel.post(body, this.identity);
+    await this.protocol.onNewMessage(this.channel);
 
-    await this.displayChannel();
     return '(successfully posted message)';
   }
 
@@ -126,7 +116,12 @@ export default class Chat {
       const message = await this.channel.getMessageAtOffset(i);
       result.push(this.displayMessage(message));
     }
+
+    console.log('===== CHANNEL UPDATE =====');
     console.log(result.join('\n'));
+    console.log('===== CHANNEL UPDATE END =====');
+
+    this.repl.displayPrompt(true);
   }
 
   displayMessage(message) {
@@ -140,6 +135,28 @@ export default class Chat {
       text = JSON.parse(body.json).text;
     }
     return `(${message.height}) [${author}]: ${text}`;
+  }
+
+  setChannel(channel) {
+    if (this.channel) {
+      this.swarm.leave(this.channel.id);
+      for (const socket of this.swarm.connections) {
+        socket.destroy();
+      }
+    }
+
+    const onMessage = () => {
+      this.displayChannel().catch(() => {});
+      channel.waitForMessage().then(onMessage);
+    };
+
+    channel.waitForMessage().then(onMessage);
+
+    this.channel = channel;
+    this.swarm.join(this.channel.id, {
+      lookup: true,
+      announce: true,
+    });
   }
 
   // Networking

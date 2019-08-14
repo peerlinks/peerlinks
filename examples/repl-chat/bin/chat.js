@@ -3,10 +3,7 @@ import * as vm from 'vm';
 
 import Chat from '../';
 
-const chat = new Chat();
-
 const io = repl.start({
-  prompt: '> ',
   eval(cmd, context, _, callback) {
     const promise = vm.runInContext(cmd, context);
     if (promise && promise.then) {
@@ -16,6 +13,8 @@ const io = repl.start({
     }
   }
 });
+
+const chat = new Chat(io);
 
 function expose(method) {
   io.context[method] = async (...args) => {
