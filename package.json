@@ -34,6 +34,7 @@
   "devDependencies": {
     "eslint": "^6.1.0",
     "mocha": "^6.2.0",
-    "nyc": "^14.1.1"
+    "nyc": "^14.1.1",
+    "stream-pair": "^1.0.3"
   }
 }

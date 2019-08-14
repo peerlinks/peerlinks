@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 
 import hyperswarm from 'hyperswarm';
 
-import Protocol, { Channel, Message, Peer } from '../../..';
+import Protocol, { Channel, Message, Peer, StreamSocket } from '../../..';
 
 const DISPLAY_COUNT = 10;
 
@@ -143,7 +143,11 @@ export default class Chat {
 
   // Networking
 
-  onConnection(socket) {
-    console.log('connected');
+  onConnection(stream) {
+    const socket = new StreamSocket(stream);
+
+    this.protocol.connect(socket).catch((e) => {
+      console.error(e.stack);
+    });
   }
 }
