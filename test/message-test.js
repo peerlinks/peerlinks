@@ -119,4 +119,13 @@ describe('Message', () => {
     // Should not throw
     copy.decrypt(channel);
   });
+
+  it('should use different encryption keys for different levels', () => {
+    const rootKey = Message.encryptionKeyFor(channel, 0);
+    const rootKey2 = Message.encryptionKeyFor(channel, 0);
+    assert.strictEqual(rootKey.toString('hex'), rootKey2.toString('hex'));
+
+    const nonRoot = Message.encryptionKeyFor(channel, 1);
+    assert.notStrictEqual(rootKey.toString('hex'), nonRoot.toString('hex'));
+  });
 });

@@ -30,8 +30,10 @@ channel_id = HASH(channel_pub_key, 'vowlink-channel-id')[:32]
 inspired by [DAT][] all channel messages are encrypted with `sodium.secretBox`
 using:
 ```
-symmetric_key = HASH(channel_pub_key, 'vowlink-symmetric')[:sodium.secretBox.keySize]
+symmetric_key = HASH(EncryptionKeyInput, 'vowlink-symmetric')[:sodium.secretBox.keySize]
 ```
+Each separate level (with different height) of Direct Acyclic Graph (DAG) of
+messages gets its own encryption key.
 
 The protocol below is transport-agnostic in a sense that it could be run using
 any available transport: [MultipeerConnectivity][], https, ...
@@ -138,6 +140,11 @@ message ChannelMessage {
     bytes signature = 4;
   }
 
+  message EncryptionKeyInput {
+    bytes channel_pub_key = 1;
+    int64 height = 2;
+  }
+
   bytes channel_id = 1;
 
   // NOTE: can be empty only in the root message
@@ -149,6 +156,7 @@ message ChannelMessage {
   // Encryption nonce for Sodium
   bytes nonce = 4;
 
+  // NOTE: encryption key = HASH(EncryptionKeyInput, 'vowlink-symmetric')
   bytes encrypted_content = 5;
 }
 ```
