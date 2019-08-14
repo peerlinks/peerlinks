@@ -16,5 +16,15 @@ describe('StreamSocket', () => {
     await a.send(Buffer.from('world'));
     assert.strictEqual((await b.receive()).toString(), 'hello');
     assert.strictEqual((await b.receive()).toString(), 'world');
+
+    await a.close();
+    await assert.rejects(b.receive(), {
+      name: 'Error',
+      message: 'Closed',
+    });
+    await assert.rejects(a.receive(), {
+      name: 'Error',
+      message: 'Closed',
+    });
   });
 });
