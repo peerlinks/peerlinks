@@ -103,7 +103,8 @@ export default class Chat {
 
     const body = Message.json(JSON.stringify({ text }));
     const message = await this.channel.post(body, this.identity);
-    await this.protocol.onNewMessage(this.channel);
+
+    await this.displayChannel();
 
     return '(successfully posted message)';
   }
@@ -147,10 +148,10 @@ export default class Chat {
 
     const onMessage = () => {
       this.displayChannel().catch(() => {});
-      channel.waitForMessage().then(onMessage);
+      channel.waitForIncomingMessage().promise.then(onMessage);
     };
 
-    channel.waitForMessage().then(onMessage);
+    channel.waitForIncomingMessage().promise.then(onMessage);
 
     this.channel = channel;
     this.swarm.join(this.channel.id, {
