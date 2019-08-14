@@ -101,7 +101,7 @@ export default class Chat {
       throw new Error('`iam()` must be called first');
     }
 
-    const body = Message.json(JSON.stringify({ text }));
+    const body = Message.json({ text });
     const message = await this.channel.post(body, this.identity);
 
     await this.displayChannel();
