@@ -89,6 +89,7 @@ export default class Chat {
     };
     invite = this.decryptInvite(invite);
     const channel = await Channel.fromInvite(invite, this.identity);
+    await this.protocol.addChannel(channel);
 
     // Join channel's swarm to start synchronization
     this.swarm.leave(this.channel.id);
@@ -125,7 +126,7 @@ export default class Chat {
       const message = await this.channel.getMessageAtOffset(i);
       result.push(this.displayMessage(message));
     }
-    return result.join('\n');
+    console.log(result.join('\n'));
   }
 
   displayMessage(message) {
