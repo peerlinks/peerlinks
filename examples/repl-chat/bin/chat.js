@@ -21,7 +21,8 @@ function expose(method) {
     try {
       return await chat[method](...args);
     } catch (err) {
-      return 'Error: ' + err.message;
+      console.error('Error: ' + err.stack);
+      return '(error)';
     }
   };
 }

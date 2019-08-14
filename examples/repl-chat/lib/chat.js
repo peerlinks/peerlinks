@@ -2,7 +2,12 @@ import { Buffer } from 'buffer';
 
 import hyperswarm from 'hyperswarm';
 
-import Protocol, { Channel, Message, Peer, StreamSocket } from 'vowlink-protocol';
+import Protocol, {
+  Channel,
+  Message,
+  Peer,
+  StreamSocket,
+} from 'vowlink-protocol';
 
 const DISPLAY_COUNT = 10;
 
