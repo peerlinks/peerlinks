@@ -1,0 +1,16 @@
+{
+  "name": "repl-chat",
+  "version": "1.0.0",
+  "main": "lib/chat.js",
+  "scripts": {
+    "start": "node -r esm bin/chat.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "esm": "^3.2.25",
+    "hyperswarm": "^2.0.6"
+  }
+}
