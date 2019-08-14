@@ -5,7 +5,7 @@
   "main": "lib/protocol.js",
   "scripts": {
     "compile-proto": "pbjs --es6 -w es6 -t static-module lib/messages.proto -o lib/messages.js",
-    "lint": "eslint lib/**/*.js test/**/*.js examples/**/*.js",
+    "lint": "eslint lib/**/*.js test/**/*.js",
     "mocha": "mocha -r esm --reporter=spec test/*-test.js",
     "coverage": "nyc --require esm npm run mocha",
     "test": "npm run mocha && npm run lint"
