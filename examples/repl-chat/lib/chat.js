@@ -131,7 +131,7 @@ export default class Chat {
   }
 
   displayMessage(message) {
-    const author = message.getAuthor(this.channel).toString('hex').slice(0, 8);
+    const author = message.getAuthor(this.channel).displayPath.join('>');
     const body = message.content.body;
 
     let text;
