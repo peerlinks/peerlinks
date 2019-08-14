@@ -9,7 +9,7 @@ const io = repl.start({
   prompt: '> ',
   eval(cmd, context, _, callback) {
     const promise = vm.runInContext(cmd, context);
-    if (promise.then) {
+    if (promise && promise.then) {
       promise.then((answer) => callback(null, answer));
     } else {
       callback(null, promise);
