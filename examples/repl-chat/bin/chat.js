@@ -26,6 +26,14 @@ function expose(method) {
   };
 }
 
+io.context.help = () => {
+  console.log('Available commands:');
+  console.log('  iam(\'name\')');
+  console.log('  post(\'message text\')');
+  console.log('  requestInvite()');
+  return '(help end)';
+};
+
 [
   'iam',
   'post',
