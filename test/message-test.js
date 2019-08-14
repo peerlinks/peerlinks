@@ -68,7 +68,10 @@ describe('Message', () => {
   it('should be signed/verified', () => {
     const second = new Identity('second');
     const chain = new Chain([
-      id.issueLink(channel, { trusteePubKey: second.publicKey }),
+      id.issueLink(channel, {
+        trusteePubKey: second.publicKey,
+        trusteeDisplayName: 'second',
+      }),
     ]);
 
     second.addChain(channel, chain);

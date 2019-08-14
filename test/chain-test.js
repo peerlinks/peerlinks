@@ -11,6 +11,10 @@ describe('Chain', () => {
   let idD = null;
   let channelA = null;
   let channelB = null;
+  let dataA = null;
+  let dataB = null;
+  let dataC = null;
+  let dataD = null;
 
   beforeEach(() => {
     idA = new Identity('a');
@@ -20,6 +24,23 @@ describe('Chain', () => {
 
     channelA = new Channel('channel-a', idA.publicKey);
     channelB = new Channel('channel-b', idB.publicKey);
+
+    dataA = {
+      trusteePubKey: idA.publicKey,
+      trusteeDisplayName: 'a',
+    }
+    dataB = {
+      trusteePubKey: idB.publicKey,
+      trusteeDisplayName: 'b',
+    }
+    dataC = {
+      trusteePubKey: idC.publicKey,
+      trusteeDisplayName: 'c',
+    }
+    dataD = {
+      trusteePubKey: idD.publicKey,
+      trusteeDisplayName: 'd',
+    }
   });
 
   afterEach(() => {
@@ -30,14 +51,19 @@ describe('Chain', () => {
 
     channelA = null;
     channelB = null;
+
+    dataA = null;
+    dataB = null;
+    dataC = null;
+    dataD = null;
   });
 
   it('should check length', () => {
     const links = [
-      idA.issueLink(channelA, { trusteePubKey: idB.publicKey }),
-      idB.issueLink(channelA, { trusteePubKey: idC.publicKey }),
-      idC.issueLink(channelA, { trusteePubKey: idD.publicKey }),
-      idD.issueLink(channelA, { trusteePubKey: idA.publicKey }),
+      idA.issueLink(channelA, dataB),
+      idB.issueLink(channelA, dataC),
+      idC.issueLink(channelA, dataD),
+      idD.issueLink(channelA, dataA),
     ];
 
     assert.throws(() => {
@@ -50,9 +76,9 @@ describe('Chain', () => {
 
   it('should check signatures', () => {
     const links = [
-      idA.issueLink(channelA, { trusteePubKey: idB.publicKey }),
-      idB.issueLink(channelA, { trusteePubKey: idC.publicKey }),
-      idC.issueLink(channelA, { trusteePubKey: idD.publicKey }),
+      idA.issueLink(channelA, dataB),
+      idB.issueLink(channelA, dataC),
+      idC.issueLink(channelA, dataD),
     ];
 
     const chain = new Chain(links);
@@ -64,14 +90,25 @@ describe('Chain', () => {
     assert.strictEqual(leafKey.toString('hex'), idD.publicKey.toString('hex'));
   });
 
+  it('should give display path', () => {
+    const links = [
+      idA.issueLink(channelA, dataB),
+      idB.issueLink(channelA, dataC),
+      idC.issueLink(channelA, dataD),
+    ];
+
+    const chain = new Chain(links);
+
+    assert.deepStrictEqual(chain.getDisplayPath(), [ 'b', 'c', 'd' ]);
+  });
+
   it('should check timestamps', () => {
     const links = [
-      idA.issueLink(channelA, { trusteePubKey: idB.publicKey }),
-      idB.issueLink(channelA, {
-        trusteePubKey: idC.publicKey,
+      idA.issueLink(channelA, dataB),
+      idB.issueLink(channelA, Object.assign(dataC, {
         expiration: now() - 1,
-      }),
-      idC.issueLink(channelA, { trusteePubKey: idD.publicKey }),
+      })),
+      idC.issueLink(channelA, dataD),
     ];
 
     const chain = new Chain(links);

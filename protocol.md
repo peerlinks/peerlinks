@@ -240,11 +240,12 @@ The `chain` is a collection of signed links:
 message Link {
   message TBS {
     bytes trustee_pub_key = 1;
-    double expiration = 2;
+    string trustee_display_name = 2;
+    double expiration = 3;
 
     // NOTE: This MUST be filled either by sender/recipient before
     // generating/verifying the signature below.
-    bytes channel_id = 3;
+    bytes channel_id = 4;
   }
 
   TBS tbs = 1;
@@ -259,6 +260,11 @@ of the chain against the limit, and MUST NOT accept messages with longer chains.
 (This should encourage peers to form tighter groups, and have more control
 over participants. The number `3` MAY be revised in the future version of the
 protocol.)
+
+`trustee_display_name` is assigned by the issuer of the link. Maximum length of
+this string is 128 UTF-8 characters and MUST be enforced. Note that each
+participant of the channel gets unique "display path" (array of display names)
+starting from the root.
 
 The `link.expiration` is a Unix-time from Jan 1st 1970 00:00:00 UTC. The
 expiration date/time of the whole `chain` is the minimum of expirations of

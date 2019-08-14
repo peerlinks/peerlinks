@@ -61,7 +61,8 @@ describe('Protocol', () => {
 
       // Issue invite
       const channelB = b.getChannel('b');
-      const { encryptedInvite, peerId } = idB.issueInvite(channelB, request);
+      const { encryptedInvite, peerId } = idB.issueInvite(
+        channelB, request, 'b');
 
       // Post a message
       await channelB.post(Message.json('ohai'), idB);

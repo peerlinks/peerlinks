@@ -26,7 +26,8 @@ describe('Invite', () => {
   it('should be requested, issued by issuer', async () => {
     const { request, decrypt } = invitee.requestInvite(Buffer.from('peer-id'));
 
-    const { encryptedInvite, peerId } = issuer.issueInvite(channel, request);
+    const { encryptedInvite, peerId } = issuer.issueInvite(
+      channel, request, 'invitee');
     assert.strictEqual(peerId.toString(), 'peer-id');
 
     const invite = decrypt(encryptedInvite);

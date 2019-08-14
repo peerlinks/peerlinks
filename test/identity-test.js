@@ -12,6 +12,7 @@ describe('Identity', () => {
 
     const link = id.issueLink(channel, {
       trusteePubKey: trustee.publicKey,
+      trusteeDisplayName: 'trustee',
     });
 
     const chain = new Chain([ link ]);
