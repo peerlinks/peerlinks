@@ -3,8 +3,8 @@
 ## Installation
 
 ```sh
-git clone https://github.com/vowlink-protocol/vowlink
-cd vowlink/examples/chat
+git clone git://github.com/vowlink/vowlink-protocol
+cd vowlink-protocol/examples/repl-chat
 npm install
 npm start
 ```
