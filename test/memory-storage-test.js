@@ -187,8 +187,8 @@ describe('MemoryStorage', () => {
 
     assert.deepStrictEqual(await storage.getEntityKeys('fake'), [ 'id' ]);
 
-    const retrieve = await storage.retrieveEntity('fake', 'id', Fake);
-    assert.strictEqual(retrieve.text, 'hello');
+    const blob = await storage.retrieveEntity('fake', 'id', Fake);
+    assert.strictEqual(Fake.deserializeData(blob).text, 'hello');
 
     const missing = await storage.retrieveEntity('fake', randomBytes(32), Fake);
     assert.ok(!missing);
