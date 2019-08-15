@@ -94,14 +94,6 @@ describe('MemoryStorage', () => {
       assert.strictEqual(result.backwardHash.toString(), 'b');
       assert.strictEqual(result.forwardHash.toString(), 'd');
     }
-
-    {
-      const result = await storage.query(channelId, { height: 1 }, true, 2);
-      assert.strictEqual(result.messages.length, 1);
-      assert.strictEqual(result.messages[0].toString(), '0: a');
-      assert.strictEqual(result.backwardHash, null);
-      assert.strictEqual(result.forwardHash.toString(), 'b');
-    }
   });
 
   it('should query messages by hash', async () => {
