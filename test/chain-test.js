@@ -100,6 +100,11 @@ describe('Chain', () => {
     const chain = new Chain(links);
 
     assert.deepStrictEqual(chain.getDisplayPath(), [ 'b', 'c', 'd' ]);
+    assert.deepStrictEqual(chain.getPublicKeys(), [
+      idB.publicKey,
+      idC.publicKey,
+      idD.publicKey,
+    ]);
   });
 
   it('should check timestamps', () => {

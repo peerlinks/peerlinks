@@ -200,7 +200,25 @@ export default class Chat {
   }
 
   displayMessage(message) {
-    const author = message.getAuthor(this.channel).displayPath.join('>');
+    let { publicKeys, displayPath } = message.getAuthor(this.channel);
+
+    displayPath = displayPath.map((name, i) => {
+      // Make last element of path bold
+      if (i === displayPath.length - 1) {
+        name = '\x1b[1m' + name;
+      }
+
+      // Colorize peers by key
+      const [ r, g, b ] = publicKeys[i].slice(0, 3);
+      name = `\x1b[38;2;${r};${g};${b}m` + name;
+
+      // Reset color
+      name +='\x1b[0m';
+
+      return name;
+    });
+    const author = displayPath.join('>');
+
     const body = message.content.body;
 
     let text;
