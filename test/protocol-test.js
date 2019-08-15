@@ -95,4 +95,14 @@ describe('Protocol', () => {
     await a.close();
     await b.close();
   });
+
+  it('should encrypt/decrypt blobs', async function() {
+    // Derivation of encryption key is a slow process
+    this.timeout(20000);
+
+    const protocol = new Protocol({ password: 'secret' });
+    const encrypted = protocol.encryptData(Buffer.from('hello'));
+    const decrypted = protocol.decryptData(encrypted);
+    assert.strictEqual(decrypted.toString(), 'hello');
+  });
 });
