@@ -19,9 +19,17 @@ async function main() {
 
   const storage = new Storage({
     file: 'chat.sqlite',
+    trace: !!process.env.VOWLINK_TRACE_DB,
   });
 
   await storage.open();
+
+  io.on('exit', () => {
+    console.log('Saving...');
+    storage.close().then(() => {
+      process.exit(0);
+    });
+  });
 
   const chat = new Chat(io, storage);
 

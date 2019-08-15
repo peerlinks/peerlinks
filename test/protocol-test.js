@@ -73,7 +73,7 @@ describe('Protocol', () => {
 
       // Decrypt and create channel
       const invite = decrypt(await invitePromise);
-      const channelForA = await Channel.fromInvite(invite, idA);
+      const channelForA = await a.channelFromInvite(invite, idA);
       await a.addChannel(channelForA);
 
       assert.strictEqual(await channelForA.getMessageCount(), 1);

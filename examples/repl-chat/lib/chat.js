@@ -18,6 +18,8 @@ export default class Chat {
     this.repl.setPrompt('> ');
     this.repl.displayPrompt(true);
 
+    this.storage = storage;
+
     this.swarm = hyperswarm();
     this.protocol = new Protocol({
       storage,
@@ -104,7 +106,8 @@ export default class Chat {
       box: Buffer.from(invite.box, 'base64'),
     };
     invite = this.decryptInvite(invite);
-    const channel = await Channel.fromInvite(invite, this.identity);
+    const channel = await this.protocol.channelFromInvite(
+      invite, this.identity);
     await this.protocol.addChannel(channel);
     await this.protocol.saveIdentity(this.identity);
 
