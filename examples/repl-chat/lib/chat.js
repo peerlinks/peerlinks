@@ -192,9 +192,9 @@ export default class Chat {
     const result = messages.map((message) => this.displayMessage(message));
 
     console.log('\x1b[2J');
-    console.log('=====================');
+    console.log(`===== ${this.channel.name} =====`);
     console.log(result.join('\n'));
-    console.log('=====================');
+    console.log(`===== ${this.channel.name} =====`);
 
     this.repl.displayPrompt(true);
   }
