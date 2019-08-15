@@ -217,6 +217,8 @@ export default class Chat {
 
       return name;
     });
+    const time = new Date(message.content.timestamp * 1000)
+      .toLocaleTimeString();
     const author = displayPath.join('>');
 
     const body = message.content.body;
@@ -227,7 +229,7 @@ export default class Chat {
     } else {
       text = JSON.parse(body.json).text;
     }
-    return `(${message.height}) [${author}]: ${text}`;
+    return `(${message.height}) ${time} [${author}]: ${text}`;
   }
 
   // Networking
