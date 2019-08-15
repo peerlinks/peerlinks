@@ -27,12 +27,12 @@
   "homepage": "https://github.com/vowlink/vowlink-protocol#readme",
   "dependencies": {
     "debug": "^4.1.1",
-    "esm": "^3.2.25",
     "protobufjs": "^6.8.8",
     "sodium-universal": "^2.0.0"
   },
   "devDependencies": {
     "eslint": "^6.1.0",
+    "esm": "^3.2.25",
     "mocha": "^6.2.0",
     "nyc": "^14.1.1",
     "stream-pair": "^1.0.3"
