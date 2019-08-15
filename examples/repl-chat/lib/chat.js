@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 
+import Storage from 'vowlink-sqlite-storage';
 import hyperswarm from 'hyperswarm';
 
 import Protocol, {
@@ -12,13 +13,15 @@ import Protocol, {
 const DISPLAY_COUNT = 10;
 
 export default class Chat {
-  constructor(repl) {
+  constructor(repl, storage) {
     this.repl = repl;
     this.repl.setPrompt('> ');
-    this.repl.displayPrompt();
+    this.repl.displayPrompt(true);
 
     this.swarm = hyperswarm();
-    this.protocol = new Protocol();
+    this.protocol = new Protocol({
+      storage,
+    });
     this.identity = null;
     this.channel = null;
 
@@ -29,14 +32,21 @@ export default class Chat {
     });
   }
 
+  async load() {
+    await this.protocol.load();
+  }
+
   async iam(name) {
     if (!name) {
       throw new Error('Usage: iam([ name ])');
     }
-    this.identity = await this.protocol.createIdentity(name);
-    this.setChannel(this.protocol.getChannel(name));
 
-    return `Created identity: "${name}"`;
+    const existing = this.protocol.getIdentity(name);
+    this.identity = existing || await this.protocol.createIdentity(name);
+    this.setChannel(name);
+
+    return existing ? `Using identity: "${name}"` :
+      `Created identity: "${name}"`;
   }
 
   async requestInvite() {
@@ -96,9 +106,10 @@ export default class Chat {
     invite = this.decryptInvite(invite);
     const channel = await Channel.fromInvite(invite, this.identity);
     await this.protocol.addChannel(channel);
+    await this.protocol.saveIdentity(this.identity);
 
     // Join channel's swarm to start synchronization
-    this.setChannel(channel);
+    this.setChannel(channel.name);
 
     return `Joined channel: "${this.channel.name}"`;
   }
@@ -115,6 +126,54 @@ export default class Chat {
 
     return '(successfully posted message)';
   }
+
+  channels() {
+    console.log(this.protocol.getChannelNames().map((name) => {
+      return `setChannel(${JSON.stringify(name)})`;
+    }).join('\n'));
+    return '(done)';
+  }
+
+  identities() {
+    console.log(this.protocol.getIdentityNames().map((name) => {
+      return `iam(${JSON.stringify(name)})`;
+    }).join('\n'));
+    return '(done)';
+  }
+
+  setChannel(name) {
+    if (this.channel) {
+      this.swarm.leave(this.channel.id);
+      for (const socket of this.swarm.connections) {
+        socket.destroy();
+      }
+    }
+
+    const channel = this.protocol.getChannel(name);
+    if (!channel) {
+      throw new Error(`Unknown channel: "${name}". ` +
+        `Use \`requestInvite()\` to join`);
+    }
+
+    const onMessage = () => {
+      this.displayChannel().catch(() => {});
+      channel.waitForIncomingMessage().promise.then(onMessage);
+    };
+
+    channel.waitForIncomingMessage().promise.then(onMessage);
+
+    this.channel = channel;
+    this.swarm.join(channel.id, {
+      lookup: true,
+      announce: true,
+    });
+
+    return '(joined channel)';
+  }
+
+  //
+  // Utils
+  //
 
   async displayChannel() {
     const count = await this.channel.getMessageCount();
@@ -143,28 +202,6 @@ export default class Chat {
       text = JSON.parse(body.json).text;
     }
     return `(${message.height}) [${author}]: ${text}`;
-  }
-
-  setChannel(channel) {
-    if (this.channel) {
-      this.swarm.leave(this.channel.id);
-      for (const socket of this.swarm.connections) {
-        socket.destroy();
-      }
-    }
-
-    const onMessage = () => {
-      this.displayChannel().catch(() => {});
-      channel.waitForIncomingMessage().promise.then(onMessage);
-    };
-
-    channel.waitForIncomingMessage().promise.then(onMessage);
-
-    this.channel = channel;
-    this.swarm.join(this.channel.id, {
-      lookup: true,
-      announce: true,
-    });
   }
 
   // Networking
