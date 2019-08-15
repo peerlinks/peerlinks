@@ -25,21 +25,20 @@ describe('MemoryStorage', () => {
       hash: Buffer.from(hash),
       height,
       parents: parents.map((hash) => Buffer.from(hash)),
+      serializeData() {
+        return Buffer.from(`${height}: ${hash}`);
+      }
     };
   };
 
-  const str = (message) => {
-    return `${message.height}: ${message.hash.toString()}`;
-  };
-
   const at = async (offset) => {
-    const message = await storage.getMessageAtOffset(channelId, offset);
-    return str(message);
+    const blob = await storage.getMessageAtOffset(channelId, offset);
+    return blob.toString();
   };
 
   const leaves = async () => {
     const result = await storage.getLeaves(channelId);
-    return result.map((message) => message.hash.toString()).sort();
+    return result.map((message) => message.toString()).sort();
   };
 
   it('should store and retrieve messages', async () => {
@@ -48,6 +47,9 @@ describe('MemoryStorage', () => {
       hash: randomBytes(32),
       height: 0,
       parents: [],
+      serializeData() {
+        return Buffer.from('fake');
+      }
     };
 
     assert.strictEqual(await storage.getMessageCount(channelId), 0);
@@ -59,12 +61,11 @@ describe('MemoryStorage', () => {
 
     const leaves = await storage.getLeaves(channelId);
     assert.strictEqual(leaves.length, 1);
-    assert.strictEqual(leaves[0].hash.toString('hex'),
-      fake.hash.toString('hex'));
+    assert.strictEqual(leaves[0].toString(), 'fake');
 
     assert.ok(await storage.hasMessage(channelId, fake.hash));
     const getFake = await storage.getMessage(channelId, fake.hash);
-    assert.strictEqual(getFake.hash.toString('hex'), fake.hash.toString('hex'));
+    assert.strictEqual(getFake.toString(), 'fake');
   });
 
   it('should order messages in CRDT order', async () => {
@@ -88,8 +89,8 @@ describe('MemoryStorage', () => {
     {
       const result = await storage.query(channelId, { height: 1 }, false, 2);
       assert.strictEqual(result.messages.length, 2);
-      assert.strictEqual(str(result.messages[0]), '1: b');
-      assert.strictEqual(str(result.messages[1]), '1: c');
+      assert.strictEqual(result.messages[0].toString(), '1: b');
+      assert.strictEqual(result.messages[1].toString(), '1: c');
       assert.strictEqual(result.backwardHash.toString(), 'b');
       assert.strictEqual(result.forwardHash.toString(), 'd');
     }
@@ -97,7 +98,7 @@ describe('MemoryStorage', () => {
     {
       const result = await storage.query(channelId, { height: 1 }, true, 2);
       assert.strictEqual(result.messages.length, 1);
-      assert.strictEqual(str(result.messages[0]), '0: a');
+      assert.strictEqual(result.messages[0].toString(), '0: a');
       assert.strictEqual(result.backwardHash, null);
       assert.strictEqual(result.forwardHash.toString(), 'b');
     }
@@ -116,8 +117,8 @@ describe('MemoryStorage', () => {
         false,
         2);
       assert.strictEqual(result.messages.length, 2);
-      assert.strictEqual(str(result.messages[0]), '1: b');
-      assert.strictEqual(str(result.messages[1]), '1: c');
+      assert.strictEqual(result.messages[0].toString(), '1: b');
+      assert.strictEqual(result.messages[1].toString(), '1: c');
       assert.strictEqual(result.backwardHash.toString(), 'b');
       assert.strictEqual(result.forwardHash.toString(), 'd');
     }
@@ -129,7 +130,7 @@ describe('MemoryStorage', () => {
         true,
         2);
       assert.strictEqual(result.messages.length, 1);
-      assert.strictEqual(str(result.messages[0]), '0: a');
+      assert.strictEqual(result.messages[0].toString(), '0: a');
       assert.strictEqual(result.backwardHash, null);
       assert.strictEqual(result.forwardHash.toString(), 'b');
     }
@@ -141,7 +142,7 @@ describe('MemoryStorage', () => {
         false,
         2);
       assert.strictEqual(result.messages.length, 1);
-      assert.strictEqual(str(result.messages[0]), '2: d');
+      assert.strictEqual(result.messages[0].toString(), '2: d');
       assert.strictEqual(result.backwardHash.toString(), 'd');
       assert.strictEqual(result.forwardHash, null);
     }
@@ -162,16 +163,16 @@ describe('MemoryStorage', () => {
     assert.deepStrictEqual(await leaves(), []);
 
     await storage.addMessage(msg('a', 0, []));
-    assert.deepStrictEqual(await leaves(), [ 'a' ]);
+    assert.deepStrictEqual(await leaves(), [ '0: a' ]);
 
     await storage.addMessage(msg('c', 1, [ 'a' ]));
-    assert.deepStrictEqual(await leaves(), [ 'c' ]);
+    assert.deepStrictEqual(await leaves(), [ '1: c' ]);
 
     await storage.addMessage(msg('b', 1, [ 'a' ]));
-    assert.deepStrictEqual(await leaves(), [ 'b', 'c' ]);
+    assert.deepStrictEqual(await leaves(), [ '1: b', '1: c' ]);
 
     await storage.addMessage(msg('d', 2, [ 'b', 'c' ]));
-    assert.deepStrictEqual(await leaves(), [ 'd' ]);
+    assert.deepStrictEqual(await leaves(), [ '2: d' ]);
   });
 
   it('should store and retrieve entities', async () => {
