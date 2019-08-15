@@ -56,7 +56,7 @@ describe('MemoryStorage', () => {
     assert.strictEqual((await storage.getLeaves(channelId)).length, 0);
     assert.ok(!await storage.hasMessage(channelId, fake.hash));
 
-    storage.addMessage(fake, []);
+    await storage.addMessage(fake);
     assert.strictEqual(await storage.getMessageCount(channelId), 1);
 
     const leaves = await storage.getLeaves(channelId);
