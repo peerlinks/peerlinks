@@ -10,6 +10,9 @@
     "coverage": "nyc --require esm npm run mocha",
     "test": "npm run mocha && npm run lint"
   },
+  "files": [
+    "lib"
+  ],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/vowlink/vowlink-protocol.git"
