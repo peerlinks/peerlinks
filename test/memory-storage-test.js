@@ -30,13 +30,14 @@ describe('MemoryStorage', () => {
   };
 
   const at = async (offset, limit) => {
-    const blobs = await storage.getMessagesAtOffset(channelId, offset,
+    const hashes = await storage.getHashesAtOffset(channelId, offset,
       limit);
+    const blobs = await storage.getMessages(channelId, hashes);
     return blobs.map((blob) => blob.toString());
   };
 
   const leaves = async () => {
-    const result = await storage.getLeaves(channelId);
+    const result = await storage.getLeafHashes(channelId);
     return result.map((message) => message.toString()).sort();
   };
 
@@ -50,13 +51,13 @@ describe('MemoryStorage', () => {
     };
 
     assert.strictEqual(await storage.getMessageCount(channelId), 0);
-    assert.strictEqual((await storage.getLeaves(channelId)).length, 0);
+    assert.strictEqual((await storage.getLeafHashes(channelId)).length, 0);
     assert.ok(!await storage.hasMessage(channelId, fake.hash));
 
     await storage.addMessage(fake);
     assert.strictEqual(await storage.getMessageCount(channelId), 1);
 
-    const leaves = await storage.getLeaves(channelId);
+    const leaves = await storage.getLeafHashes(channelId);
     assert.strictEqual(leaves.length, 1);
     assert.strictEqual(leaves[0].toString(), 'fake');
 
@@ -90,9 +91,9 @@ describe('MemoryStorage', () => {
 
     {
       const result = await storage.query(channelId, { height: 1 }, false, 2);
-      assert.strictEqual(result.messages.length, 2);
-      assert.strictEqual(result.messages[0].toString(), '1: b');
-      assert.strictEqual(result.messages[1].toString(), '1: c');
+      assert.strictEqual(result.abbreviatedMessages.length, 2);
+      assert.strictEqual(result.abbreviatedMessages[0].hash.toString(), 'b');
+      assert.strictEqual(result.abbreviatedMessages[1].hash.toString(), 'c');
       assert.strictEqual(result.backwardHash.toString(), 'b');
       assert.strictEqual(result.forwardHash.toString(), 'd');
     }
@@ -110,9 +111,9 @@ describe('MemoryStorage', () => {
         { hash: Buffer.from('b') },
         false,
         2);
-      assert.strictEqual(result.messages.length, 2);
-      assert.strictEqual(result.messages[0].toString(), '1: b');
-      assert.strictEqual(result.messages[1].toString(), '1: c');
+      assert.strictEqual(result.abbreviatedMessages.length, 2);
+      assert.strictEqual(result.abbreviatedMessages[0].hash.toString(), 'b');
+      assert.strictEqual(result.abbreviatedMessages[1].hash.toString(), 'c');
       assert.strictEqual(result.backwardHash.toString(), 'b');
       assert.strictEqual(result.forwardHash.toString(), 'd');
     }
@@ -123,8 +124,8 @@ describe('MemoryStorage', () => {
         { hash: Buffer.from('b') },
         true,
         2);
-      assert.strictEqual(result.messages.length, 1);
-      assert.strictEqual(result.messages[0].toString(), '0: a');
+      assert.strictEqual(result.abbreviatedMessages.length, 1);
+      assert.strictEqual(result.abbreviatedMessages[0].hash.toString(), 'a');
       assert.strictEqual(result.backwardHash, null);
       assert.strictEqual(result.forwardHash.toString(), 'b');
     }
@@ -135,8 +136,8 @@ describe('MemoryStorage', () => {
         { hash: Buffer.from('d') },
         false,
         2);
-      assert.strictEqual(result.messages.length, 1);
-      assert.strictEqual(result.messages[0].toString(), '2: d');
+      assert.strictEqual(result.abbreviatedMessages.length, 1);
+      assert.strictEqual(result.abbreviatedMessages[0].hash.toString(), 'd');
       assert.strictEqual(result.backwardHash.toString(), 'd');
       assert.strictEqual(result.forwardHash, null);
     }
@@ -147,7 +148,7 @@ describe('MemoryStorage', () => {
         { hash: Buffer.from('x') },
         false,
         2);
-      assert.strictEqual(result.messages.length, 0);
+      assert.strictEqual(result.abbreviatedMessages.length, 0);
       assert.strictEqual(result.backwardHash, null);
       assert.strictEqual(result.forwardHash, null);
     }
