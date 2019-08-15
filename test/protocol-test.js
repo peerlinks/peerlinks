@@ -108,4 +108,20 @@ describe('Protocol', () => {
     // Should create encrypted identity
     await a.createIdentity('test');
   });
+
+  it('should work when peers have no common channels', async () => {
+    const idA = await a.createIdentity('a');
+    const idB = await b.createIdentity('b');
+
+    await Promise.race([
+      a.connect(socketA),
+      b.connect(socketB),
+
+      // Lame, but okay
+      new Promise((resolve) => setTimeout(resolve, 100)),
+    ]);
+
+    await a.close();
+    await b.close();
+  });
 });
