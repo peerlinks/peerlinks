@@ -10,7 +10,7 @@ import Protocol, {
   StreamSocket,
 } from 'vowlink-protocol';
 
-const DISPLAY_COUNT = 10;
+const DISPLAY_COUNT = 30;
 
 export default class Chat {
   constructor(repl, storage) {
@@ -45,7 +45,7 @@ export default class Chat {
 
     const existing = this.protocol.getIdentity(name);
     this.identity = existing || await this.protocol.createIdentity(name);
-    this.setChannel(name);
+    await this.setChannel(name);
 
     return existing ? `Using identity: "${name}"` :
       `Created identity: "${name}"`;
@@ -112,7 +112,7 @@ export default class Chat {
     await this.protocol.saveIdentity(this.identity);
 
     // Join channel's swarm to start synchronization
-    this.setChannel(channel.name);
+    await this.setChannel(channel.name);
 
     return `Joined channel: "${this.channel.name}"`;
   }
@@ -144,7 +144,7 @@ export default class Chat {
     return '(done)';
   }
 
-  setChannel(name) {
+  async setChannel(name) {
     if (this.channel) {
       this.swarm.leave(this.channel.id);
       for (const socket of this.swarm.connections) {
@@ -159,6 +159,9 @@ export default class Chat {
     }
 
     const onMessage = () => {
+      // Bell sound
+      process.stdout.write('\u0007');
+
       this.displayChannel().catch(() => {});
       channel.waitForIncomingMessage().promise.then(onMessage);
     };
@@ -170,6 +173,8 @@ export default class Chat {
       lookup: true,
       announce: true,
     });
+
+    await this.displayChannel();
 
     return '(joined channel)';
   }
@@ -186,9 +191,10 @@ export default class Chat {
       DISPLAY_COUNT);
     const result = messages.map((message) => this.displayMessage(message));
 
-    console.log('===== CHANNEL UPDATE =====');
+    console.log('\x1b[2J');
+    console.log('=====================');
     console.log(result.join('\n'));
-    console.log('===== CHANNEL UPDATE END =====');
+    console.log('=====================');
 
     this.repl.displayPrompt(true);
   }
