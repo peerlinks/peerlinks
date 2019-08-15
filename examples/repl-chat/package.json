@@ -12,6 +12,6 @@
   "dependencies": {
     "esm": "^3.2.25",
     "hyperswarm": "^2.0.6",
-    "vowlink-protocol": "^1.0.1-4"
+    "vowlink-protocol": "^1.0.1-5"
   }
 }
