@@ -8,6 +8,19 @@ Implementation of VowLink [Protocol][] in JavaScript.
 At this point the most useful starting point would be a [Protocol][] description
 page.
 
+## Help requested
+
+The protocol darft and the implementations are in the very early stages. Any
+feedback or ideas on boths are very appreciated.
+
+Not exhaustive list of possible issues:
+
+* Unclear wording in the protocol description
+* Cryptography problems
+* Bugs in implementation
+* API improvements
+* Documentation!
+
 ## LICENSE
 
 This software is licensed under the MIT License.
