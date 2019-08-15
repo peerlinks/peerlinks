@@ -31,9 +31,10 @@ describe('MemoryStorage', () => {
     };
   };
 
-  const at = async (offset) => {
-    const blob = await storage.getMessageAtOffset(channelId, offset);
-    return blob.toString();
+  const at = async (offset, limit) => {
+    const blobs = await storage.getMessagesAtOffset(channelId, offset,
+      limit);
+    return blobs.map((blob) => blob.toString());
   };
 
   const leaves = async () => {
@@ -66,6 +67,9 @@ describe('MemoryStorage', () => {
     assert.ok(await storage.hasMessage(channelId, fake.hash));
     const getFake = await storage.getMessage(channelId, fake.hash);
     assert.strictEqual(getFake.toString(), 'fake');
+
+    // NOTE: should not fail, even though fake is already in database
+    await storage.addMessage(fake);
   });
 
   it('should order messages in CRDT order', async () => {
@@ -74,10 +78,12 @@ describe('MemoryStorage', () => {
     await storage.addMessage(msg('b', 1));
     await storage.addMessage(msg('d', 2));
 
-    assert.strictEqual(await at(0), '0: a');
-    assert.strictEqual(await at(1), '1: b');
-    assert.strictEqual(await at(2), '1: c');
-    assert.strictEqual(await at(3), '2: d');
+    assert.deepStrictEqual(await at(0, 4), [
+      '0: a',
+      '1: b',
+      '1: c',
+      '2: d',
+    ]);
   });
 
   it('should query messages by height', async () => {

@@ -20,12 +20,14 @@ describe('Channel', () => {
     channel = null;
   });
 
-  const at = async (offset) => {
-    const message = await channel.getMessageAtOffset(offset);
-    if (message.content.body.root) {
-      return '<root>';
-    }
-    return message.content.body.json;
+  const at = async (offset, limit) => {
+    const messages = await channel.getMessagesAtOffset(offset, limit);
+    return messages.map((message) => {
+      if (message.content.body.root) {
+        return '<root>';
+      }
+      return message.content.body.json;
+    });
   };
 
   const msg = (text, parents, height, timestamp, identity = id) => {
@@ -44,21 +46,25 @@ describe('Channel', () => {
   describe('.post()', () => {
     it('should post messages and set parents appropriately', async () => {
       assert.strictEqual(await channel.getMessageCount(), 1);
-      assert.strictEqual(await at(0), '<root>');
+      assert.deepStrictEqual(await at(0), [ '<root>' ]);
       assert.strictEqual(await channel.getMinLeafHeight(), 0);
 
       const first = await channel.post(Message.json('hello'), id);
       assert.strictEqual(await channel.getMessageCount(), 2);
-      assert.strictEqual(await at(0), '<root>');
-      assert.strictEqual(await at(1), '"hello"');
+      assert.deepStrictEqual(await at(0, 2), [
+        '<root>',
+        '"hello"',
+      ]);
       assert.ok(first.verify(channel));
       assert.strictEqual(await channel.getMinLeafHeight(), 1);
 
       const second = await channel.post(Message.json('world'), id);
       assert.strictEqual(await channel.getMessageCount(), 3);
-      assert.strictEqual(await at(0), '<root>');
-      assert.strictEqual(await at(1), '"hello"');
-      assert.strictEqual(await at(2), '"world"');
+      assert.deepStrictEqual(await at(0, 3), [
+        '<root>',
+        '"hello"',
+        '"world"',
+      ]);
       assert.ok(second.verify(channel));
       assert.strictEqual(await channel.getMinLeafHeight(), 2);
 
@@ -80,7 +86,7 @@ describe('Channel', () => {
 
     it('should post messages concurrently', async () => {
       assert.strictEqual(await channel.getMessageCount(), 1);
-      assert.strictEqual(await at(0), '<root>');
+      assert.deepStrictEqual(await at(0), [ '<root>' ]);
 
       await Promise.all([
         channel.post(Message.json('hello'), id),
@@ -91,7 +97,7 @@ describe('Channel', () => {
 
       const last = await channel.post(Message.json('world'), id);
       assert.strictEqual(await channel.getMessageCount(), 4);
-      assert.strictEqual(await at(3), '"world"');
+      assert.deepStrictEqual(await at(3, 1), [ '"world"' ]);
       assert.ok(last.height > 1);
       assert.ok(last.parents.length >= 1);
       assert.ok(last.verify(channel));
@@ -299,8 +305,9 @@ describe('Channel', () => {
       await clone.sync(channel);
       assert.strictEqual(await channel.getMessageCount(), 32);
 
-      const last = await channel.getMessageAtOffset(31);
-      assert.strictEqual(last.hash.toString('hex'), merge.hash.toString('hex'));
+      const last = await channel.getMessagesAtOffset(31, 1);
+      assert.strictEqual(last[0].hash.toString('hex'),
+        merge.hash.toString('hex'));
 
       // Do a final clone
 

@@ -181,11 +181,10 @@ export default class Chat {
   async displayChannel() {
     const count = await this.channel.getMessageCount();
 
-    const result = [];
-    for (let i = Math.max(0, count - DISPLAY_COUNT); i < count; i++) {
-      const message = await this.channel.getMessageAtOffset(i);
-      result.push(this.displayMessage(message));
-    }
+    const messages = await this.channel.getMessagesAtOffset(
+      Math.max(0, count - DISPLAY_COUNT),
+      DISPLAY_COUNT);
+    const result = messages.map((message) => this.displayMessage(message));
 
     console.log('===== CHANNEL UPDATE =====');
     console.log(result.join('\n'));
