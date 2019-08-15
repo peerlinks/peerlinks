@@ -104,5 +104,8 @@ describe('Protocol', () => {
     const encrypted = protocol.encryptData(Buffer.from('hello'));
     const decrypted = protocol.decryptData(encrypted);
     assert.strictEqual(decrypted.toString(), 'hello');
+
+    // Should create encrypted identity
+    await a.createIdentity('test');
   });
 });
