@@ -10,7 +10,7 @@ page.
 
 ## Help requested
 
-The protocol darft and the implementations are in the very early stages. Any
+The protocol draft and the implementations are in the very early stages. Any
 feedback or ideas on boths are very appreciated.
 
 Not exhaustive list of possible issues:
