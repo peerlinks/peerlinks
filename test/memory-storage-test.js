@@ -59,7 +59,7 @@ describe('MemoryStorage', () => {
 
     const leaves = await storage.getLeafHashes(channelId);
     assert.strictEqual(leaves.length, 1);
-    assert.strictEqual(leaves[0].toString(), 'fake');
+    assert.strictEqual(leaves[0].toString('hex'), fake.hash.toString('hex'));
 
     assert.ok(await storage.hasMessage(channelId, fake.hash));
     const getFake = await storage.getMessage(channelId, fake.hash);
@@ -158,16 +158,16 @@ describe('MemoryStorage', () => {
     assert.deepStrictEqual(await leaves(), []);
 
     await storage.addMessage(msg('a', 0, []));
-    assert.deepStrictEqual(await leaves(), [ '0: a' ]);
+    assert.deepStrictEqual(await leaves(), [ 'a' ]);
 
     await storage.addMessage(msg('c', 1, [ 'a' ]));
-    assert.deepStrictEqual(await leaves(), [ '1: c' ]);
+    assert.deepStrictEqual(await leaves(), [ 'c' ]);
 
     await storage.addMessage(msg('b', 1, [ 'a' ]));
-    assert.deepStrictEqual(await leaves(), [ '1: b', '1: c' ]);
+    assert.deepStrictEqual(await leaves(), [ 'b', 'c' ]);
 
     await storage.addMessage(msg('d', 2, [ 'b', 'c' ]));
-    assert.deepStrictEqual(await leaves(), [ '2: d' ]);
+    assert.deepStrictEqual(await leaves(), [ 'd' ]);
   });
 
   it('should store and retrieve entities', async () => {
