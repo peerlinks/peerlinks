@@ -29,8 +29,8 @@ export default class Chat {
 
     this.decryptInvite = null;
 
-    this.swarm.on('connection', (socket) => {
-      this.onConnection(socket);
+    this.swarm.on('connection', (socket, info) => {
+      this.onConnection(socket, info);
     });
   }
 
@@ -234,10 +234,14 @@ export default class Chat {
 
   // Networking
 
-  onConnection(stream) {
+  onConnection(stream, info) {
     const socket = new StreamSocket(stream);
 
-    this.protocol.connect(socket).catch((e) => {
+    this.protocol.connect(socket).then((reconnect) => {
+      if (!reconnect) {
+        info.reconnect(false);
+      }
+    }).catch((e) => {
       console.error(e.stack);
     });
   }
