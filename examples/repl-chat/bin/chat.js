@@ -48,12 +48,13 @@ async function main() {
 
   io.context.help = () => {
     console.log('Available commands:');
-    console.log('  iam(\'name\')');
-    console.log('  post(\'message text\')');
-    console.log('  requestInvite()');
-    console.log('  identities()');
-    console.log('  channels()');
-    console.log('  setChannel(\'channel name\')');
+    console.log('  iam(\'name\') - create new or select existing ' +
+      'identity+channel');
+    console.log('  setChannel(\'channel name\') - set current channel');
+    console.log('  post(\'message text\') - post message to current channel');
+    console.log('  requestInvite() - request an invite to new channel');
+    console.log('  identities() - list available identities');
+    console.log('  channels() - list available channels');
     return '(help end)';
   };
 

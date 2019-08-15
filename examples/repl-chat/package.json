@@ -1,18 +1,22 @@
 {
-  "name": "repl-chat",
+  "name": "vowlink-repl-chat",
   "version": "1.0.0",
+  "private": true,
   "main": "lib/chat.js",
   "scripts": {
     "start": "node -r esm bin/chat.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "vowlink",
+    "example"
+  ],
+  "author": "Fedor Indutny <fedor@indutny.com>",
+  "license": "MIT",
   "description": "",
   "dependencies": {
     "esm": "^3.2.25",
     "hyperswarm": "^2.0.6",
-    "vowlink-protocol": "^1.0.1-9",
+    "vowlink-protocol": "^1.0.1-10",
     "vowlink-sqlite-storage": "^1.0.1-5"
   }
 }

@@ -31,6 +31,7 @@
   "dependencies": {
     "debug": "^4.1.1",
     "protobufjs": "^6.8.8",
+    "quick-lru": "^4.0.1",
     "sodium-universal": "^2.0.0"
   },
   "devDependencies": {
