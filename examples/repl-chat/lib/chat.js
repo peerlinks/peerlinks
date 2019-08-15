@@ -52,7 +52,7 @@ export default class Chat {
     const request64 = JSON.stringify(request.toString('base64'));
     const trusteeName = JSON.stringify(this.identity.name);
 
-    console.log('Ask you peer to run:');
+    console.log('Ask your peer to run:');
     console.log(`issueInvite(${request64},${trusteeName})`);
     return '(generated invite request)';
   }
