@@ -1,6 +1,6 @@
 {
   "name": "@vowlink/protocol",
-  "version": "1.0.1-12",
+  "version": "1.0.1-13",
   "description": "VowLink Protocol implementation",
   "main": "lib/protocol.js",
   "scripts": {
