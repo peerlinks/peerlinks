@@ -44,6 +44,8 @@ describe('Protocol', () => {
     const clone = new Protocol({ storage: a.storage });
     await clone.load();
 
+    assert.ok(clone.getIdentity('1').canInvite(clone.getChannel('1')));
+
     assert.deepStrictEqual(clone.channels.map((channel) => channel.name),
       [ '1', '2' ]);
     assert.deepStrictEqual(clone.identities.map((id) => id.name),
