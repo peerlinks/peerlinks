@@ -1,7 +1,7 @@
 import * as repl from 'repl';
 import * as vm from 'vm';
 
-import Storage from 'vowlink-sqlite-storage';
+import Storage from '@vowlink/sqlite-storage';
 
 import Chat from '../';
 

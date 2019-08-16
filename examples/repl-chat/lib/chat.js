@@ -1,6 +1,5 @@
 import { Buffer } from 'buffer';
 
-import Storage from 'vowlink-sqlite-storage';
 import hyperswarm from 'hyperswarm';
 
 import Protocol, {
@@ -8,7 +7,7 @@ import Protocol, {
   Message,
   Peer,
   StreamSocket,
-} from 'vowlink-protocol';
+} from '@vowlink/protocol';
 
 const DISPLAY_COUNT = 30;
 
