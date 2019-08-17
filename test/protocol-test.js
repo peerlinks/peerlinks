@@ -27,7 +27,7 @@ describe('Protocol', () => {
   });
 
   it('should create new identity with a channel', async () => {
-    const test = await a.createIdentity('test');
+    const [ test, _ ] = await a.createIdentityPair('test');
     assert.strictEqual(test.name, 'test');
 
     assert.strictEqual(a.identities.length, 1);
@@ -35,8 +35,8 @@ describe('Protocol', () => {
   });
 
   it('should reload identities/channels from a storage', async () => {
-    const id2 = await a.createIdentity('2');
-    const id1 = await a.createIdentity('1');
+    const id2 = (await a.createIdentityPair('2'))[0];
+    const id1 = (await a.createIdentityPair('1'))[0];
 
     assert.strictEqual(id1.name, '1');
     assert.strictEqual(id2.name, '2');
@@ -53,8 +53,8 @@ describe('Protocol', () => {
   });
 
   it('should connect peers', async () => {
-    const idA = await a.createIdentity('a');
-    const idB = await b.createIdentity('b');
+    const [ idA, _ ] = await a.createIdentityPair('a');
+    const [ idB, channelB ] = await b.createIdentityPair('b');
 
     const run = async () => {
       // Generate invite request
@@ -62,7 +62,6 @@ describe('Protocol', () => {
       const invitePromise = a.waitForInvite(requestId).promise;
 
       // Issue invite
-      const channelB = b.getChannel('b');
       const { encryptedInvite, peerId } = idB.issueInvite(
         channelB, request, 'b');
 
@@ -113,12 +112,12 @@ describe('Protocol', () => {
     assert.strictEqual(decrypted.toString(), 'hello');
 
     // Should create encrypted identity
-    await a.createIdentity('test');
+    await a.createIdentityPair('test');
   });
 
   it('should work when peers have no common channels', async () => {
-    const idA = await a.createIdentity('a');
-    const idB = await b.createIdentity('b');
+    const idA = (await a.createIdentityPair('a'))[0];
+    const idB = (await b.createIdentityPair('b'))[0];
 
     await Promise.race([
       a.connect(socketA),

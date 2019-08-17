@@ -43,8 +43,15 @@ export default class Chat {
     }
 
     const existing = this.protocol.getIdentity(name);
-    this.identity = existing || await this.protocol.createIdentity(name);
-    await this.setChannel(name);
+    let channel;
+    if (existing) {
+      this.identity = existing;
+      channel = this.protocol.getChannel(name);
+    } else {
+      [ this.identity, channel ] =
+        await this.protocol.createIdentityPair(name);
+    }
+    this.setChannel(channel);
 
     return existing ? `Using identity: "${name}"` :
       `Created identity: "${name}"`;
