@@ -51,7 +51,7 @@ export default class Chat {
       [ this.identity, channel ] =
         await this.protocol.createIdentityPair(name);
     }
-    this.setChannel(channel);
+    this.setChannel(channel.name);
 
     return existing ? `Using identity: "${name}"` :
       `Created identity: "${name}"`;
