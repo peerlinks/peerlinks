@@ -351,17 +351,24 @@ The `invite.links` MUST be a chain from `channel_priv_key` to the
 
 This DAG would make little sense without synchronization.
 
+NOTE: For all messages below and for each channel the first `Query` and/or
+`Bulk` messages SHOULD have `seq = 0`, and the each next `Query` or `Bulk`
+SHOULD increment it by `1` and wrap it as in unsigned integer addition in C.
+The `QueryResponse` and `BulkResponse` MUST contain the same `seq` value as in
+the `Query` and `Bulk` respectively that triggered them.
+
 Unencrypted `Query` is sent in order to request the latest messages from the
 channel:
 ```proto
 message Query {
   bytes channel_id = 1;
+  uint32 seq = 2;
   oneof cursor {
-    int64 height = 2;
-    bytes hash = 3;
+    int64 height = 3;
+    bytes hash = 4;
   }
-  bool is_backward = 4;
-  uint32 limit = 5;
+  bool is_backward = 5;
+  uint32 limit = 6;
 }
 ```
 The `query.cursor` MUST be either of `height` or `hash`.
@@ -375,9 +382,10 @@ message QueryResponse {
   }
 
   bytes channel_id = 1;
-  repeated Abbreviated abbreviated_messages = 2;
-  bytes forward_hash = 3;
-  bytes backward_hash = 4;
+  uint32 seq = 2;
+  repeated Abbreviated abbreviated_messages = 3;
+  bytes forward_hash = 4;
+  bytes backward_hash = 5;
 }
 ```
 
@@ -412,7 +420,8 @@ that are not present in their dataset. This can be done with `Bulk` packet:
 ```proto
 message Bulk {
   bytes channel_id = 1;
-  repeated bytes hashes = 2;
+  uint32 seq = 2;
+  repeated bytes hashes = 3;
 }
 ```
 
@@ -424,8 +433,9 @@ set to the number of processes messages:
 ```proto
 message BulkResponse {
   bytes channel_id = 1;
-  repeated ChannelMessage messages = 2;
-  uint32 forward_index = 3;
+  uint32 seq = 2;
+  repeated ChannelMessage messages = 3;
+  uint32 forward_index = 4;
 }
 ```
 
