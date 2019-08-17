@@ -1,9 +1,5 @@
-import { SocketBase } from '../../';
-
-export default class Socket extends SocketBase {
+export default class Socket {
   constructor(name) {
-    super();
-
     this.id = name;
     this.remote = null;
 
@@ -33,8 +29,6 @@ export default class Socket extends SocketBase {
   }
 
   async close() {
-    super.close();
-
     while (this.receiveQueue.length !== 0) {
       const elem = this.receiveQueue.shift();
       elem.reject(new Error('Closed'));
