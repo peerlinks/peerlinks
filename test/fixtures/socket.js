@@ -35,8 +35,9 @@ export default class Socket extends SocketBase {
   async close() {
     super.close();
 
-    for (const timer of this.timers) {
-      clearTimeout(timer);
+    while (this.receiveQueue.length !== 0) {
+      const elem = this.receiveQueue.shift();
+      elem.reject(new Error('Closed'));
     }
   }
 
