@@ -218,13 +218,11 @@ export default class Chat {
       .toLocaleTimeString();
     const author = displayPath.join('>');
 
-    const body = message.content.body;
-
     let text;
-    if (body.root) {
+    if (message.isRoot) {
       text = '<root>';
     } else {
-      text = JSON.parse(body.json).text;
+      text = message.json.text;
     }
     return `(${message.height}) ${time} [${author}]: ${text}`;
   }
