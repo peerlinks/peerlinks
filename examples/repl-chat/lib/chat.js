@@ -61,13 +61,15 @@ export default class Chat {
     const trusteeName = JSON.stringify(this.identity.name);
 
     console.log('Ask your peer to run:');
-    console.log(`issueInvite(${requstId64},${request64},${trusteeName})`);
+    console.log(`issueInvite(${requestId64},${request64},${trusteeName})`);
+    console.log('...waiting');
 
     const encryptedInvite = await this.swarm.waitForInvite(
       requestId, INVITE_TIMEOUT).promise;
     const invite = decrypt(encryptedInvite);
 
-    const channel = await a.channelFromInvite(invite, idA);
+    const channel = await this.protocol.channelFromInvite(
+      invite, this.identity);
 
     // Join channel's swarm to start synchronization
     await this.setChannel(channel.name);
