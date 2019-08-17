@@ -1,15 +1,11 @@
 import { Buffer } from 'buffer';
 
-import hyperswarm from 'hyperswarm';
-
-import Protocol, {
-  Channel,
-  Message,
-  Peer,
-  StreamSocket,
-} from '@vowlink/protocol';
+import Protocol, { Message }from '@vowlink/protocol';
+import Swarm from '@vowlink/swarm';
 
 const DISPLAY_COUNT = 30;
+
+const INVITE_TIMEOUT = 2 * 60 * 1000; // 2 minutes
 
 export default class Chat {
   constructor(repl, storage) {
@@ -18,23 +14,18 @@ export default class Chat {
     this.repl.displayPrompt(true);
 
     this.storage = storage;
+    this.swarm = null;
 
-    this.swarm = hyperswarm();
-    this.protocol = new Protocol({
-      storage,
-    });
+    this.protocol = new Protocol({ storage });
     this.identity = null;
     this.channel = null;
-
-    this.decryptInvite = null;
-
-    this.swarm.on('connection', (socket, info) => {
-      this.onConnection(socket, info);
-    });
+    this.channelWait = null;
   }
 
   async load() {
     await this.protocol.load();
+
+    this.swarm = new Swarm(this.protocol);
   }
 
   async iam(name) {
@@ -62,63 +53,50 @@ export default class Chat {
       throw new Error('`iam()` must be called first');
     }
 
-    const { request, decrypt } = this.identity.requestInvite(
+    const { requestId, request, decrypt } = this.identity.requestInvite(
       this.protocol.id);
 
-    this.decryptInvite = decrypt;
-
+    const requestId64 = JSON.stringify(requestId.toString('base64'));
     const request64 = JSON.stringify(request.toString('base64'));
     const trusteeName = JSON.stringify(this.identity.name);
 
     console.log('Ask your peer to run:');
-    console.log(`issueInvite(${request64},${trusteeName})`);
-    return '(generated invite request)';
-  }
+    console.log(`issueInvite(${requstId64},${request64},${trusteeName})`);
 
-  async issueInvite(request, inviteeName) {
-    if (!this.identity) {
-      throw new Error('`iam()` must be called first');
-    }
-    if (!request || !inviteeName) {
-      throw new Error(
-        'Usage: issueInvite([ base64 request string], inviteeName)');
-    }
+    const encryptedInvite = await this.swarm.waitForInvite(
+      requestId, INVITE_TIMEOUT).promise;
+    const invite = decrypt(encryptedInvite);
 
-    request = Buffer.from(request, 'base64');
-    const { encryptedInvite } = this.identity.issueInvite(
-      this.channel, request, inviteeName);
-    const json = JSON.stringify({
-      requestId: encryptedInvite.requestId.toString('base64'),
-      box: encryptedInvite.box.toString('base64'),
-    });
-
-    console.log('Ask invitee to run:');
-    console.log(`join(${json})`);
-
-    return '(issued invite)';
-  }
-
-  async join(invite) {
-    if (!this.identity) {
-      throw new Error('`iam()` must be called first');
-    }
-    if (!invite || !invite.requestId || !invite.box || !this.decryptInvite) {
-      throw new Error(
-        'Ask your peer for an invite first with `requestInvite()`');
-    }
-
-    invite = {
-      requestId: Buffer.from(invite.requestId, 'base64'),
-      box: Buffer.from(invite.box, 'base64'),
-    };
-    invite = this.decryptInvite(invite);
-    const channel = await this.protocol.channelFromInvite(
-      invite, this.identity);
+    const channel = await a.channelFromInvite(invite, idA);
 
     // Join channel's swarm to start synchronization
     await this.setChannel(channel.name);
 
     return `Joined channel: "${this.channel.name}"`;
+  }
+
+  async issueInvite(requestId, request, inviteeName) {
+    if (!this.identity) {
+      throw new Error('`iam()` must be called first');
+    }
+    if (!requestId, !request || !inviteeName) {
+      throw new Error(
+        'Usage: issueInvite([ base64 request string], inviteeName)');
+    }
+
+    requestId = Buffer.from(requestId, 'base64');
+    request = Buffer.from(request, 'base64');
+
+    const { encryptedInvite, peerId } = this.identity.issueInvite(
+      this.channel, request, inviteeName);
+
+    await this.swarm.sendInvite({
+      requestId,
+      peerId,
+      encryptedInvite,
+    }, INVITE_TIMEOUT).promise;
+
+    return '(issued invite)';
   }
 
   async post(text) {
@@ -149,11 +127,9 @@ export default class Chat {
   }
 
   async setChannel(name) {
-    if (this.channel) {
-      this.swarm.leave(this.channel.id);
-      for (const socket of this.swarm.connections) {
-        socket.destroy();
-      }
+    if (this.channelWait) {
+      this.channelWait.cancel();
+      this.channelWait = null;
     }
 
     const channel = this.protocol.getChannel(name);
@@ -162,21 +138,28 @@ export default class Chat {
         `Use \`requestInvite()\` to join`);
     }
 
-    const onMessage = () => {
-      // Bell sound
-      process.stdout.write('\u0007');
+    const loop = () => {
+      this.channelWait = channel.waitForIncomingMessage();
 
-      this.displayChannel().catch(() => {});
-      channel.waitForIncomingMessage().promise.then(onMessage);
+      this.channelWait.promise.then(() => {
+        this.channelWait = null;
+
+        // Bell sound
+        process.stdout.write('\u0007');
+
+        this.displayChannel().catch(() => {
+          // ignore
+        });
+        loop();
+      }).catch(() => {
+        // ignore
+      });
     };
 
-    channel.waitForIncomingMessage().promise.then(onMessage);
-
     this.channel = channel;
-    this.swarm.join(channel.id, {
-      lookup: true,
-      announce: true,
-    });
+    this.swarm.joinChannel(channel);
+
+    loop();
 
     await this.displayChannel();
 
@@ -232,19 +215,5 @@ export default class Chat {
       text = message.json.text;
     }
     return `(${message.height}) ${time} [${author}]: ${text}`;
-  }
-
-  // Networking
-
-  onConnection(stream, info) {
-    const socket = new StreamSocket(stream);
-
-    this.protocol.connect(socket).then((reconnect) => {
-      if (!reconnect) {
-        info.reconnect(false);
-      }
-    }).catch((e) => {
-      console.error(e.stack);
-    });
   }
 }

@@ -63,7 +63,6 @@ async function main() {
     'post',
     'requestInvite',
     'issueInvite',
-    'join',
 
     'identities',
     'channels',
