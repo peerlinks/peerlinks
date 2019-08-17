@@ -32,14 +32,8 @@ const identity = await vowlink.createIdentity('identity-name');
 const channel = vowlink.getChannel('identity-name');
 ```
 
-Connect remote peers (to be simplified) to synchronize and distribute messages:
-```js
-// stream is a `Duplex` instance
-const socket = new StreamSocket(stream);
-
-// NOTE: will block for the lifetime of socket
-await vowLink.connect(socket);
-```
+See [@vowlink/hyperswarm][swarm] for details on connecting to remote peers and
+requesting/issuing invites.
 
 Process incoming messages (and similarly outgoing with `waitForOutgoingMessage`:
 ```js
@@ -78,29 +72,6 @@ for (const message of messages) {
 
   console.log(`${displayPath.join('>')}: ${text}`);
 }
-```
-
-Request invite to a channel:
-```js
-// Generate invite request
-const { requestId, request, decrypt } = identity.requestInvite(vowLink.id);
-
-const encryptedInvite = await vowLink.waitForInvite(requestId).promise;
-const invite = decrypt(encryptedInvite);
-
-const channel = await vowLink.channelFromInvite(invite, identity);
-```
-NOTE: requesting invite reveals associated channel
-NOTE: `request` has to be distributed by some other means (perhaps through
-displayed QR code).
-
-Issue invite using request:
-```js
-const { encryptedInvite, peerId } =
-  idB.issueInvite(channel, request, 'invitee-name');
-
-const peer = await b.waitForPeer(peerId).promise;
-await peer.sendInvite(encryptedInvite);
 ```
 
 ## Help requested
@@ -143,3 +114,4 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 [Protocol]: protocol.md
 [promise-waitlist]: https://github.com/indutny/promise-waitlist
+[swarm]: https://github.com/vowlink/vowlink-swarm
