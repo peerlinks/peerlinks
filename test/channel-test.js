@@ -112,11 +112,13 @@ describe('Channel', () => {
     });
 
     it('should notify message waiters', async () => {
-      const [ message, _ ] = await Promise.all([
+      const [ message, same, _ ] = await Promise.all([
+        channel.waitForOutgoingMessage().promise,
         channel.waitForOutgoingMessage().promise,
         channel.post(Message.json('hello'), id),
       ]);
 
+      assert.strictEqual(message, same);
       assert.strictEqual(message.json, 'hello');
     });
   });
