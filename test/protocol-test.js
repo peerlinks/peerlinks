@@ -106,7 +106,7 @@ describe('Protocol', () => {
     // Derivation of encryption key is a slow process
     this.timeout(20000);
 
-    const protocol = new Protocol({ password: 'secret' });
+    const protocol = new Protocol({ passphrase: 'secret' });
     const encrypted = protocol.encryptData(Buffer.from('hello'));
     const decrypted = protocol.decryptData(encrypted);
     assert.strictEqual(decrypted.toString(), 'hello');

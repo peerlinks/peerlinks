@@ -22,7 +22,7 @@ await storage.open();
 // Initialize protocol layer
 const vowLink = new VowLink({
   storage,
-  password: 'secret',
+  passphrase: 'secret',
 });
 await vowLink.load();
 
