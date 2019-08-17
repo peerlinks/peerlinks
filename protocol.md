@@ -51,6 +51,11 @@ message Hello {
 
 NOTE: `peer_id.length` MUST be checked to be equal to 32 bytes.
 
+NOTE: In the course of the protocol lifetime there is a chance that some peers
+will connect to each other twice. This could be mitigated through some
+techniques in the future. For now we just ignore the problem, assuming that it
+will not have substantial impact on the first versions of clients.
+
 The `hello.version` specifies the protocol version and MUST be checked by the
 recipient. In case of the mismatch and/or other errors `Error` SHOULD be sent:
 ```proto
