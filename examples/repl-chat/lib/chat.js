@@ -107,8 +107,6 @@ export default class Chat {
     invite = this.decryptInvite(invite);
     const channel = await this.protocol.channelFromInvite(
       invite, this.identity);
-    await this.protocol.addChannel(channel);
-    await this.protocol.saveIdentity(this.identity);
 
     // Join channel's swarm to start synchronization
     await this.setChannel(channel.name);

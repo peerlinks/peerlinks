@@ -8,6 +8,101 @@ Implementation of VowLink [Protocol][] in JavaScript.
 At this point the most useful starting point would be a [Protocol][] description
 page.
 
+## Usage
+
+Initialization:
+```js
+import VowLink, { Message, StreamSocket } from '@vowlink/protocol';
+import SqliteStorage from '@vowlink/sqlite-storage';
+
+// Initialize persistence layer
+const storage = new SqliteStorage({ file: 'db.sqlite' });
+await storage.open();
+
+// Initialize protocol layer
+const vowLink = new VowLink({
+  storage,
+  password: 'secret',
+});
+await vowLink.load();
+
+// Create identity (and associated channel)
+// NOTE: multiple identities/channels are supported
+const identity = await vowlink.createIdentity('identity-name');
+const channel = vowlink.getChannel('identity-name');
+```
+
+Connect remote peers (to be simplified) to synchronize and distribute messages:
+```js
+// stream is a `Duplex` instance
+const socket = new StreamSocket(stream);
+
+// NOTE: will block for the lifetime of socket
+await vowLink.connect(socket);
+```
+
+Process incoming messages (and similarly outgoing with `waitForOutgoingMessage`:
+```js
+function loop() {
+  const wait = channel.waitForIncomingMessage();
+  wait.promise.then((message) => {
+    // Display message
+    loop();
+  });
+
+  // Call `wait.cancel()` if needed
+}
+loop();
+```
+See [promise-waitlist][] for waiting APIs here and in later code samples..
+
+Post a new message:
+```js
+const author = identity;
+await channel.post(Message.json({ /* any json data here */ }), author);
+```
+
+Display channel messages:
+```js
+const count = await channel.getMessageCount();
+
+// Get the latest 100 messages
+const messages = await channel.getMessagesAtOffset(
+  Math.max(0, count - 100), // offset
+  100); // limit
+
+for (const message of messages) {
+  const displayPath = message.getAuthor().displayPath;
+
+  const text = message.isRoot ? '<root>' : message.json.text;
+
+  console.log(`${displayPath.join('>')}: ${text}`);
+}
+```
+
+Request invite to a channel:
+```js
+// Generate invite request
+const { requestId, request, decrypt } = identity.requestInvite(vowLink.id);
+
+const encryptedInvite = await vowLink.waitForInvite(requestId).promise;
+const invite = decrypt(encryptedInvite);
+
+const channel = await vowLink.channelFromInvite(invite, identity);
+```
+NOTE: requesting invite reveals associated channel
+NOTE: `request` has to be distributed by some other means (perhaps through
+displayed QR code).
+
+Issue invite using request:
+```js
+const { encryptedInvite, peerId } =
+  idB.issueInvite(channel, request, 'invitee-name');
+
+const peer = await b.waitForPeer(peerId).promise;
+await peer.sendInvite(encryptedInvite);
+```
+
 ## Help requested
 
 The protocol draft and the implementations are in the very early stages. Any
@@ -47,3 +142,4 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 [Protocol]: protocol.md
+[promise-waitlist]: https://github.com/indutny/promise-waitlist

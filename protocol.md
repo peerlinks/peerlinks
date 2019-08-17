@@ -298,6 +298,8 @@ message InviteRequest {
 where `trustee_pub_key` is the invitee's public key. `box_pub_key` is from
 `sodium.box.keyPair()`.
 
+NOTE: requesting invite reveals public key and an associated channel.
+
 Upon receiving `InviteRequest` the peer having write access to the channel MUST
 consider the invitation carefully and ONLY IN CASE of user confirmation issue
 an `EncryptedInvite`:

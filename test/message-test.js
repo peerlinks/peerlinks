@@ -47,7 +47,7 @@ describe('Message', () => {
     copy.decrypt(channel);
     assert.ok(copy.verify(channel));
 
-    assert.strictEqual(copy.content.body.json, '"okay"');
+    assert.strictEqual(copy.json, 'okay');
     assert.strictEqual(copy.hash.toString('hex'), message.hash.toString('hex'));
 
     const invalid = new Message({

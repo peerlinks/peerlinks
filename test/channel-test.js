@@ -23,10 +23,10 @@ describe('Channel', () => {
   const at = async (offset, limit) => {
     const messages = await channel.getMessagesAtOffset(offset, limit);
     return messages.map((message) => {
-      if (message.content.body.root) {
+      if (message.isRoot) {
         return '<root>';
       }
-      return message.content.body.json;
+      return message.json;
     });
   };
 
@@ -53,7 +53,7 @@ describe('Channel', () => {
       assert.strictEqual(await channel.getMessageCount(), 2);
       assert.deepStrictEqual(await at(0, 2), [
         '<root>',
-        '"hello"',
+        'hello',
       ]);
       assert.ok(first.verify(channel));
       assert.strictEqual(await channel.getMinLeafHeight(), 1);
@@ -62,8 +62,8 @@ describe('Channel', () => {
       assert.strictEqual(await channel.getMessageCount(), 3);
       assert.deepStrictEqual(await at(0, 3), [
         '<root>',
-        '"hello"',
-        '"world"',
+        'hello',
+        'world',
       ]);
       assert.ok(second.verify(channel));
       assert.strictEqual(await channel.getMinLeafHeight(), 2);
@@ -97,7 +97,7 @@ describe('Channel', () => {
 
       const last = await channel.post(Message.json('world'), id);
       assert.strictEqual(await channel.getMessageCount(), 4);
-      assert.deepStrictEqual(await at(3, 1), [ '"world"' ]);
+      assert.deepStrictEqual(await at(3, 1), [ 'world' ]);
       assert.ok(last.height > 1);
       assert.ok(last.parents.length >= 1);
       assert.ok(last.verify(channel));
@@ -117,7 +117,7 @@ describe('Channel', () => {
         channel.post(Message.json('hello'), id),
       ]);
 
-      assert.strictEqual(message.content.body.json, '"hello"');
+      assert.strictEqual(message.json, 'hello');
     });
   });
 
@@ -259,7 +259,7 @@ describe('Channel', () => {
         channel.receive(remote),
       ]);
 
-      assert.strictEqual(message.content.body.json, '"okay"');
+      assert.strictEqual(message.json, 'okay');
     });
   });
 

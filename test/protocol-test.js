@@ -76,7 +76,8 @@ describe('Protocol', () => {
       // Decrypt and create channel
       const invite = decrypt(await invitePromise);
       const channelForA = await a.channelFromInvite(invite, idA);
-      await a.addChannel(channelForA);
+
+      // Duplicate adds should throw
       await assert.rejects(a.addChannel(channelForA), {
         name: 'Error',
         message: 'Channel with a duplicate name: "b"',
@@ -89,7 +90,7 @@ describe('Protocol', () => {
 
       assert.strictEqual(await channelForA.getMessageCount(), 2);
       const last = await channelForA.getMessagesAtOffset(1);
-      assert.strictEqual(last[0].content.body.json, '"ohai"');
+      assert.strictEqual(last[0].json, 'ohai');
     };
 
     await Promise.race([
