@@ -173,12 +173,12 @@ export default class Chat {
   //
 
   async displayChannel() {
-    const count = await this.channel.getMessageCount();
-
-    const messages = await this.channel.getMessagesAtOffset(
-      Math.max(0, count - DISPLAY_COUNT),
+    const messages = await this.channel.getReverseMessagesAtOffset(
+      0,
       DISPLAY_COUNT);
-    const result = messages.map((message) => this.displayMessage(message));
+    const result = messages.slice().reverse().map((message) => {
+      return this.displayMessage(message);
+    });
 
     console.log('\x1b[2J');
     console.log(`===== ${this.channel.name} =====`);
