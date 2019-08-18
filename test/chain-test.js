@@ -82,6 +82,7 @@ describe('Chain', () => {
     ];
 
     const chain = new Chain(links);
+    assert.ok(!chain.canAppend());
 
     assert.ok(chain.verify(channelA));
     assert.ok(!chain.verify(channelB));
