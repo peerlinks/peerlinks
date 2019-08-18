@@ -403,4 +403,29 @@ describe('Channel', () => {
 
     await copy.post(Message.json('hello'), id);
   });
+
+  it('should get reverse messages by offset/limit', async () => {
+    await channel.post(Message.json('a'), id);
+    await channel.post(Message.json('b'), id);
+    await channel.post(Message.json('c'), id);
+    await channel.post(Message.json('d'), id);
+
+    assert.strictEqual(await channel.getMessageCount(), 5);
+
+    const messages = await channel.getReverseMessagesAtOffset(0, 2);
+    assert.deepStrictEqual(messages.map((m) => m.json), [
+      'd',
+      'c',
+    ])
+
+    const messages2 = await channel.getReverseMessagesAtOffset(2, 1000);
+    assert.deepStrictEqual(messages2.map((m) => m.json || '<root>'), [
+      'b',
+      'a',
+      '<root>',
+    ])
+
+    const messages3 = await channel.getReverseMessagesAtOffset(100);
+    assert.strictEqual(messages3.length, 0);
+  });
 });

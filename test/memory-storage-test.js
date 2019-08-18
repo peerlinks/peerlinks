@@ -192,4 +192,17 @@ describe('MemoryStorage', () => {
     const missing = await storage.retrieveEntity('fake', randomBytes(32), Fake);
     assert.ok(!missing);
   });
+
+  it('should get reverse hashes by offset/limit', async () => {
+    await storage.addMessage(msg('a', 0));
+    await storage.addMessage(msg('c', 1));
+    await storage.addMessage(msg('b', 1));
+    await storage.addMessage(msg('d', 2));
+
+    const hashes = await storage.getReverseHashesAtOffset(channelId, 0, 2);
+    assert.deepStrictEqual(hashes.map((h) => h.toString()), [ 'd', 'c' ]);
+
+    const hashes2 = await storage.getReverseHashesAtOffset(channelId, 2, 2);
+    assert.deepStrictEqual(hashes2.map((h) => h.toString()), [ 'b', 'a' ]);
+  });
 });
