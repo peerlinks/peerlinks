@@ -58,14 +58,13 @@ await channel.post(Message.json({ /* any json data here */ }), author);
 
 Display channel messages:
 ```js
-const count = await channel.getMessageCount();
-
 // Get the latest 100 messages
-const messages = await channel.getMessagesAtOffset(
-  Math.max(0, count - 100), // offset
-  100); // limit
+const messages = await channel.getReverseMessagesAtOffset(
+  0, // end of the message list
+  100 // limit
+);
 
-for (const message of messages) {
+for (const message of messages.slice().reverse()) {
   const displayPath = message.getAuthor().displayPath;
 
   const text = message.isRoot ? '<root>' : message.json.text;
