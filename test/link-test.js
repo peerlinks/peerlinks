@@ -26,11 +26,13 @@ describe('Link', () => {
     });
 
     assert.ok(link.verify(channel, issuer.publicKey));
+    assert.ok(link.isValid());
     assert.ok(!link.verify(channel, trustee.publicKey));
 
     // Invalid because of timestamp
     const ONE_YEAR = 365 * 24 * 3600;
     assert.ok(!link.verify(channel, issuer.publicKey, now() + ONE_YEAR));
+    assert.ok(!link.isValid(now() + ONE_YEAR));
   });
 
   it('should be throw on invalid name length', () => {

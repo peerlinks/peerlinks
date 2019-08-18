@@ -85,6 +85,7 @@ describe('Chain', () => {
     assert.ok(!chain.canAppend());
 
     assert.ok(chain.verify(channelA));
+    assert.ok(chain.isValid());
     assert.ok(!chain.verify(channelB));
 
     const leafKey = chain.getLeafKey(channelA);
@@ -120,5 +121,6 @@ describe('Chain', () => {
     const chain = new Chain(links);
 
     assert.ok(!chain.verify(channelA));
+    assert.ok(!chain.isValid());
   });
 });
