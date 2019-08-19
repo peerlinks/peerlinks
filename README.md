@@ -8,6 +8,10 @@ Implementation of VowLink [Protocol][] in JavaScript.
 At this point the most useful starting point would be a [Protocol][] description
 page.
 
+## Demo
+
+Try the prototype of [Electron App][electron] of the protocol!
+
 ## Usage
 
 Initialization:
@@ -119,3 +123,4 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 [Protocol]: protocol.md
 [promise-waitlist]: https://github.com/indutny/promise-waitlist
 [swarm]: https://github.com/vowlink/vowlink-swarm
+[electron]: https://github.com/vowlink/vowlink-electron/releases
