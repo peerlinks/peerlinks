@@ -122,7 +122,10 @@ describe('Protocol', () => {
     assert.ok(peerId.equals(a.id));
 
     // Send it back
-    a.resolveInvite(requestId, encryptedInvite);
+    assert.ok(a.resolveInvite(requestId, encryptedInvite));
+
+    // Can\'t resolve twice
+    assert.ok(!a.resolveInvite(requestId, encryptedInvite));
 
     // Decrypt and create channel
     const invite = decrypt(await invitePromise);
