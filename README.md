@@ -24,7 +24,10 @@ const vowLink = new VowLink({
   storage,
   passphrase: 'secret',
 });
-await vowLink.load();
+const isRightPassphrase = await vowLink.load();
+if (!isRightPassPhrase) {
+  throw new Error('Invalid passphrase');
+}
 
 // Create identity (and associated channel)
 // NOTE: multiple identities/channels are supported
