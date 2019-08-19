@@ -404,6 +404,8 @@ describe('Channel', () => {
       channel.root.hash.toString('hex'));
 
     await copy.post(Message.json('hello'), id);
+    assert.ok(copy.equals(channel));
+    assert.ok(channel.equals(copy));
   });
 
   it('should get reverse messages by offset/limit', async () => {

@@ -56,6 +56,7 @@ describe('Protocol', () => {
   it('should connect peers', async () => {
     const [ idA, _ ] = await a.createIdentityPair('a');
     const [ idB, channelB ] = await b.createIdentityPair('b');
+    const [ idC, duplicate ] = await b.createIdentityPair('a');
 
     const run = async () => {
       // Generate invite request
@@ -77,10 +78,14 @@ describe('Protocol', () => {
       const invite = decrypt(await invitePromise);
       const channelForA = await a.channelFromInvite(invite, idA);
 
+      // Same channels should not be added, but can be ignored
+      await a.addChannel(
+        await Channel.deserializeData(channelForA.serializeData()));
+
       // Duplicate adds should throw
-      await assert.rejects(a.addChannel(channelForA), {
+      await assert.rejects(a.addChannel(duplicate), {
         name: 'Error',
-        message: 'Channel with a duplicate name: "b"',
+        message: 'Channel with a duplicate name: "a"',
       });
 
       assert.strictEqual(await channelForA.getMessageCount(), 1);
