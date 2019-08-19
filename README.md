@@ -10,7 +10,7 @@ page.
 
 ## Demo
 
-Try the prototype of [Electron App][electron] of the protocol!
+Try the prototype of [Electron App][electron]!
 
 ## Usage
 
