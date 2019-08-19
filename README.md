@@ -48,7 +48,9 @@ function loop() {
 }
 loop();
 ```
-See [promise-waitlist][] for waiting APIs here and in later code samples..
+See [promise-waitlist][] for waiting APIs here and in later code samples.
+`waitForUpdate` could be used to refresh the channel contents.
+
 
 Post a new message:
 ```js
