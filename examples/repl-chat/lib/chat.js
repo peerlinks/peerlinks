@@ -5,7 +5,7 @@ import Swarm from '@vowlink/swarm';
 
 const DISPLAY_COUNT = 30;
 
-const INVITE_TIMEOUT = 2 * 60 * 1000; // 2 minutes
+const INVITE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 export default class Chat {
   constructor(repl, storage) {
@@ -16,7 +16,7 @@ export default class Chat {
     this.storage = storage;
     this.swarm = null;
 
-    this.protocol = new Protocol({ storage });
+    this.protocol = new Protocol({ storage, passphrase: 'test' });
     this.identity = null;
     this.channel = null;
     this.channelWait = null;
@@ -56,12 +56,12 @@ export default class Chat {
     const { requestId, request, decrypt } = this.identity.requestInvite(
       this.protocol.id);
 
-    const requestId64 = JSON.stringify(requestId.toString('base64'));
-    const request64 = JSON.stringify(request.toString('base64'));
+    const requestIdHex = JSON.stringify(requestId.toString('hex'));
+    const requestHex = JSON.stringify(request.toString('hex'));
     const trusteeName = JSON.stringify(this.identity.name);
 
     console.log('Ask your peer to run:');
-    console.log(`issueInvite(${requestId64},${request64},${trusteeName})`);
+    console.log(`issueInvite(${trusteeName},${requestIdHex},${requestHex})`);
     console.log('...waiting');
 
     const encryptedInvite = await this.swarm.waitForInvite(
@@ -77,17 +77,18 @@ export default class Chat {
     return `Joined channel: "${this.channel.name}"`;
   }
 
-  async issueInvite(requestId, request, inviteeName) {
+  async issueInvite(inviteeName, requestId, request) {
     if (!this.identity) {
       throw new Error('`iam()` must be called first');
     }
     if (!requestId, !request || !inviteeName) {
       throw new Error(
-        'Usage: issueInvite([ base64 request string], inviteeName)');
+        'Usage: issueInvite(inviteeName, <hex request id>, ' +
+        '< hex request string >)');
     }
 
-    requestId = Buffer.from(requestId, 'base64');
-    request = Buffer.from(request, 'base64');
+    requestId = Buffer.from(requestId, 'hex');
+    request = Buffer.from(request, 'hex');
 
     const { encryptedInvite, peerId } = this.identity.issueInvite(
       this.channel, request, inviteeName);

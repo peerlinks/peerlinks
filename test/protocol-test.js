@@ -103,6 +103,27 @@ describe('Protocol', () => {
     await b.close();
   });
 
+  it('should self-resolve invite', async () => {
+    const [ idA, _ ] = await a.createIdentityPair('a');
+    const [ idB, channelB ] = await a.createIdentityPair('b');
+
+    // Generate invite request
+    const { requestId, request, decrypt } = idA.requestInvite(a.id);
+    const invitePromise = a.waitForInvite(requestId).promise;
+
+    // Issue invite
+    const { encryptedInvite, peerId } = idB.issueInvite(
+      channelB, request, 'b');
+    assert.ok(peerId.equals(a.id));
+
+    // Send it back
+    a.resolveInvite(requestId, encryptedInvite);
+
+    // Decrypt and create channel
+    const invite = decrypt(await invitePromise);
+    await a.channelFromInvite(invite, idA, { name: 'b-copy' });
+  });
+
   it('should encrypt/decrypt blobs', async function() {
     // Derivation of encryption key is a slow process
     this.timeout(20000);
