@@ -13,11 +13,12 @@ message Link {
   message TBS {
     bytes trustee_pub_key = 1;
     string trustee_display_name = 2;
-    double expiration = 3;
+    double valid_from = 4;
+    double valid_to = 5;
 
     // NOTE: This MUST be filled either by sender/recipient before
     // generating/verifying the signature below.
-    bytes channel_id = 4;
+    bytes channel_id = 6;
   }
 
   TBS tbs = 1;

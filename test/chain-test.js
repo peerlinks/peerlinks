@@ -109,11 +109,27 @@ describe('Chain', () => {
     ]);
   });
 
-  it('should check timestamps', () => {
+  it('should check validTo', () => {
     const links = [
       idA.issueLink(channelA, dataB),
       idB.issueLink(channelA, Object.assign(dataC, {
-        expiration: now() - 1,
+        validTo: now() - 1,
+      })),
+      idC.issueLink(channelA, dataD),
+    ];
+
+    const chain = new Chain(links);
+
+    assert.ok(!chain.verify(channelA));
+    assert.ok(!chain.isValid());
+  });
+
+  it('should check validFrom', () => {
+    const links = [
+      idA.issueLink(channelA, dataB),
+      idB.issueLink(channelA, Object.assign(dataC, {
+        validFrom: now() + 1000,
+        validTo: now() + 2000,
       })),
       idC.issueLink(channelA, dataD),
     ];

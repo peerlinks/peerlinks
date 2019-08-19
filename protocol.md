@@ -194,7 +194,7 @@ and MUST be greater or equal to the maximum timestamp of the message parents.
 `content.timestamp` MUST NOT be too far in the future. Particular implementation
 SHOULD decide on the value of this leeway (5-10 seconds is recommended).
 
-The validity of `content.timestamp` and the expiration of links MUST be enforced
+The validity of `content.timestamp` and the validity of links MUST be enforced
 through the following mechanism. Suppose that for a received `message`:
 ```
 min_timestamp = min(p.content.timestamp for p in message.parents)
@@ -226,8 +226,10 @@ The subscribers of the channel MUST verify the messages against full DAG:
   parent messages, and SHOULD not be in the future. It is understood that the
   clocks are not ideal, so the "SHOULD" in the previous sentence means that
   small leeway has to be allowed. Several seconds of leniency should be enough
-* `timestamp` MUST be less than the minimum of `expiration` of links in the
-  `chain`.
+* `timestamp` MUST be less than the minimum of `valid_to` of links in the
+  `chain`
+* `timestamp` MUST be greater or equal to the maximum of `valid_from` of links
+  in the chain.
 
 ### Merges
 
@@ -246,11 +248,12 @@ message Link {
   message TBS {
     bytes trustee_pub_key = 1;
     string trustee_display_name = 2;
-    double expiration = 3;
+    double valid_from = 4;
+    double valid_to = 5;
 
     // NOTE: This MUST be filled either by sender/recipient before
     // generating/verifying the signature below.
-    bytes channel_id = 4;
+    bytes channel_id = 6;
   }
 
   TBS tbs = 1;
@@ -271,11 +274,13 @@ this string is 128 UTF-8 characters and MUST be enforced. Note that each
 participant of the channel gets unique "display path" (array of display names)
 starting from the root.
 
-The `link.expiration` is a Unix-time from Jan 1st 1970 00:00:00 UTC. The
-expiration date/time of the whole `chain` is the minimum of expirations of
-all links. This mechanism ensures granularity of control over peers' ability
-to write new messages. The expiration of the chain MUST be checked against the
-`content.timestamp` (see constraints on `content.timestamp` above.)
+The `link.valid_from` and `link.valid_to` are both Unix-times since
+Jan 1st 1970 00:00:00 UTC. The `valid_to` of the whole `chain` is the
+minimum of `valid_to` of all links. The `valid_from` is then the maximum of
+`valid_from` of all links. This mechanism ensures granularity of control over
+peers' ability to write new messages. The validity of the chain MUST be
+checked against the `content.timestamp` (see constraints on `content.timestamp`
+above.)
 
 The `message.signature` MUST be generated using the private key that corresponds
 to the last public key in the chain, or the channel's private key if the chain
