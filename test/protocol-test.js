@@ -34,6 +34,15 @@ describe('Protocol', () => {
     assert.strictEqual(a.channels.length, 1);
   });
 
+  it('should remove the identity and the channel', async () => {
+    const [ id, channel ] = await a.createIdentityPair('test');
+
+    await a.removeIdentity(id);
+    await a.removeChannel(channel);
+    assert.strictEqual(a.channels.length, 0);
+    assert.strictEqual(a.identities.length, 0);
+  });
+
   it('should reload identities/channels from a storage', async () => {
     const id2 = (await a.createIdentityPair('2'))[0];
     const id1 = (await a.createIdentityPair('1'))[0];
