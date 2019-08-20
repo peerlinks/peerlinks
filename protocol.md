@@ -491,10 +491,14 @@ to issue a new channel root from time to time so that past DAGs may be evicted.
 HTTPS webserver MAY be used as a remote peer to facilitate synchronization
 between peers that are not in vicinity of each other physically.
 
-# UX
+#### Ideas
 
-Ideas:
-1. User has to recite channel "vows" before receiving the trust link.
+*(Something that is not implemented in neither client nor protocol, but might
+be desired)*
+
+1. User has to recite channel "vows" before receiving the trust link
+2. Backward and forward secrecy of messages. Perhaps [KDF chain][KDF] could be
+   used at least?
 
 [DAT]: https://docs.datproject.org/
 [Sodium]: https://download.libsodium.org/doc/
@@ -503,3 +507,4 @@ Ideas:
 [git]: https://git-scm.com/
 [Public Key Infrastructure]: https://en.wikipedia.org/wiki/Public_key_infrastructure
 [CRDT]: https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type
+[KDF]: https://signal.org/docs/specifications/doubleratchet/#kdf-chains
