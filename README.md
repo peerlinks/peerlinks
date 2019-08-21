@@ -95,6 +95,11 @@ Not exhaustive list of possible issues:
 * API improvements
 * Documentation!
 
+## Community
+
+* [#vowlink][irc] IRC Channel on FreeNode
+* [Slack][] channel
+
 ## LICENSE
 
 This software is licensed under the MIT License.
@@ -124,3 +129,5 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 [promise-waitlist]: https://github.com/indutny/promise-waitlist
 [swarm]: https://github.com/vowlink/vowlink-swarm
 [electron]: https://github.com/vowlink/vowlink-electron/releases
+[irc]: https://webchat.freenode.net/?channel=#vowlink
+[Slack]: https://join.slack.com/t/vowlink/shared_invite/enQtNzM1MjEzMjM1Njg2LTg2NGM2YjI0ODA0YWQ3ZDJhMGE5NTU2YTc0MTZhZGNjY2EzYjc2NmUzMTFmNTZlOGE0ZmZkMTQxMGNkMTdhYzQ
