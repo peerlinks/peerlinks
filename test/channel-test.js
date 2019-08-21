@@ -421,9 +421,11 @@ describe('Channel', () => {
   });
 
   it('should serialize/deserialize', async () => {
+    channel.setMetadata({ ok: true });
     const copy = await Channel.deserializeData(channel.serializeData());
     assert.strictEqual(copy.root.hash.toString('hex'),
       channel.root.hash.toString('hex'));
+    assert.deepStrictEqual(copy.metadata, { ok: true });
 
     await copy.post(Message.json('hello'), id);
     assert.ok(copy.equals(channel));

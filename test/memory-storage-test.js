@@ -100,45 +100,45 @@ describe('MemoryStorage', () => {
   });
 
   it('should query messages by hash', async () => {
-    await storage.addMessage(msg('a', 0));
-    await storage.addMessage(msg('c', 1));
-    await storage.addMessage(msg('b', 1));
-    await storage.addMessage(msg('d', 2));
+    await storage.addMessage(msg('9a', 0));
+    await storage.addMessage(msg('9c', 1));
+    await storage.addMessage(msg('0b', 1));
+    await storage.addMessage(msg('9d', 2));
 
     {
       const result = await storage.query(
         channelId,
-        { hash: Buffer.from('b') },
+        { hash: Buffer.from('0b') },
         false,
         2);
       assert.strictEqual(result.abbreviatedMessages.length, 2);
-      assert.strictEqual(result.abbreviatedMessages[0].hash.toString(), 'b');
-      assert.strictEqual(result.abbreviatedMessages[1].hash.toString(), 'c');
-      assert.strictEqual(result.backwardHash.toString(), 'b');
-      assert.strictEqual(result.forwardHash.toString(), 'd');
+      assert.strictEqual(result.abbreviatedMessages[0].hash.toString(), '0b');
+      assert.strictEqual(result.abbreviatedMessages[1].hash.toString(), '9c');
+      assert.strictEqual(result.backwardHash.toString(), '0b');
+      assert.strictEqual(result.forwardHash.toString(), '9d');
     }
 
     {
       const result = await storage.query(
         channelId,
-        { hash: Buffer.from('b') },
+        { hash: Buffer.from('0b') },
         true,
         2);
       assert.strictEqual(result.abbreviatedMessages.length, 1);
-      assert.strictEqual(result.abbreviatedMessages[0].hash.toString(), 'a');
+      assert.strictEqual(result.abbreviatedMessages[0].hash.toString(), '9a');
       assert.strictEqual(result.backwardHash, null);
-      assert.strictEqual(result.forwardHash.toString(), 'b');
+      assert.strictEqual(result.forwardHash.toString(), '0b');
     }
 
     {
       const result = await storage.query(
         channelId,
-        { hash: Buffer.from('d') },
+        { hash: Buffer.from('9d') },
         false,
         2);
       assert.strictEqual(result.abbreviatedMessages.length, 1);
-      assert.strictEqual(result.abbreviatedMessages[0].hash.toString(), 'd');
-      assert.strictEqual(result.backwardHash.toString(), 'd');
+      assert.strictEqual(result.abbreviatedMessages[0].hash.toString(), '9d');
+      assert.strictEqual(result.backwardHash.toString(), '9d');
       assert.strictEqual(result.forwardHash, null);
     }
 
@@ -204,5 +204,38 @@ describe('MemoryStorage', () => {
 
     const hashes2 = await storage.getReverseHashesAtOffset(channelId, 2, 2);
     assert.deepStrictEqual(hashes2.map((h) => h.toString()), [ 'b', 'a' ]);
+  });
+
+  it('should preserve order of hashes in getMessages', async () => {
+    await storage.addMessage(msg('a', 0));
+    await storage.addMessage(msg('c', 1));
+    await storage.addMessage(msg('b', 1));
+    await storage.addMessage(msg('d', 2));
+
+    const messages = await storage.getMessages(channelId, [
+      Buffer.from('a'),
+      Buffer.from('b'),
+      Buffer.from('c'),
+      Buffer.from('d'),
+    ]);
+    assert.deepStrictEqual(messages.map((m) => m.toString()), [
+      '0: a',
+      '1: b',
+      '1: c',
+      '2: d',
+    ]);
+
+    const messages2 = await storage.getMessages(channelId, [
+      Buffer.from('d'),
+      Buffer.from('b'),
+      Buffer.from('a'),
+      Buffer.from('c'),
+    ]);
+    assert.deepStrictEqual(messages2.map((m) => m.toString()), [
+      '2: d',
+      '1: b',
+      '0: a',
+      '1: c',
+    ]);
   });
 });

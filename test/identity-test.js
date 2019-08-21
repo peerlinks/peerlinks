@@ -19,6 +19,7 @@ describe('Identity', () => {
 
     const chain = new Chain([ link ]);
     trustee.addChain(channel, chain);
+    trustee.setMetadata({ ok: true });
 
     assert.strictEqual(trustee.getChannelIds().length, 1);
     assert.strictEqual(trustee.getChannelIds()[0].toString('hex'),
@@ -27,6 +28,7 @@ describe('Identity', () => {
     const copy = Identity.deserializeData(trustee.serializeData());
     assert.strictEqual(copy.publicKey.toString('hex'),
       trustee.publicKey.toString('hex'));
+    assert.deepStrictEqual(copy.getMetadata(), { ok: true });
 
     await channel.post(Message.json('test'), copy);
   });

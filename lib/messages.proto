@@ -179,10 +179,13 @@ message Identity {
   bytes secret_key = 3;
 
   repeated ChannelChain channel_chains = 4;
+  string metadata = 5;
 }
 
 message Channel {
   bytes public_key = 1;
   string name = 2;
   ChannelMessage root = 3;
+
+  string metadata = 4;
 }
