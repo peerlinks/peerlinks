@@ -122,6 +122,28 @@ describe('Channel', () => {
       assert.strictEqual(message, same);
       assert.strictEqual(message.json, 'hello');
     });
+
+    it('should find suitable past leaves when posting', async () => {
+      const timestamp = now();
+
+      const start = await channel.post(Message.json('hello'), id, {
+        timestamp: timestamp + 1000,
+      });
+      const end = await channel.post(Message.json('world'), id, {
+        timestamp: timestamp + 2000,
+      });
+      const middle = await channel.post(Message.json('dear'), id, {
+        timestamp: timestamp + 1500,
+      });
+
+      assert.strictEqual(middle.parents.length, 1);
+      assert.strictEqual(middle.parents[0].toString('hex'),
+        start.hash.toString('hex'));
+
+      assert.strictEqual(end.parents.length, 1);
+      assert.strictEqual(end.parents[0].toString('hex'),
+        start.hash.toString('hex'));
+    });
   });
 
   describe('.receive()', () => {
