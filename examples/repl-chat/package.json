@@ -14,8 +14,8 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "@vowlink/protocol": "^1.0.1",
-    "@vowlink/sqlite-storage": "^1.0.1",
+    "@vowlink/protocol": "^1.1.0",
+    "@vowlink/sqlite-storage": "^1.0.3",
     "@vowlink/swarm": "^1.0.2",
     "esm": "^3.2.25"
   }
