@@ -217,7 +217,8 @@ with introductions of https relays.)
 The subscribers of the channel MUST verify the messages against full DAG:
 
 * `height` MUST be checked
-* `parents` MUST lead to the root, and MUST NOT be empty
+* `parents` MUST lead to the root, MUST NOT be empty, and MUST have less or
+  equal to `128` (see merges below)
 * `content.box` MUST be signed
 * `chain` MUST lead to the channel's public key and MUST not be longer than 5
   links
@@ -234,7 +235,7 @@ The subscribers of the channel MUST verify the messages against full DAG:
 ### Merges
 
 Whenever new message is posted by a participant it SHOULD:
-1. Take all current DAG leaves
+1. Take at most `128` current DAG leaves
 2. It might be possible that some of them are in the future (see verification
    steps for received messages), if this is the case:
   1. If there is a non-empty set of the leaves in the past - use them as the

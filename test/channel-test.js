@@ -187,6 +187,28 @@ describe('Channel', () => {
       });
     });
 
+    it('should throw on too many parents', async () => {
+      const parents = [];
+      for (let i = 0; i < 1024; i++) {
+        parents.push(channel.root.hash);
+      }
+
+      const wrong = new Message({
+        channel,
+        parents,
+        height: 1,
+        content: id.signMessageBody(Message.json('wrong'), channel, {
+          height: 1,
+          parents,
+        }),
+      });
+
+      await assert.rejects(channel.receive(wrong), {
+        name: 'Error',
+        message: /Invalid parent count: 1024/,
+      });
+    });
+
     it('should throw on unknown parents', async () => {
       const alt = await Channel.create(id, 'test-alt');
 
