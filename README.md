@@ -154,3 +154,4 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 [comm-slack]: https://join.slack.com/t/vowlink/shared_invite/enQtNzM1MjEzMjM1Njg2LTg2NGM2YjI0ODA0YWQ3ZDJhMGE5NTU2YTc0MTZhZGNjY2EzYjc2NmUzMTFmNTZlOGE0ZmZkMTQxMGNkMTdhYzQ
 [sodium]: https://github.com/sodium-friends/sodium-universal
 [org]: https://github.com/vowlink/
+[Slack]: https://slack.com/
