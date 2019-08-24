@@ -1,16 +1,28 @@
 # vowlink-protocol
 [![Build Status](https://travis-ci.org/vowlink/vowlink-protocol.svg?branch=master)](http://travis-ci.org/vowlink/vowlink-protocol)
 
-Implementation of VowLink [Protocol][] in JavaScript.
+VowLink is a protocol for building "Distributed Secure IRC" (or distributed
+Slack if you wish). The core principles are:
+
+* No server required
+* Untrusted parties help distribute messages
+* Invites reveal messages to new participants
+* The "invite chain" does not involve more than 3 people
+* Write access expires after 99 days.
+
+## Trying it out
+
+The [Desktop Client][electron]! is a great way to start using the protocol with
+your peers. Once installed the identities and channels can be created.
+Once requested an invite to other's channel, or approved an invite for someone
+else the familiar UI (:wink:) will help to make the conversation over a P2P
+network.
 
 ## Protocol
 
-At this point the most useful starting point would be a [Protocol][] description
-page.
-
-## Demo
-
-Try the prototype of [Electron App][electron]!
+The [Protocol][Protocol] and all repositories in [GitHub organization][org] are
+Open Source (MIT Licensed). Aside from other benefits this means that a custom
+client can connect to the network. VowLink is not a [walled garden][Slack].
 
 ## Usage
 
@@ -103,8 +115,8 @@ Not exhaustive list of possible issues:
 
 ## Community
 
-* [#vowlink][irc] IRC Channel on FreeNode
-* [Slack][] channel
+* [#vowlink][comm-irc] IRC Channel on FreeNode
+* [Slack][comm-slack] channel
 
 ## LICENSE
 
@@ -135,6 +147,7 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 [promise-waitlist]: https://github.com/indutny/promise-waitlist
 [swarm]: https://github.com/vowlink/vowlink-swarm
 [electron]: https://github.com/vowlink/vowlink-electron/releases
-[irc]: https://webchat.freenode.net/?channel=#vowlink
-[Slack]: https://join.slack.com/t/vowlink/shared_invite/enQtNzM1MjEzMjM1Njg2LTg2NGM2YjI0ODA0YWQ3ZDJhMGE5NTU2YTc0MTZhZGNjY2EzYjc2NmUzMTFmNTZlOGE0ZmZkMTQxMGNkMTdhYzQ
+[comm-irc]: https://webchat.freenode.net/?channel=#vowlink
+[comm-slack]: https://join.slack.com/t/vowlink/shared_invite/enQtNzM1MjEzMjM1Njg2LTg2NGM2YjI0ODA0YWQ3ZDJhMGE5NTU2YTc0MTZhZGNjY2EzYjc2NmUzMTFmNTZlOGE0ZmZkMTQxMGNkMTdhYzQ
 [sodium]: https://github.com/sodium-friends/sodium-universal
+[org]: https://github.com/vowlink/
