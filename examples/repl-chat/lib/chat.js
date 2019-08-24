@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer';
+import * as sodium from 'sodium-universal';
 
 import Protocol, { Message }from '@vowlink/protocol';
 import Swarm from '@vowlink/swarm';
@@ -16,7 +17,7 @@ export default class Chat {
     this.storage = storage;
     this.swarm = null;
 
-    this.protocol = new Protocol({ storage, passphrase: 'test' });
+    this.protocol = new Protocol({ storage, passphrase: 'test', sodium });
     this.identity = null;
     this.channel = null;
     this.channelWait = null;
