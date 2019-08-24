@@ -1,6 +1,6 @@
 # VowLink
 [![Build Status](https://travis-ci.org/vowlink/vowlink-protocol.svg?branch=master)](http://travis-ci.org/vowlink/vowlink-protocol)
-[![IRC Channel](https://img.shields.io/badge/IRC-%23vowlink-1e72ff.svg?style=flat)](https://www.irccloud.com/invite?channel=%23vowlink&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1)
+[![IRC Channel](https://img.shields.io/badge/IRC-%23vowlink-1e72ff.svg?style=flat)][comm-irc]
 
 VowLink is a protocol for building "Distributed Secure IRC" (or distributed
 Slack if you wish). The core principles are:
@@ -153,7 +153,7 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 [promise-waitlist]: https://github.com/indutny/promise-waitlist
 [swarm]: https://github.com/vowlink/vowlink-swarm
 [desktop]: https://github.com/vowlink/vowlink-desktop/releases/latest
-[comm-irc]: https://webchat.freenode.net/?channel=#vowlink
+[comm-irc]: https://www.irccloud.com/invite?channel=%23vowlink&hostname=irc.freenode.net&port=6697&ssl=1
 [comm-slack]: https://join.slack.com/t/vowlink/shared_invite/enQtNzM1MjEzMjM1Njg2LTg2NGM2YjI0ODA0YWQ3ZDJhMGE5NTU2YTc0MTZhZGNjY2EzYjc2NmUzMTFmNTZlOGE0ZmZkMTQxMGNkMTdhYzQ
 [sodium]: https://github.com/sodium-friends/sodium-universal
 [org]: https://github.com/vowlink/
