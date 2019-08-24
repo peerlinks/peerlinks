@@ -238,4 +238,49 @@ describe('MemoryStorage', () => {
       '1: c',
     ]);
   });
+
+  it('should load tons of messages with getMessages', async () => {
+    const hashes = [];
+    for (let i = 0; i < 3000; i++ ){
+      let padded = i.toString();
+      while (padded.length < 4) {
+        padded = '0' + padded;
+      }
+      const hash = `h${padded}`;
+      hashes.push(Buffer.from(hash));
+      await storage.addMessage(msg(hash, 0));
+    }
+
+    const messages = await storage.getMessages(channelId, hashes);
+    assert.strictEqual(messages.length, hashes.length);
+    for (let i = 0; i < messages.length; i++) {
+      assert.strictEqual(messages[i].toString(), '0: ' + hashes[i]);
+    }
+  });
+
+  it('should remove messages specific to the channel', async () => {
+    const a = {
+      channelId,
+      hash: randomBytes(32),
+      height: 0,
+      parents: [],
+      data: Buffer.from('fake'),
+    };
+
+    await storage.addMessage(a);
+    assert.ok(await storage.hasMessage(channelId, a.hash));
+
+    const b = {
+      channelId: randomBytes(32),
+      hash: randomBytes(32),
+      height: 0,
+      parents: [],
+      data: Buffer.from('fake'),
+    };
+    await storage.addMessage(b);
+    assert.ok(await storage.hasMessage(b.channelId, b.hash));
+
+    await storage.removeChannelMessages(b.channelId);
+    assert.ok(!(await storage.hasMessage(b.channelId, b.hash)));
+  });
 });
