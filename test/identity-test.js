@@ -6,12 +6,15 @@ import { Chain, Channel, Identity, Message } from '../';
 
 describe('Identity', () => {
   it('should be serialized/deserialized with chain', async () => {
-    const id = new Identity('id', { sodium });
-    const channel = await Channel.create(id, 'channel', { sodium });
+    const identity = new Identity('id', { sodium });
+    const channel = await Channel.fromIdentity(identity, {
+      name: 'channel',
+      sodium,
+    });
 
     const trustee = new Identity('trustee', { sodium });
 
-    const link = id.issueLink(channel, {
+    const link = identity.issueLink(channel, {
       trusteePubKey: trustee.publicKey,
       trusteeDisplayName: 'trustee',
     });

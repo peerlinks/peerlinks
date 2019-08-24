@@ -10,7 +10,11 @@ describe('Message', () => {
 
   beforeEach(() => {
     id = new Identity('test', { sodium });
-    channel = new Channel('test-channel', id.publicKey, { sodium });
+    channel = new Channel({
+      name: 'test-channel',
+      publicKey: id.publicKey,
+      sodium,
+    });
 
     id.addChain(channel, new Chain([]));
   });

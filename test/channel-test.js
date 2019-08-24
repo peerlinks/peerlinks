@@ -7,16 +7,19 @@ import { Chain, Channel, Identity, Message } from '../';
 import { now } from '../lib/utils';
 
 describe('Channel', () => {
-  let id = null;
+  let identity = null;
   let channel = null;
 
   beforeEach(async () => {
-    id = new Identity('test', { sodium });
-    channel = await Channel.create(id, 'test-channel', { sodium });
+    identity = new Identity('test', { sodium });
+    channel = await Channel.fromIdentity(identity, {
+      name: 'test-channel',
+      sodium,
+    });
   });
 
   afterEach(() => {
-    id = null;
+    identity = null;
     channel = null;
   });
 
@@ -30,13 +33,13 @@ describe('Channel', () => {
     });
   };
 
-  const msg = (text, parents, height, timestamp, identity = id) => {
+  const msg = (text, parents, height, timestamp, id = identity) => {
     return new Message({
       sodium,
       channel,
       parents: parents.map((p) => p.hash),
       height,
-      content: identity.signMessageBody(Message.json(text), channel, {
+      content: id.signMessageBody(Message.json(text), channel, {
         height,
         parents: parents.map((p) => p.hash),
         timestamp,
@@ -50,7 +53,7 @@ describe('Channel', () => {
       assert.deepStrictEqual(await at(0), [ '<root>' ]);
       assert.strictEqual(await channel.getMinLeafHeight(), 0);
 
-      const first = await channel.post(Message.json('hello'), id);
+      const first = await channel.post(Message.json('hello'), identity);
       assert.strictEqual(await channel.getMessageCount(), 2);
       assert.deepStrictEqual(await at(0, 2), [
         '<root>',
@@ -59,7 +62,7 @@ describe('Channel', () => {
       assert.ok(first.verify(channel));
       assert.strictEqual(await channel.getMinLeafHeight(), 1);
 
-      const second = await channel.post(Message.json('world'), id);
+      const second = await channel.post(Message.json('world'), identity);
       assert.strictEqual(await channel.getMessageCount(), 3);
       assert.deepStrictEqual(await at(0, 3), [
         '<root>',
@@ -90,13 +93,13 @@ describe('Channel', () => {
       assert.deepStrictEqual(await at(0), [ '<root>' ]);
 
       await Promise.all([
-        channel.post(Message.json('hello'), id),
-        channel.post(Message.json('hi'), id),
+        channel.post(Message.json('hello'), identity),
+        channel.post(Message.json('hi'), identity),
       ]);
 
       assert.strictEqual(await channel.getMessageCount(), 3);
 
-      const last = await channel.post(Message.json('world'), id);
+      const last = await channel.post(Message.json('world'), identity);
       assert.strictEqual(await channel.getMessageCount(), 4);
       assert.deepStrictEqual(await at(3, 1), [ 'world' ]);
       assert.ok(last.height > 1);
@@ -106,7 +109,7 @@ describe('Channel', () => {
     });
 
     it('should disallow posting root', async () => {
-      await assert.rejects(channel.post(Message.root(), id), {
+      await assert.rejects(channel.post(Message.root(), identity), {
         name: 'Error',
         message: 'Posting root is not allowed',
       });
@@ -117,7 +120,7 @@ describe('Channel', () => {
         channel.waitForOutgoingMessage().promise,
         channel.waitForOutgoingMessage().promise,
         channel.waitForUpdate().promise,
-        channel.post(Message.json('hello'), id),
+        channel.post(Message.json('hello'), identity),
       ]);
 
       assert.strictEqual(message, same);
@@ -127,13 +130,13 @@ describe('Channel', () => {
     it('should find suitable past leaves when posting', async () => {
       const timestamp = now();
 
-      const start = await channel.post(Message.json('hello'), id, {
+      const start = await channel.post(Message.json('hello'), identity, {
         timestamp: timestamp + 1000,
       });
-      const end = await channel.post(Message.json('world'), id, {
+      const end = await channel.post(Message.json('world'), identity, {
         timestamp: timestamp + 2000,
       });
-      const middle = await channel.post(Message.json('dear'), id, {
+      const middle = await channel.post(Message.json('dear'), identity, {
         timestamp: timestamp + 1500,
       });
 
@@ -149,7 +152,11 @@ describe('Channel', () => {
 
   describe('.receive()', () => {
     it('should receive root', async () => {
-      const clone = new Channel('test-clone', channel.publicKey, { sodium });
+      const clone = new Channel({
+        name: 'test-clone',
+        publicKey: channel.publicKey,
+        sodium,
+      });
       await clone.receive(channel.root);
       assert.strictEqual(await clone.getMinLeafHeight(), 0);
     });
@@ -159,7 +166,10 @@ describe('Channel', () => {
     });
 
     it('should throw on invalid root', async () => {
-      const alt = await Channel.create(id, 'test-alt-channel', { sodium });
+      const alt = await Channel.fromIdentity(identity, {
+        name: 'test-alt-channel',
+        sodium,
+      });
 
       await assert.rejects(channel.receive(alt.root), {
         name: 'Error',
@@ -200,7 +210,7 @@ describe('Channel', () => {
         channel,
         parents,
         height: 1,
-        content: id.signMessageBody(Message.json('wrong'), channel, {
+        content: identity.signMessageBody(Message.json('wrong'), channel, {
           height: 1,
           parents,
         }),
@@ -213,14 +223,17 @@ describe('Channel', () => {
     });
 
     it('should throw on unknown parents', async () => {
-      const alt = await Channel.create(id, 'test-alt', { sodium });
+      const alt = await Channel.fromIdentity(identity, {
+        name: 'test-alt',
+        sodium,
+      });
 
       const wrong = new Message({
         sodium,
         channel,
         parents: [ alt.root.hash ],
         height: 1,
-        content: id.signMessageBody(Message.json('wrong'), channel, {
+        content: identity.signMessageBody(Message.json('wrong'), channel, {
           height: 1,
           parents: [ alt.root.hash ],
         }),
@@ -274,7 +287,7 @@ describe('Channel', () => {
 
     it('should disallow receiving root from non-root', async () => {
       const trustee = new Identity('trustee', { sodium });
-      const link = id.issueLink(channel, {
+      const link = identity.issueLink(channel, {
         trusteePubKey: trustee.publicKey,
         trusteeDisplayName: 'trustee',
       });
@@ -287,7 +300,7 @@ describe('Channel', () => {
         channel,
         parents: [ channel.root.hash ],
         height: 1,
-        content: id.signMessageBody(Message.root(), channel, {
+        content: identity.signMessageBody(Message.root(), channel, {
           height: 1,
           parents: [ channel.root.hash ],
           timestamp: now(),
@@ -301,10 +314,14 @@ describe('Channel', () => {
     });
 
     it('should notify message waiters', async () => {
-      const clone = new Channel('test-clone', channel.publicKey, { sodium });
+      const clone = new Channel({
+        name: 'test-clone',
+        publicKey: channel.publicKey,
+        sodium,
+      });
       await clone.receive(channel.root);
 
-      const remote = await clone.post(Message.json('okay'), id);
+      const remote = await clone.post(Message.json('okay'), identity);
 
       const [ message ] = await Promise.all([
         channel.waitForIncomingMessage().promise,
@@ -318,7 +335,9 @@ describe('Channel', () => {
 
   describe('sync()', () => {
     it('should synchronize channel lagging behind the other', async () => {
-      const clone = new Channel('test-clone', channel.publicKey, {
+      const clone = new Channel({
+        name: 'test-clone',
+        publicKey: channel.publicKey,
         sodium,
 
         // Force low limits to trigger more branches
@@ -329,7 +348,7 @@ describe('Channel', () => {
 
       // Post three times the query limit
       for (let i = 0; i < 15; i++) {
-        await clone.post(Message.json(`message: ${i}`), id);
+        await clone.post(Message.json(`message: ${i}`), identity);
       }
 
       await channel.sync(clone);
@@ -337,7 +356,9 @@ describe('Channel', () => {
     });
 
     it('should synchronize diverging branches', async () => {
-      const clone = new Channel('test-clone', channel.publicKey, {
+      const clone = new Channel({
+        name: 'test-clone',
+        publicKey: channel.publicKey,
         sodium,
 
         // Force low limits to trigger more branches
@@ -348,16 +369,16 @@ describe('Channel', () => {
 
       // Post three times the query limit
       for (let i = 0; i < 15; i++) {
-        await channel.post(Message.json(`original: ${i}`), id);
+        await channel.post(Message.json(`original: ${i}`), identity);
       }
       for (let i = 0; i < 15; i++) {
-        await clone.post(Message.json(`clone: ${i}`), id);
+        await clone.post(Message.json(`clone: ${i}`), identity);
       }
 
       await channel.sync(clone);
       assert.strictEqual(await channel.getMessageCount(), 31);
 
-      const merge = await channel.post(Message.json('merge'), id);
+      const merge = await channel.post(Message.json('merge'), identity);
 
       await clone.sync(channel);
       assert.strictEqual(await channel.getMessageCount(), 32);
@@ -368,7 +389,9 @@ describe('Channel', () => {
 
       // Do a final clone
 
-      const final = new Channel('test-final', channel.publicKey, {
+      const final = new Channel({
+        name: 'test-final',
+        publicKey: channel.publicKey,
         sodium,
 
         maxQueryLimit: 5,
@@ -381,7 +404,9 @@ describe('Channel', () => {
     });
 
     it('should resort to full sync', async () => {
-      const clone = new Channel('test-clone', channel.publicKey, {
+      const clone = new Channel({
+        name: 'test-clone',
+        publicKey: channel.publicKey,
         sodium,
 
         // Force low limits to trigger more branches
@@ -393,10 +418,10 @@ describe('Channel', () => {
 
       // Post three times the query limit
       for (let i = 0; i < 15; i++) {
-        await channel.post(Message.json(`original: ${i}`), id);
+        await channel.post(Message.json(`original: ${i}`), identity);
       }
       for (let i = 0; i < 15; i++) {
-        await clone.post(Message.json(`message: ${i}`), id);
+        await clone.post(Message.json(`message: ${i}`), identity);
       }
 
       await clone.sync(channel);
@@ -409,7 +434,7 @@ describe('Channel', () => {
     beforeEach(() => {
       trustee = new Identity('trustee', { sodium });
 
-      const link = id.issueLink(channel, {
+      const link = identity.issueLink(channel, {
         trusteePubKey: trustee.publicKey,
         trusteeDisplayName: 'trustee',
       });
@@ -424,7 +449,7 @@ describe('Channel', () => {
 
     describe('post()', () => {
       it('should be unlimited for root\'s messages', async () => {
-        await channel.post(Message.json('x'.repeat(1024 * 1024)), id);
+        await channel.post(Message.json('x'.repeat(1024 * 1024)), identity);
       });
 
       it('should be limited for non-root\'s messages', async () => {
@@ -464,16 +489,16 @@ describe('Channel', () => {
       channel.root.hash.toString('hex'));
     assert.deepStrictEqual(copy.metadata, { ok: true });
 
-    await copy.post(Message.json('hello'), id);
+    await copy.post(Message.json('hello'), identity);
     assert.ok(copy.equals(channel));
     assert.ok(channel.equals(copy));
   });
 
   it('should get reverse messages by offset/limit', async () => {
-    await channel.post(Message.json('a'), id);
-    await channel.post(Message.json('b'), id);
-    await channel.post(Message.json('c'), id);
-    await channel.post(Message.json('d'), id);
+    await channel.post(Message.json('a'), identity);
+    await channel.post(Message.json('b'), identity);
+    await channel.post(Message.json('c'), identity);
+    await channel.post(Message.json('d'), identity);
 
     assert.strictEqual(await channel.getMessageCount(), 5);
 

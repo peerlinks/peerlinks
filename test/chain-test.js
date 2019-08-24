@@ -23,8 +23,16 @@ describe('Chain', () => {
     idC = new Identity('c', { sodium });
     idD = new Identity('d', { sodium });
 
-    channelA = new Channel('channel-a', idA.publicKey, { sodium });
-    channelB = new Channel('channel-b', idB.publicKey, { sodium });
+    channelA = new Channel({
+      name: 'channel-a',
+      publicKey: idA.publicKey,
+      sodium,
+    });
+    channelB = new Channel({
+      name: 'channel-b',
+      publicKey: idB.publicKey,
+      sodium,
+    });
 
     dataA = {
       trusteePubKey: idA.publicKey,

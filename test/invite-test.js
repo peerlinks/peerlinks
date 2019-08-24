@@ -14,7 +14,10 @@ describe('Invite', () => {
     issuer = new Identity('issuer', { sodium });
     invitee = new Identity('invitee', { sodium });
 
-    channel = await Channel.create(issuer, 'test-channel', { sodium });
+    channel = await Channel.fromIdentity(issuer, {
+      name: 'test-channel',
+      sodium,
+    });
   });
 
   afterEach(() => {
@@ -33,7 +36,10 @@ describe('Invite', () => {
 
     const invite = decrypt(encryptedInvite);
 
-    const copy = await Channel.fromInvite(invite, invitee, { sodium });
+    const copy = await Channel.fromInvite(invite, {
+      identity: invitee,
+      sodium,
+    });
 
     // Try posting a message
     const posted = await copy.post(Message.json('hello world'), invitee);

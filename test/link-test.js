@@ -17,7 +17,11 @@ describe('Link', () => {
   });
 
   it('should be issued by identity', () => {
-    const channel = new Channel('test-channel', issuer.publicKey, { sodium });
+    const channel = new Channel({
+      name: 'test-channel',
+      publicKey: issuer.publicKey,
+      sodium,
+    });
 
     const trustee = new Identity('trustee', { sodium });
 
@@ -37,7 +41,11 @@ describe('Link', () => {
   });
 
   it('should be throw on invalid name length', () => {
-    const channel = new Channel('test-channel', issuer.publicKey, { sodium });
+    const channel = new Channel({
+      name: 'test-channel',
+      publicKey: issuer.publicKey,
+      sodium,
+    });
 
     const trustee = new Identity('trustee', { sodium });
 
@@ -53,7 +61,11 @@ describe('Link', () => {
   });
 
   it('should be serialized/deserialized', () => {
-    const channel = new Channel('test-channel', issuer.publicKey, { sodium });
+    const channel = new Channel({
+      name: 'test-channel',
+      publicKey: issuer.publicKey,
+      sodium,
+    });
 
     const trustee = new Identity('trustee', { sodium });
 
