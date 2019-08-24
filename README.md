@@ -1,5 +1,6 @@
 # VowLink
 [![Build Status](https://travis-ci.org/vowlink/vowlink-protocol.svg?branch=master)](http://travis-ci.org/vowlink/vowlink-protocol)
+[![IRC Channel](https://img.shields.io/badge/IRC-%23vowlink-1e72ff.svg?style=flat)](https://www.irccloud.com/invite?channel=%23vowlink&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1)
 
 VowLink is a protocol for building "Distributed Secure IRC" (or distributed
 Slack if you wish). The core principles are:
