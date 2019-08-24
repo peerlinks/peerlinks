@@ -14,8 +14,10 @@ Try the prototype of [Electron App][electron]!
 
 ## Usage
 
-Initialization:
+Initialization (requires [`sodium-universal`][sodium] or any other library with
+compatible API):
 ```js
+import * as sodium from 'sodium-universal';
 import VowLink, { Message, StreamSocket } from '@vowlink/protocol';
 import SqliteStorage from '@vowlink/sqlite-storage';
 
@@ -25,6 +27,7 @@ await storage.open();
 
 // Initialize protocol layer
 const vowLink = new VowLink({
+  sodium,
   storage,
   passphrase: 'secret',
 });
@@ -131,3 +134,4 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 [electron]: https://github.com/vowlink/vowlink-electron/releases
 [irc]: https://webchat.freenode.net/?channel=#vowlink
 [Slack]: https://join.slack.com/t/vowlink/shared_invite/enQtNzM1MjEzMjM1Njg2LTg2NGM2YjI0ODA0YWQ3ZDJhMGE5NTU2YTc0MTZhZGNjY2EzYjc2NmUzMTFmNTZlOGE0ZmZkMTQxMGNkMTdhYzQ
+[sodium]: https://github.com/sodium-friends/sodium-universal
