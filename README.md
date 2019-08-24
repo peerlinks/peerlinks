@@ -21,6 +21,8 @@ Once requested an invite to other's channel, or approved an invite for someone
 else the familiar UI (:wink:) will help to make the conversation over a P2P
 network.
 
+![screenshot](https://raw.githubusercontent.com/vowlink/vowlink-desktop/master/Artwork/desktop-screenshot.png)
+
 ## Protocol
 
 The [Protocol][Protocol] and all repositories in [GitHub organization][org] are
