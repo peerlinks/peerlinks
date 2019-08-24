@@ -1,5 +1,6 @@
 /* eslint-env node, mocha */
 import * as assert from 'assert';
+import * as sodium from 'sodium-universal';
 
 import { Chain, Channel, Identity, Message } from '../';
 
@@ -8,8 +9,8 @@ describe('Message', () => {
   let channel = null;
 
   beforeEach(() => {
-    id = new Identity('test');
-    channel = new Channel('test-channel', id.publicKey);
+    id = new Identity('test', { sodium });
+    channel = new Channel('test-channel', id.publicKey, { sodium });
 
     id.addChain(channel, new Chain([]));
   });
@@ -29,6 +30,7 @@ describe('Message', () => {
       });
 
     const message = new Message({
+      sodium,
       channel,
       parents: [],
       height: 0,
@@ -37,6 +39,7 @@ describe('Message', () => {
     assert.ok(message.verify(channel));
 
     const copy = new Message({
+      sodium,
       channelId: channel.id,
       parents: [],
       height: 0,
@@ -51,6 +54,7 @@ describe('Message', () => {
     assert.strictEqual(copy.hash.toString('hex'), message.hash.toString('hex'));
 
     const invalid = new Message({
+      sodium,
       channelId: channel.id,
       parents: [],
       height: 0,
@@ -66,7 +70,7 @@ describe('Message', () => {
   });
 
   it('should be signed/verified', () => {
-    const second = new Identity('second');
+    const second = new Identity('second', { sodium });
     const chain = new Chain([
       id.issueLink(channel, {
         trusteePubKey: second.publicKey,
@@ -85,6 +89,7 @@ describe('Message', () => {
       });
 
     const message = new Message({
+      sodium,
       channel,
       parents: [],
       height: 0,
@@ -106,6 +111,7 @@ describe('Message', () => {
       });
 
     const message = new Message({
+      sodium,
       channel,
       parents: [],
       height: 1,
@@ -113,7 +119,7 @@ describe('Message', () => {
     });
 
     const data = message.serializeData();
-    const copy = Message.deserializeData(data);
+    const copy = Message.deserializeData(data, { sodium });
     assert.strictEqual(copy.channelId.toString('hex'),
       message.channelId.toString('hex'));
     assert.strictEqual(copy.height, message.height);
@@ -133,6 +139,7 @@ describe('Message', () => {
       });
 
     const message = new Message({
+      sodium,
       channel,
       parents: [],
       height: 1,
@@ -140,7 +147,7 @@ describe('Message', () => {
     });
 
     const data = message.serializeData();
-    const copy = Message.deserializeData(data);
+    const copy = Message.deserializeData(data, { sodium });
 
     assert.throws(() => {
       copy.decrypt(channel);

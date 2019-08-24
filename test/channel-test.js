@@ -11,8 +11,8 @@ describe('Channel', () => {
   let channel = null;
 
   beforeEach(async () => {
-    id = new Identity('test');
-    channel = await Channel.create(id, 'test-channel');
+    id = new Identity('test', { sodium });
+    channel = await Channel.create(id, 'test-channel', { sodium });
   });
 
   afterEach(() => {
@@ -32,6 +32,7 @@ describe('Channel', () => {
 
   const msg = (text, parents, height, timestamp, identity = id) => {
     return new Message({
+      sodium,
       channel,
       parents: parents.map((p) => p.hash),
       height,
@@ -148,7 +149,7 @@ describe('Channel', () => {
 
   describe('.receive()', () => {
     it('should receive root', async () => {
-      const clone = new Channel('test-clone', channel.publicKey);
+      const clone = new Channel('test-clone', channel.publicKey, { sodium });
       await clone.receive(channel.root);
       assert.strictEqual(await clone.getMinLeafHeight(), 0);
     });
@@ -158,7 +159,7 @@ describe('Channel', () => {
     });
 
     it('should throw on invalid root', async () => {
-      const alt = await Channel.create(id, 'test-alt-channel');
+      const alt = await Channel.create(id, 'test-alt-channel', { sodium });
 
       await assert.rejects(channel.receive(alt.root), {
         name: 'Error',
@@ -168,6 +169,7 @@ describe('Channel', () => {
 
     it('should throw on invalid signature', async () => {
       const wrong = new Message({
+        sodium,
         channel,
         parents: [ channel.root.hash ],
         height: 1,
@@ -194,6 +196,7 @@ describe('Channel', () => {
       }
 
       const wrong = new Message({
+        sodium,
         channel,
         parents,
         height: 1,
@@ -210,9 +213,10 @@ describe('Channel', () => {
     });
 
     it('should throw on unknown parents', async () => {
-      const alt = await Channel.create(id, 'test-alt');
+      const alt = await Channel.create(id, 'test-alt', { sodium });
 
       const wrong = new Message({
+        sodium,
         channel,
         parents: [ alt.root.hash ],
         height: 1,
@@ -269,7 +273,7 @@ describe('Channel', () => {
     });
 
     it('should disallow receiving root from non-root', async () => {
-      const trustee = new Identity('trustee');
+      const trustee = new Identity('trustee', { sodium });
       const link = id.issueLink(channel, {
         trusteePubKey: trustee.publicKey,
         trusteeDisplayName: 'trustee',
@@ -279,6 +283,7 @@ describe('Channel', () => {
       trustee.addChain(channel, chain);
 
       const invalid = new Message({
+        sodium,
         channel,
         parents: [ channel.root.hash ],
         height: 1,
@@ -296,7 +301,7 @@ describe('Channel', () => {
     });
 
     it('should notify message waiters', async () => {
-      const clone = new Channel('test-clone', channel.publicKey);
+      const clone = new Channel('test-clone', channel.publicKey, { sodium });
       await clone.receive(channel.root);
 
       const remote = await clone.post(Message.json('okay'), id);
@@ -314,6 +319,8 @@ describe('Channel', () => {
   describe('sync()', () => {
     it('should synchronize channel lagging behind the other', async () => {
       const clone = new Channel('test-clone', channel.publicKey, {
+        sodium,
+
         // Force low limits to trigger more branches
         maxQueryLimit: 5,
         maxBulkCount: 2,
@@ -331,6 +338,8 @@ describe('Channel', () => {
 
     it('should synchronize diverging branches', async () => {
       const clone = new Channel('test-clone', channel.publicKey, {
+        sodium,
+
         // Force low limits to trigger more branches
         maxQueryLimit: 5,
         maxBulkCount: 2,
@@ -360,6 +369,8 @@ describe('Channel', () => {
       // Do a final clone
 
       const final = new Channel('test-final', channel.publicKey, {
+        sodium,
+
         maxQueryLimit: 5,
         maxBulkCount: 2,
       });
@@ -371,6 +382,8 @@ describe('Channel', () => {
 
     it('should resort to full sync', async () => {
       const clone = new Channel('test-clone', channel.publicKey, {
+        sodium,
+
         // Force low limits to trigger more branches
         maxQueryLimit: 5,
         maxUnresolvedCount: 0,
@@ -394,7 +407,7 @@ describe('Channel', () => {
   describe('json limit', () => {
     let trustee = null;
     beforeEach(() => {
-      trustee = new Identity('trustee');
+      trustee = new Identity('trustee', { sodium });
 
       const link = id.issueLink(channel, {
         trusteePubKey: trustee.publicKey,
@@ -444,7 +457,9 @@ describe('Channel', () => {
 
   it('should serialize/deserialize', async () => {
     channel.setMetadata({ ok: true });
-    const copy = await Channel.deserializeData(channel.serializeData());
+    const copy = await Channel.deserializeData(channel.serializeData(), {
+      sodium
+    });
     assert.strictEqual(copy.root.hash.toString('hex'),
       channel.root.hash.toString('hex'));
     assert.deepStrictEqual(copy.metadata, { ok: true });

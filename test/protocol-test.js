@@ -1,5 +1,6 @@
 /* eslint-env node, mocha */
 import * as assert from 'assert';
+import * as sodium from 'sodium-universal';
 
 import Protocol, { Channel, Message } from '../';
 
@@ -12,10 +13,10 @@ describe('Protocol', () => {
   let socketB = null;
 
   beforeEach(async () => {
-    a = new Protocol();
+    a = new Protocol({ sodium });
     await a.load();
 
-    b = new Protocol();
+    b = new Protocol({ sodium });
     await b.load();
 
     [ socketA, socketB ] = Socket.pair();
@@ -50,7 +51,7 @@ describe('Protocol', () => {
     assert.strictEqual(id1.name, '1');
     assert.strictEqual(id2.name, '2');
 
-    const clone = new Protocol({ storage: a.storage });
+    const clone = new Protocol({ storage: a.storage, sodium });
     await clone.load();
 
     assert.ok(clone.getIdentity('1').canInvite(clone.getChannel('1')));
@@ -88,8 +89,10 @@ describe('Protocol', () => {
       const channelForA = await a.channelFromInvite(invite, idA);
 
       // Same channels should not be added, but can be ignored
-      await a.addChannel(
-        await Channel.deserializeData(channelForA.serializeData()));
+      const ignored = await Channel.deserializeData(
+        channelForA.serializeData(),
+        { sodium });
+      await a.addChannel(ignored);
 
       // Duplicate adds should throw
       await assert.rejects(a.addChannel(duplicate), {
@@ -103,7 +106,7 @@ describe('Protocol', () => {
       await new Promise((resolve) => setImmediate(resolve));
 
       assert.strictEqual(await channelForA.getMessageCount(), 2);
-      const last = await channelForA.getMessagesAtOffset(1);
+      const last = await channelForA.getReverseMessagesAtOffset(0);
       assert.strictEqual(last[0].json, 'ohai');
     };
 
@@ -145,7 +148,7 @@ describe('Protocol', () => {
     // Derivation of encryption key is a slow process
     this.timeout(20000);
 
-    const protocol = new Protocol({ passphrase: 'secret' });
+    const protocol = new Protocol({ passphrase: 'secret', sodium });
     const encrypted = protocol.encryptData(Buffer.from('hello'));
     const decrypted = protocol.decryptData(encrypted);
     assert.strictEqual(decrypted.toString(), 'hello');

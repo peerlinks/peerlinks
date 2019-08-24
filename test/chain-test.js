@@ -1,5 +1,6 @@
 /* eslint-env node, mocha */
 import * as assert from 'assert';
+import * as sodium from 'sodium-universal';
 
 import { Chain, Channel, Identity } from '../';
 import { now } from '../lib/utils';
@@ -17,13 +18,13 @@ describe('Chain', () => {
   let dataD = null;
 
   beforeEach(() => {
-    idA = new Identity('a');
-    idB = new Identity('b');
-    idC = new Identity('c');
-    idD = new Identity('d');
+    idA = new Identity('a', { sodium });
+    idB = new Identity('b', { sodium });
+    idC = new Identity('c', { sodium });
+    idD = new Identity('d', { sodium });
 
-    channelA = new Channel('channel-a', idA.publicKey);
-    channelB = new Channel('channel-b', idB.publicKey);
+    channelA = new Channel('channel-a', idA.publicKey, { sodium });
+    channelB = new Channel('channel-b', idB.publicKey, { sodium });
 
     dataA = {
       trusteePubKey: idA.publicKey,
