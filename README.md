@@ -15,7 +15,7 @@ avoided whenever possible.**
 
 ## Trying it out
 
-The [Desktop Client][desktop]! is a great way to start using the protocol with
+The [Desktop Client][desktop] is a great way to start using the protocol with
 your peers. Once installed the identities and channels can be created.
 Once requested an invite to other's channel, or approved an invite for someone
 else the familiar UI (:wink:) will help to make the conversation over a P2P
