@@ -10,8 +10,8 @@ Slack if you wish). The core principles are:
 * The "invite chain" does not involve more than 3 people
 * Write access expires after 99 days.
 
-**NOTE: The protocol is still under development. The changes will be introduced
-without breaking compatibility whenever possible.**
+**NOTE: The protocol is still under development. Breaking changes will be
+avoided whenever possible.**
 
 ## Trying it out
 
