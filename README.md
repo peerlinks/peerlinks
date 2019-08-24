@@ -1,4 +1,4 @@
-# vowlink-protocol
+# VowLink
 [![Build Status](https://travis-ci.org/vowlink/vowlink-protocol.svg?branch=master)](http://travis-ci.org/vowlink/vowlink-protocol)
 
 VowLink is a protocol for building "Distributed Secure IRC" (or distributed
