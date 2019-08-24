@@ -22,7 +22,10 @@ import VowLink, { Message, StreamSocket } from '@vowlink/protocol';
 import SqliteStorage from '@vowlink/sqlite-storage';
 
 // Initialize persistence layer
-const storage = new SqliteStorage({ file: 'db.sqlite' });
+const storage = new SqliteStorage({
+  file: 'db.sqlite',
+  passphrase,
+});
 await storage.open();
 
 // Initialize protocol layer
