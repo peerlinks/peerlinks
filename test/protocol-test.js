@@ -70,7 +70,7 @@ describe('Protocol', () => {
 
     const run = async () => {
       // Generate invite request
-      const { requestId, request, decrypt } = idA.requestInvite(a.id);
+      const { requestId, request, decrypt } = idA.requestInvite(a.publicKey);
       const invitePromise = a.waitForInvite(requestId).promise;
 
       // Issue invite
@@ -125,13 +125,13 @@ describe('Protocol', () => {
     const [ idB, channelB ] = await a.createIdentityPair('b');
 
     // Generate invite request
-    const { requestId, request, decrypt } = idA.requestInvite(a.id);
+    const { requestId, request, decrypt } = idA.requestInvite(a.publicKey);
     const invitePromise = a.waitForInvite(requestId).promise;
 
     // Issue invite
     const { encryptedInvite, peerId } = idB.issueInvite(
       channelB, request, 'b');
-    assert.ok(peerId.equals(a.id));
+    assert.ok(peerId.equals(a.publicKey));
 
     // Send it back
     assert.ok(a.resolveInvite(requestId, encryptedInvite));
