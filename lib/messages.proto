@@ -9,6 +9,10 @@ message Hello {
   bytes peer_id = 2;
 }
 
+message Shake {
+  bool is_duplicate = 1;
+}
+
 message Link {
   message TBS {
     bytes trustee_pub_key = 1;

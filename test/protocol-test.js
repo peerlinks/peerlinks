@@ -110,9 +110,17 @@ describe('Protocol', () => {
       assert.strictEqual(last[0].json, 'ohai');
     };
 
+    const [ socketC, socketD ] = Socket.pair();
+
     await Promise.race([
-      a.connect(socketA),
-      b.connect(socketB),
+      Promise.all([
+        a.connect(socketA),
+        b.connect(socketB),
+
+        // Test duplicate connections too
+        a.connect(socketC),
+        b.connect(socketD),
+      ]),
       run(),
     ]);
 

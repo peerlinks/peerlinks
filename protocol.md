@@ -1,6 +1,6 @@
 # Protocol
 
-**DRAFT**
+**Version 2**
 
 ## Goals
 
@@ -51,11 +51,6 @@ message Hello {
 
 NOTE: `peer_id.length` MUST be checked to be equal to 32 bytes.
 
-NOTE: In the course of the protocol lifetime there is a chance that some peers
-will connect to each other twice. This could be mitigated through some
-techniques in the future. For now we just ignore the problem, assuming that it
-will not have substantial impact on the first versions of clients.
-
 The `hello.version` specifies the protocol version and MUST be checked by the
 recipient. In case of the mismatch and/or other errors `Error` SHOULD be sent:
 ```proto
@@ -64,6 +59,20 @@ message Error {
 }
 ```
 and connection MUST be closed.
+
+Once both parties have sent and received hellos the node with `hello.peer_id`
+lexicographically less than `remote_hello.peer_id` MUST send `Shake`:
+```proto
+message Shake {
+  bool is_duplicate = 1;
+}
+```
+Connection MUST be closed with error if remote sends Shake and has
+`remote_hello.peer_id` lexicographically greater (or equal) to `hello.peer_id`.
+Peer sending `Shake` SHOULD take `remote_hello.peer_id` in account to prevent
+duplicate connections. `shake.is_duplicate` SHOULD be set to `true` only if the
+connection to remote peer is deemed to be duplicate by sender. In this case
+the connection SHOULD be closed after sending `Shake`.
 
 NOTE: `reason.length` MUST be checked to be less than 1024 utf-8 characters.
 
