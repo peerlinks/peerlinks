@@ -9,6 +9,7 @@ import { now } from '../lib/utils';
 describe('Channel', () => {
   let identity = null;
   let channel = null;
+  let root = null;
 
   beforeEach(async () => {
     identity = new Identity('test', { sodium });
@@ -16,11 +17,13 @@ describe('Channel', () => {
       name: 'test-channel',
       sodium,
     });
+    root = await channel.getRoot();
   });
 
   afterEach(() => {
     identity = null;
     channel = null;
+    root = null;
   });
 
   const at = async (offset, limit) => {
@@ -72,7 +75,6 @@ describe('Channel', () => {
       assert.ok(second.verify(channel));
       assert.strictEqual(await channel.getMinLeafHeight(), 2);
 
-      const root = channel.root;
       assert.ok(root.verify(channel));
       assert.strictEqual(root.parents.length, 0);
       assert.strictEqual(root.height, 0);
@@ -157,31 +159,19 @@ describe('Channel', () => {
         publicKey: channel.publicKey,
         sodium,
       });
-      await clone.receive(channel.root);
+      await clone.receive(root);
       assert.strictEqual(await clone.getMinLeafHeight(), 0);
     });
 
     it('should ignore duplicate', async () => {
-      await channel.receive(channel.root);
-    });
-
-    it('should throw on invalid root', async () => {
-      const alt = await Channel.fromIdentity(identity, {
-        name: 'test-alt-channel',
-        sodium,
-      });
-
-      await assert.rejects(channel.receive(alt.root), {
-        name: 'Error',
-        message: 'Received invalid root',
-      });
+      await channel.receive(root);
     });
 
     it('should throw on invalid signature', async () => {
       const wrong = new Message({
         sodium,
         channel,
-        parents: [ channel.root.hash ],
+        parents: [ root.hash ],
         height: 1,
         content: {
           chain: [],
@@ -202,7 +192,7 @@ describe('Channel', () => {
     it('should throw on too many parents', async () => {
       const parents = [];
       for (let i = 0; i < 1024; i++) {
-        parents.push(channel.root.hash);
+        parents.push(root.hash);
       }
 
       const wrong = new Message({
@@ -228,14 +218,16 @@ describe('Channel', () => {
         sodium,
       });
 
+      const altRoot = await alt.getRoot();
+
       const wrong = new Message({
         sodium,
         channel,
-        parents: [ alt.root.hash ],
+        parents: [ altRoot.hash ],
         height: 1,
         content: identity.signMessageBody(Message.json('wrong'), channel, {
           height: 1,
-          parents: [ alt.root.hash ],
+          parents: [ altRoot.hash ],
         }),
       });
 
@@ -246,8 +238,8 @@ describe('Channel', () => {
     });
 
     it('should check height', async () => {
-      const left = msg('left', [ channel.root ], 1);
-      const right = msg('right', [ channel.root ], 1);
+      const left = msg('left', [ root ], 1);
+      const right = msg('right', [ root ], 1);
       const grand = msg('grand', [ right ], 2);
 
       await channel.receive(left);
@@ -270,14 +262,14 @@ describe('Channel', () => {
     });
 
     it('should check timestamp', async () => {
-      const future = msg('future', [ channel.root ], 1, now() + 3600);
+      const future = msg('future', [ root ], 1, now() + 3600);
 
       await assert.rejects(channel.receive(future), {
         name: 'Error',
         message: 'Received message is in the future',
       });
 
-      const past = msg('future', [ channel.root ], 1, now() - 3600);
+      const past = msg('future', [ root ], 1, now() - 3600);
 
       await assert.rejects(channel.receive(past), {
         name: 'Error',
@@ -298,11 +290,11 @@ describe('Channel', () => {
       const invalid = new Message({
         sodium,
         channel,
-        parents: [ channel.root.hash ],
+        parents: [ root.hash ],
         height: 1,
         content: identity.signMessageBody(Message.root(), channel, {
           height: 1,
-          parents: [ channel.root.hash ],
+          parents: [ root.hash ],
           timestamp: now(),
         }),
       });
@@ -319,7 +311,7 @@ describe('Channel', () => {
         publicKey: channel.publicKey,
         sodium,
       });
-      await clone.receive(channel.root);
+      await clone.receive(root);
 
       const remote = await clone.post(Message.json('okay'), identity);
 
@@ -344,7 +336,7 @@ describe('Channel', () => {
         maxQueryLimit: 5,
         maxBulkCount: 2,
       });
-      await clone.receive(channel.root);
+      await clone.receive(root);
 
       // Post three times the query limit
       for (let i = 0; i < 15; i++) {
@@ -365,7 +357,7 @@ describe('Channel', () => {
         maxQueryLimit: 5,
         maxBulkCount: 2,
       });
-      await clone.receive(channel.root);
+      await clone.receive(root);
 
       // Post three times the query limit
       for (let i = 0; i < 15; i++) {
@@ -397,7 +389,7 @@ describe('Channel', () => {
         maxQueryLimit: 5,
         maxBulkCount: 2,
       });
-      await final.receive(channel.root);
+      await final.receive(root);
 
       await final.sync(clone);
       assert.strictEqual(await final.getMessageCount(), 32);
@@ -414,7 +406,7 @@ describe('Channel', () => {
         maxUnresolvedCount: 0,
         maxBulkCount: 2,
       });
-      await clone.receive(channel.root);
+      await clone.receive(root);
 
       // Post three times the query limit
       for (let i = 0; i < 15; i++) {
@@ -464,12 +456,12 @@ describe('Channel', () => {
 
     describe('receive()', () => {
       it('should be unlimited for root\'s messages', async () => {
-        const big = msg('x'.repeat(1024 * 1024), [ channel.root ], 1);
+        const big = msg('x'.repeat(1024 * 1024), [ root ], 1);
         await channel.receive(big);
       });
 
       it('should be limited for non-root\'s messages', async () => {
-        const invalid = msg('x'.repeat(1024 * 1024), [ channel.root ], 1,
+        const invalid = msg('x'.repeat(1024 * 1024), [ root ], 1,
           now(), trustee);
         await assert.rejects(channel.receive(invalid), {
           name: 'Error',
@@ -483,10 +475,9 @@ describe('Channel', () => {
   it('should serialize/deserialize', async () => {
     channel.setMetadata({ ok: true });
     const copy = await Channel.deserializeData(channel.serializeData(), {
-      sodium
+      sodium,
+      storage: channel.cache.backend,
     });
-    assert.strictEqual(copy.root.hash.toString('hex'),
-      channel.root.hash.toString('hex'));
     assert.deepStrictEqual(copy.metadata, { ok: true });
 
     await copy.post(Message.json('hello'), identity);

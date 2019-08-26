@@ -32,7 +32,6 @@ message Link {
 message Invite {
   bytes channel_pub_key = 1;
   string channel_name = 2;
-  ChannelMessage channel_root = 3;
 
   repeated Link chain = 4;
 }
@@ -189,7 +188,6 @@ message Identity {
 message Channel {
   bytes public_key = 1;
   string name = 2;
-  ChannelMessage root = 3;
 
   string metadata = 4;
 }

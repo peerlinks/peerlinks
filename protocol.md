@@ -353,7 +353,6 @@ decrypted `encrypted_invite.box` becomes:
 message Invite {
   bytes channel_pub_key = 1;
   string channel_name = 2;
-  ChannelMessage channel_root = 3;
 
   repeated Link chain = 4;
 }
@@ -363,9 +362,7 @@ NOTE: `encryptedInvite.box = nonce + ciphertext + mac`. See
 `sodium.crypto_box_seal_open`.
 
 The `channel_name` is a suggested name for the channel and MUST have no more
-than `128` UTF-8 characters. `channel_root` MUST be decryptable using
-`symmetric_key`, MUST have empty `content.chain`, and MUST be signed by
-`channel_priv_key`.
+than `128` UTF-8 characters.
 
 The `invite.links` MUST be a chain from `channel_priv_key` to the
 `request.trustee_key`.

@@ -100,7 +100,7 @@ describe('Protocol', () => {
         message: 'Channel with a duplicate name: "a"',
       });
 
-      assert.strictEqual(await channelForA.getMessageCount(), 1);
+      assert.strictEqual(await channelForA.getMessageCount(), 0);
 
       // Wait for sync to complete
       await new Promise((resolve) => setImmediate(resolve));

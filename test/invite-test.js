@@ -41,6 +41,8 @@ describe('Invite', () => {
       sodium,
     });
 
+    await copy.receive(await channel.getRoot());
+
     // Try posting a message
     const posted = await copy.post(Message.json('hello world'), invitee);
 
