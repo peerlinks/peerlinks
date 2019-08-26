@@ -60,19 +60,22 @@ message Error {
 ```
 and connection MUST be closed.
 
-Once both parties have sent and received hellos the node with `hello.peer_id`
-lexicographically less than `remote_hello.peer_id` MUST send `Shake`:
+Once both parties have sent and received hellos the `hello.peer_id` and
+`remote_hello.peer_id` are converted to big integers `local` and `remote`
+respectively. If `abs(local - remote)` is less than `2 ** 255` - the peer with
+the least big integer id MUST send `Shake`. If `abs(local - remote)` is greater
+or equal to `2 ** 255` - the peer with the greatest integer id MUST send
+`Shake`:
 ```proto
 message Shake {
   bool is_duplicate = 1;
 }
 ```
-Connection MUST be closed with error if remote sends Shake and has
-`remote_hello.peer_id` lexicographically greater (or equal) to `hello.peer_id`.
-Peer sending `Shake` SHOULD take `remote_hello.peer_id` in account to prevent
-duplicate connections. `shake.is_duplicate` SHOULD be set to `true` only if the
-connection to remote peer is deemed to be duplicate by sender. In this case
-the connection SHOULD be closed after sending `Shake`.
+Connection MUST be closed if `Shake` is received in violation of big integer
+procedure above. Peer sending `Shake` SHOULD take `remote_hello.peer_id` in
+account to prevent duplicate connections. `shake.is_duplicate` SHOULD be set to
+`true` only if the connection to remote peer is deemed to be duplicate by
+sender. In this case the connection SHOULD be closed after sending `Shake`.
 
 NOTE: `reason.length` MUST be checked to be less than 1024 utf-8 characters.
 
