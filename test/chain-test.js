@@ -148,4 +148,15 @@ describe('Chain', () => {
     assert.ok(!chain.verify(channelA));
     assert.ok(!chain.isValid());
   });
+
+  it('should report when chain is better', () => {
+    const links = [
+      idA.issueLink(channelA, dataB),
+    ];
+
+    const root = new Chain([]);
+    const chain = new Chain(links);
+    assert.ok(root.isBetterThan(chain));
+    assert.ok(!chain.isBetterThan(root));
+  });
 });
