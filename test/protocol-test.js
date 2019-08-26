@@ -101,6 +101,10 @@ describe('Protocol', () => {
       });
 
       assert.strictEqual(await channelForA.getMessageCount(), 0);
+      await assert.rejects(channelForA.post(Message.json('no-sync', idA)), {
+        name: 'Error',
+        message: 'Initial synchronization not complete',
+      });
 
       // Wait for sync to complete
       await new Promise((resolve) => setImmediate(resolve));
