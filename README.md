@@ -1,5 +1,5 @@
 # VowLink
-[![Build Status](https://travis-ci.org/vowlink/vowlink-protocol.svg?branch=master)](http://travis-ci.org/vowlink/vowlink-protocol)
+[![Build Status](https://travis-ci.org/vowlink/vowlink.svg?branch=master)](http://travis-ci.org/vowlink/vowlink)
 [![IRC Channel](https://img.shields.io/badge/IRC-%23vowlink-1e72ff.svg?style=flat)][comm-irc]
 ![License](https://img.shields.io/npm/l/@vowlink/protocol)
 
