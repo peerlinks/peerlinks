@@ -38,8 +38,10 @@ describe('Protocol', () => {
   it('should remove the identity and the channel', async () => {
     const [ id, channel ] = await a.createIdentityPair('test');
 
-    await a.removeIdentity(id);
     await a.removeChannel(channel);
+    assert.ok(!id.getChain(channel));
+
+    await a.removeIdentity(id);
     assert.strictEqual(a.channels.length, 0);
     assert.strictEqual(a.identities.length, 0);
   });
