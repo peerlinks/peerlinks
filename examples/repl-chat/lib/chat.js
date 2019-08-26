@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import * as sodium from 'sodium-universal';
+import * as bs58 from 'bs58';
 
 import Protocol, { Message }from '@vowlink/protocol';
 import Swarm from '@vowlink/swarm';
@@ -57,12 +58,11 @@ export default class Chat {
     const { requestId, request, decrypt } = this.identity.requestInvite(
       this.protocol.id);
 
-    const requestIdHex = JSON.stringify(requestId.toString('hex'));
-    const requestHex = JSON.stringify(request.toString('hex'));
+    const request58 = JSON.stringify(bs58.encode(request));
     const trusteeName = JSON.stringify(this.identity.name);
 
     console.log('Ask your peer to run:');
-    console.log(`issueInvite(${trusteeName},${requestIdHex},${requestHex})`);
+    console.log(`issueInvite(${trusteeName},${request58})`);
     console.log('...waiting');
 
     const encryptedInvite = await this.swarm.waitForInvite(
@@ -78,24 +78,21 @@ export default class Chat {
     return `Joined channel: "${this.channel.name}"`;
   }
 
-  async issueInvite(inviteeName, requestId, request) {
+  async issueInvite(inviteeName, request) {
     if (!this.identity) {
       throw new Error('`iam()` must be called first');
     }
-    if (!requestId, !request || !inviteeName) {
+    if (!request || !inviteeName) {
       throw new Error(
-        'Usage: issueInvite(inviteeName, <hex request id>, ' +
-        '< hex request string >)');
+        'Usage: issueInvite(inviteeName, < base58 request string >)');
     }
 
-    requestId = Buffer.from(requestId, 'hex');
-    request = Buffer.from(request, 'hex');
+    request = bs58.decode(request);
 
     const { encryptedInvite, peerId } = this.identity.issueInvite(
       this.channel, request, inviteeName);
 
     await this.swarm.sendInvite({
-      requestId,
       peerId,
       encryptedInvite,
     }, INVITE_TIMEOUT).promise;
