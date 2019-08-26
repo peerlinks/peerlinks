@@ -180,7 +180,9 @@ export default class Chat {
     });
 
     console.log('\x1b[2J');
-    console.log(`===== ${this.channel.name} =====`);
+    console.log(`===== ${this.channel.name} ` +
+      `${bs58.encode(this.channel.publicKey)} =====`);
+
     console.log(result.join('\n'));
     console.log(`===== ${this.channel.name} =====`);
 
