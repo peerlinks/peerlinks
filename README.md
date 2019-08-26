@@ -107,6 +107,13 @@ for (const message of messages.slice().reverse()) {
 }
 ```
 
+Create read-only channel using its public key obtained elsewhere:
+```js
+cosnt channel = await vowLink.channelFromPublicKey(
+  publicKey,
+  { name: 'channel-name' });
+```
+
 ## Help requested
 
 The protocol draft and the implementations are in the very early stages. Any

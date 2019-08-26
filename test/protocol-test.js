@@ -132,6 +132,41 @@ describe('Protocol', () => {
     await b.close();
   });
 
+  it('should sync read-only channels', async () => {
+    const [ idA, channelA ] = await a.createIdentityPair('a');
+    const [ idB, _ ] = await b.createIdentityPair('b');
+
+    const run = async () => {
+      // Post a message
+      await channelA.post(Message.json('ohai'), idA);
+
+      const readonly = await b.channelFromPublicKey(channelA.publicKey, {
+        name: 'readonly',
+      });
+      assert.ok(!idB.canInvite(readonly));
+      assert.ok(!idB.canPost(readonly));
+
+      assert.strictEqual(await readonly.getMessageCount(), 0);
+      while ((await readonly.getMessageCount()) !== 2) {
+        await readonly.waitForIncomingMessage().promise;
+      }
+
+      const last = await readonly.getReverseMessagesAtOffset(0);
+      assert.strictEqual(last[0].json, 'ohai');
+    };
+
+    await Promise.race([
+      Promise.all([
+        a.connect(socketA),
+        b.connect(socketB),
+      ]),
+      run(),
+    ]);
+
+    await a.close();
+    await b.close();
+  });
+
   it('should self-resolve invite', async () => {
     const [ idA, _ ] = await a.createIdentityPair('a');
     const [ idB, channelB ] = await a.createIdentityPair('b');
