@@ -17,6 +17,17 @@ The goals of this protocol are:
 5. Eventual consistency. Messages must be viewable offline. New messages can be
    posted offline and distributed once remote peers are available.
 
+## Security Disclaimer
+
+Current version of protocol **DOES NOT** have:
+
+* Forward secrecy and backward secrecy (once invited to the channel - the
+  participant downloads all history and read all further conversations even
+  though they write access will expire in 99 days)
+* Data obfuscation. The messages in this protocol could be filtered by
+  firewalls. Obfuscation can potentially happen on transport level (e.g.,
+  using [Noise Protocol Framework][Noise])
+
 ## Notes
 
 Here and below [Sodium][] is used for all cryptography operations.
@@ -526,3 +537,4 @@ be desired)*
 [Public Key Infrastructure]: https://en.wikipedia.org/wiki/Public_key_infrastructure
 [CRDT]: https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type
 [KDF]: https://signal.org/docs/specifications/doubleratchet/#kdf-chains
+[Noise]: http://noiseprotocol.org/
