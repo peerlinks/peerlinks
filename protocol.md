@@ -204,7 +204,7 @@ height = max(p.height for p in parents) + 1
 `content.timestamp` MUST be a valid Unix time since Jan 1st 1970 00:00:00 UTC,
 and MUST be greater or equal to the maximum timestamp of the message parents.
 `content.timestamp` MUST NOT be too far in the future. Particular implementation
-SHOULD decide on the value of this leeway (5-10 seconds is recommended).
+SHOULD decide on the value of this leeway (~2 minutes is recommended).
 
 The validity of `content.timestamp` and the validity of links MUST be enforced
 through the following mechanism. Suppose that for a received `message`:
@@ -299,6 +299,9 @@ minimum of `valid_to` of all links. The `valid_from` is then the maximum of
 peers' ability to write new messages. The validity of the chain MUST be
 checked against the `content.timestamp` (see constraints on `content.timestamp`
 above.)
+
+NOTE: When issuing new link set `valid_from` a bit in the past to avoid issues
+with slightly out-of-sync time. 2 minutes in the past should be safe to use.
 
 The `message.signature` MUST be generated using the private key that corresponds
 to the last public key in the chain, or the channel's private key if the chain

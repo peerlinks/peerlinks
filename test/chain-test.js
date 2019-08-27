@@ -94,6 +94,7 @@ describe('Chain', () => {
     assert.ok(!chain.canAppend());
 
     assert.ok(chain.verify(channelA));
+    assert.ok(!chain.verify(channelA, now() - 3600));
     assert.ok(chain.isValid());
     assert.ok(!chain.verify(channelB));
 
