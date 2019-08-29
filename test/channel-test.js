@@ -129,7 +129,7 @@ describe('Channel', () => {
       assert.strictEqual(message.json, 'hello');
     });
 
-    it('should find suitable past leaves when posting', async () => {
+    it('should adjust timestamp when leaves are in the future', async () => {
       const timestamp = now();
 
       const start = await channel.post(Message.json('hello'), identity, {
@@ -144,11 +144,13 @@ describe('Channel', () => {
 
       assert.strictEqual(middle.parents.length, 1);
       assert.strictEqual(middle.parents[0].toString('hex'),
-        start.hash.toString('hex'));
+        end.hash.toString('hex'));
+      assert.strictEqual(middle.content.timestamp, end.content.timestamp);
 
       assert.strictEqual(end.parents.length, 1);
       assert.strictEqual(end.parents[0].toString('hex'),
         start.hash.toString('hex'));
+      assert.strictEqual(end.content.timestamp, timestamp + 2000);
     });
   });
 

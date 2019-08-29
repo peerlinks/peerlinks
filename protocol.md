@@ -259,13 +259,10 @@ The subscribers of the channel MUST verify the messages against full DAG:
 
 Whenever new message is posted by a participant it SHOULD:
 1. Take at most `128` current DAG leaves
-2. It might be possible that some of them are in the future (see verification
-   steps for received messages), if this is the case:
-  1. If there is a non-empty set of the leaves in the past - use them as the
-     parents
-  2. Otherwise take parents of each leaf and return to the step `2` above
-3. Find the maximum of their timestamps
-4. Remove those that differ from the maximum timestamp by more than **30 days**.
+2. For `content.timestamp` use maximum of: current unix time, leaves'
+   timestamps. (NOTE: with the 2 minute leeway above, the maximum difference
+   is bounded anyway)
+3. Remove those that differ from the maximum timestamp by more than **30 days**.
 These leaves SHOULD be used as parents for the new message. Peers naturally
 merge different branches into a single new leaf.
 
