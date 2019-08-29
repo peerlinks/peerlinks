@@ -1,6 +1,6 @@
 # Protocol
 
-**Version 2**
+**Version 1** (DRAFT)
 
 ## Goals
 
@@ -344,15 +344,12 @@ consider the invitation carefully and ONLY IN CASE of user confirmation issue
 an `EncryptedInvite`:
 ```proto
 message EncryptedInvite {
-  // NOTE: `request_id = req.box_pub_key`
+  // NOTE: `request_id = HASH(req.trustee_pub_key, 'vowlink-invite')[:32]`
   bytes request_id = 1;
 
   bytes box = 2;
 }
 ```
-
-NOTE: `encrypted_invite.request_id` MUST be equal to
-`invite_request.box_pub_key`.
 
 NOTE: `peer_id.length` MUST be checked to be equal to 32 bytes.
 `trustee_pub_key` and `box_pub_key` lengths MUST be checked.
