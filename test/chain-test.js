@@ -78,7 +78,7 @@ describe('Chain', () => {
     assert.throws(() => {
       new Chain(links);
     }, {
-      name: 'Error',
+      name: 'BanError',
       message: 'Chain length overflow: 4',
     });
   });

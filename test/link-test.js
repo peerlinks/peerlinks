@@ -55,7 +55,7 @@ describe('Link', () => {
         trusteeDisplayName: 'trustee'.repeat(100),
       });
     }, {
-      name: 'Error',
+      name: 'BanError',
       message: 'Invalid trusteeDisplayName length: 700',
     });
   });

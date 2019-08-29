@@ -186,7 +186,7 @@ describe('Channel', () => {
       });
 
       await assert.rejects(channel.receive(wrong), {
-        name: 'Error',
+        name: 'BanError',
         message: 'Invalid message signature, or invalid chain',
       });
     });
@@ -209,7 +209,7 @@ describe('Channel', () => {
       });
 
       await assert.rejects(channel.receive(wrong), {
-        name: 'Error',
+        name: 'BanError',
         message: /Invalid parent count: 1024/,
       });
     });
@@ -234,7 +234,7 @@ describe('Channel', () => {
       });
 
       await assert.rejects(channel.receive(wrong), {
-        name: 'Error',
+        name: 'BanError',
         message: /Message parent: .* not found/,
       });
     });
@@ -254,7 +254,7 @@ describe('Channel', () => {
       const wrong = msg('wrong', [ left, grand ], 1);
 
       await assert.rejects(channel.receive(wrong), {
-        name: 'Error',
+        name: 'BanError',
         message: 'Invalid received message height: 1, expected: 3',
       });
 
@@ -267,14 +267,14 @@ describe('Channel', () => {
       const future = msg('future', [ root ], 1, now() + 3600);
 
       await assert.rejects(channel.receive(future), {
-        name: 'Error',
+        name: 'BanError',
         message: 'Received message is in the future',
       });
 
       const past = msg('future', [ root ], 1, now() - 3600);
 
       await assert.rejects(channel.receive(past), {
-        name: 'Error',
+        name: 'BanError',
         message: 'Received message is in the past',
       });
     });
@@ -302,7 +302,7 @@ describe('Channel', () => {
       });
 
       await assert.rejects(channel.receive(invalid), {
-        name: 'Error',
+        name: 'BanError',
         message: 'Invalid non-root content',
       });
     });
@@ -449,7 +449,7 @@ describe('Channel', () => {
       it('should be limited for non-root\'s messages', async () => {
         const body = Message.json('x'.repeat(1024 * 1024));
         await assert.rejects(channel.post(body, trustee), {
-          name: 'Error',
+          name: 'BanError',
           message: 'Message body length overflow. Expected less or equal to: ' +
             '262144. Got: 1048578'
         });
@@ -466,7 +466,7 @@ describe('Channel', () => {
         const invalid = msg('x'.repeat(1024 * 1024), [ root ], 1,
           now(), trustee);
         await assert.rejects(channel.receive(invalid), {
-          name: 'Error',
+          name: 'BanError',
           message: 'Message body length overflow. Expected less or equal to: ' +
             '262144. Got: 1048578'
         });

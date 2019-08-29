@@ -68,7 +68,7 @@ describe('Message', () => {
     });
 
     assert.throws(() => invalid.decrypt(channel), {
-      name: 'Error',
+      name: 'BanError',
       message: 'Failed to decrypt message content',
     });
   });
@@ -156,7 +156,7 @@ describe('Message', () => {
     assert.throws(() => {
       copy.decrypt(channel);
     }, {
-      name: 'Error',
+      name: 'BanError',
       message: 'Invalid JSON content. Unexpected end of JSON input',
     });
   });
