@@ -28,10 +28,10 @@ export default class Socket {
     });
   }
 
-  async close() {
+  async close(error) {
     while (this.receiveQueue.length !== 0) {
       const elem = this.receiveQueue.shift();
-      elem.reject(new Error('Closed'));
+      elem.reject(error || new Error('Closed'));
     }
   }
 
