@@ -331,11 +331,9 @@ form of scanned QR code (or by other means):
 message InviteRequest {
   bytes peer_id = 1;
   bytes trustee_pub_key = 2;
-  bytes box_pub_key = 3;
 }
 ```
-where `trustee_pub_key` is the invitee's public key. `box_pub_key` is from
-`sodium.box.keyPair()`.
+where `trustee_pub_key` is the invitee's public key.
 
 NOTE: requesting invite reveals public key and an associated channel.
 
@@ -351,12 +349,16 @@ message EncryptedInvite {
 }
 ```
 
-NOTE: `peer_id.length` MUST be checked to be equal to 32 bytes.
-`trustee_pub_key` and `box_pub_key` lengths MUST be checked.
+NOTE: `crypto_sign_ed25519_pk_to_curve25519`,
+`crypto_sign_ed25519_sk_to_curve25519`,
+`crypto_box_seal`, `crypto_box_seal_open` from Sodium are used for getting
+encryption keys out of `trustee_pub_key` and (not sent over the wire)
+`trustee_priv_key`, and encrypting/decrypting the `box` contents respectively.
 
-The `encrypted_invite.box` can be decrypted with `box_priv_key` that the issuer
-of `InviteRequest` MUST know from the moment the generated `InviteRequest`. When
-decrypted `encrypted_invite.box` becomes:
+NOTE: `peer_id.length` MUST be checked to be equal to 32 bytes.
+`trustee_pub_key` length MUST be checked.
+
+When decrypted `encrypted_invite.box` becomes:
 ```proto
 message Invite {
   bytes channel_pub_key = 1;
@@ -365,9 +367,6 @@ message Invite {
   repeated Link chain = 4;
 }
 ```
-
-NOTE: `encryptedInvite.box = nonce + ciphertext + mac`. See
-`sodium.crypto_box_seal_open`.
 
 The `channel_name` is a suggested name for the channel and MUST have no more
 than `128` UTF-8 characters.
