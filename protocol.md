@@ -171,7 +171,7 @@ message ChannelMessage {
   // NOTE: can be empty only in the root message
   repeated bytes parents = 2;
 
-  // height = max(p.height for p in parents)
+  // height = max(p.height for p in parents) + 1
   int64 height = 3;
 
   // Encryption nonce for Sodium
