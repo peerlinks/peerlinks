@@ -36,8 +36,6 @@ describe('Message', () => {
     const message = new Message({
       sodium,
       channel,
-      parents: [],
-      height: 0,
       content,
     });
     assert.ok(message.verify(channel));
@@ -45,8 +43,6 @@ describe('Message', () => {
     const copy = new Message({
       sodium,
       channelId: channel.id,
-      parents: [],
-      height: 0,
       nonce: message.nonce,
       encryptedContent: message.encryptedContent,
     });
@@ -60,8 +56,6 @@ describe('Message', () => {
     const invalid = new Message({
       sodium,
       channelId: channel.id,
-      parents: [],
-      height: 0,
       // NOTE: Random nonce here
       nonce: null,
       encryptedContent: message.encryptedContent,
@@ -95,8 +89,6 @@ describe('Message', () => {
     const message = new Message({
       sodium,
       channel,
-      parents: [],
-      height: 0,
       content,
     });
     assert.ok(message.verify(channel));
@@ -117,20 +109,17 @@ describe('Message', () => {
     const message = new Message({
       sodium,
       channel,
-      parents: [],
-      height: 1,
       content,
     });
 
     const data = message.serializeData();
     const copy = Message.deserializeData(data, { sodium });
-    assert.strictEqual(copy.channelId.toString('hex'),
-      message.channelId.toString('hex'));
-    assert.strictEqual(copy.height, message.height);
-    assert.strictEqual(copy.parents.length, message.parents.length);
 
     // Should not throw
     copy.decrypt(channel);
+
+    assert.strictEqual(copy.height, message.height);
+    assert.strictEqual(copy.parents.length, message.parents.length);
   });
 
   it('should throw on decrypting bad JSON', () => {
@@ -145,8 +134,6 @@ describe('Message', () => {
     const message = new Message({
       sodium,
       channel,
-      parents: [],
-      height: 1,
       content,
     });
 

@@ -40,8 +40,6 @@ describe('Channel', () => {
     return new Message({
       sodium,
       channel,
-      parents: parents.map((p) => p.hash),
-      height,
       content: id.signMessageBody(Message.json(text), channel, {
         height,
         parents: parents.map((p) => p.hash),
@@ -173,9 +171,9 @@ describe('Channel', () => {
       const wrong = new Message({
         sodium,
         channel,
-        parents: [ root.hash ],
-        height: 1,
         content: {
+          parents: [ root.hash ],
+          height: 1,
           chain: [],
           timestamp: now(),
           body: {
@@ -200,8 +198,6 @@ describe('Channel', () => {
       const wrong = new Message({
         sodium,
         channel,
-        parents,
-        height: 1,
         content: identity.signMessageBody(Message.json('wrong'), channel, {
           height: 1,
           parents,
@@ -225,8 +221,6 @@ describe('Channel', () => {
       const wrong = new Message({
         sodium,
         channel,
-        parents: [ altRoot.hash ],
-        height: 1,
         content: identity.signMessageBody(Message.json('wrong'), channel, {
           height: 1,
           parents: [ altRoot.hash ],
@@ -292,8 +286,6 @@ describe('Channel', () => {
       const invalid = new Message({
         sodium,
         channel,
-        parents: [ root.hash ],
-        height: 1,
         content: identity.signMessageBody(Message.root(), channel, {
           height: 1,
           parents: [ root.hash ],

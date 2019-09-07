@@ -153,39 +153,41 @@ message ChannelMessage {
       int64 height = 5;
     }
 
+    // NOTE: can be empty only in the root message
+    repeated bytes parents = 1;
+
+    // height = max(p.height for p in parents)
+    int64 height = 2;
+
     // Link chain that leads from the channel's public key to the signer of
     // this message
-    repeated Link chain = 1;
+    repeated Link chain = 3;
 
     // Floating point unix time
-    double timestamp = 2;
+    double timestamp = 4;
 
     // body of the message
-    Body body = 3;
+    Body body = 5;
 
-    bytes signature = 4;
+    bytes signature = 6;
   }
 
-  bytes channel_id = 1;
-
-  // NOTE: can be empty only in the root message
-  repeated bytes parents = 2;
-
-  // height = max(p.height for p in parents) + 1
-  int64 height = 3;
+  message EncryptionKeyInput {
+    bytes channel_pub_key = 1;
+  }
 
   // Encryption nonce for Sodium
-  bytes nonce = 4;
+  bytes nonce = 1;
 
-  // NOTE: encryption key = HASH(channel_pub_key, 'vowlink-symmetric')
-  bytes encrypted_content = 5;
+  // NOTE: encryption key = HASH(EncryptionKeyInput, 'vowlink-symmetric')
+  bytes encrypted_content = 2;
 }
 ```
 
 Despite having many fields the aim of `ChannelMessage` is to form a Direct
 Acyclic Graph (DAG) similar to the commit graph in [git][]. In other words,
 each message except for the root MUST have one or more parents.
-`message.parents` contains the hashes of these parents, and the hash of the
+`content.parents` contains the hashes of these parents, and the hash of the
 `message` might be used as a parent for some future message. Thus messages form
 a directed graph with no cycles (merges are possible, but just as in [git][]
 they are not cycles because of edge directions).
@@ -202,9 +204,9 @@ Maximum text length in `json` is:
 * `256` for `chain.length == 3`
 in UTF-8 characters and MUST be enforced.
 
-`message.content.body` MUST be `json` for non-root messages.
+`content.body` MUST be `json` for non-root messages.
 
-`message.height` is a number of edges between the `message` and the
+`content.height` is a number of edges between the `message` and the
 `channel.root`. `channel.root` naturally MUST have `height = 0`, and in general
 any message MUST have:
 ```
@@ -220,8 +222,8 @@ SHOULD decide on the value of this leeway (~2 minutes is recommended).
 The validity of `content.timestamp` and the validity of links MUST be enforced
 through the following mechanism. Suppose that for a received `message`:
 ```
-min_timestamp = min(p.content.timestamp for p in message.parents)
-max_timestamp = max(p.content.timestamp for p in message.parents)
+min_timestamp = min(p.content.timestamp for p in content.parents)
+max_timestamp = max(p.content.timestamp for p in content.parents)
 ```
 The `message` MUST NOT be accepted and should be treated as INVALID (peer SHOULD
 issue an `Error` protocol packet and MUST close the connection to such peer) if:
@@ -421,7 +423,7 @@ The synchronization process is following:
 2. Recipient of `Query` with `cursor.height` computes the starting `height` as
    `min(min_leaf_height, cursor.height)`
 3. Recipient replies with a slice of the list of abbreviated messages (see CRDT
-   Order below) starting from the first message of `message.height == height`
+   Order below) starting from the first message of `content.height == height`
    and either up to the latest message or up to `query.limit` messages total
 4. The recipient walks over received messages sequentially, `Bulk`-requesting
    the messages with known parents and messages with parents in the
