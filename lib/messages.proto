@@ -63,14 +63,11 @@ message ChannelMessage {
 
   message Content {
     message TBS {
-      repeated Link chain = 1;
-      double timestamp = 2;
-      Body body = 3;
-
-      // NOTE: Despite these fields being outside of content they have to be
-      // included here to prevent replay attacks
-      repeated bytes parents = 4;
-      int64 height = 5;
+      repeated bytes parents = 1;
+      int64 height = 2;
+      repeated Link chain = 3;
+      double timestamp = 4;
+      Body body = 5;
     }
 
     // NOTE: can be empty only in the root message
