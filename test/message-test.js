@@ -24,49 +24,6 @@ describe('Message', () => {
     channel = null;
   });
 
-  it('should be encrypted/decrypted', () => {
-    const content = id.signMessageBody(
-      Message.json('okay'),
-      channel,
-      {
-        height: 0,
-        parents: [],
-      });
-
-    const message = new Message({
-      sodium,
-      channel,
-      content,
-    });
-    assert.ok(message.verify(channel));
-
-    const copy = new Message({
-      sodium,
-      channelId: channel.id,
-      nonce: message.nonce,
-      encryptedContent: message.encryptedContent,
-    });
-
-    copy.decrypt(channel);
-    assert.ok(copy.verify(channel));
-
-    assert.strictEqual(copy.json, 'okay');
-    assert.strictEqual(copy.hash.toString('hex'), message.hash.toString('hex'));
-
-    const invalid = new Message({
-      sodium,
-      channelId: channel.id,
-      // NOTE: Random nonce here
-      nonce: null,
-      encryptedContent: message.encryptedContent,
-    });
-
-    assert.throws(() => invalid.decrypt(channel), {
-      name: 'BanError',
-      message: 'Failed to decrypt message content',
-    });
-  });
-
   it('should be signed/verified', () => {
     const second = new Identity('second', { sodium });
     const chain = new Chain([
@@ -87,9 +44,8 @@ describe('Message', () => {
       });
 
     const message = new Message({
+      ...content,
       sodium,
-      channel,
-      content,
     });
     assert.ok(message.verify(channel));
 
@@ -107,16 +63,12 @@ describe('Message', () => {
       });
 
     const message = new Message({
+      ...content,
       sodium,
-      channel,
-      content,
     });
 
     const data = message.serializeData();
     const copy = Message.deserializeData(data, { sodium });
-
-    // Should not throw
-    copy.decrypt(channel);
 
     assert.strictEqual(copy.height, message.height);
     assert.strictEqual(copy.parents.length, message.parents.length);
@@ -124,27 +76,21 @@ describe('Message', () => {
 
   it('should throw on decrypting bad JSON', () => {
     const content = id.signMessageBody(
-      { body: { json: 'not-json' } },
+      { json: 'not-json' },
       channel,
       {
         height: 0,
         parents: [],
       });
 
-    const message = new Message({
-      sodium,
-      channel,
-      content,
-    });
-
-    const data = message.serializeData();
-    const copy = Message.deserializeData(data, { sodium });
-
     assert.throws(() => {
-      copy.decrypt(channel);
+      const _ = new Message({
+        ...content,
+        sodium,
+      });
     }, {
       name: 'BanError',
-      message: 'Invalid JSON content. Unexpected end of JSON input',
+      message: 'Invalid JSON content. Unexpected token o in JSON at position 1',
     });
   });
 });

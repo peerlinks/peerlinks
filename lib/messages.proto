@@ -61,15 +61,7 @@ message ChannelMessage {
     }
   }
 
-  message Content {
-    message TBS {
-      repeated bytes parents = 1;
-      int64 height = 2;
-      repeated Link chain = 3;
-      double timestamp = 4;
-      Body body = 5;
-    }
-
+  message TBS {
     // NOTE: can be empty only in the root message
     repeated bytes parents = 1;
 
@@ -85,19 +77,12 @@ message ChannelMessage {
 
     // body of the message
     Body body = 5;
-
-    bytes signature = 6;
   }
 
-  message EncryptionKeyInput {
-    bytes channel_pub_key = 1;
-  }
+  TBS tbs = 1;
 
-  // Encryption nonce for Sodium
-  bytes nonce = 1;
-
-  // NOTE: encryption key = HASH(EncryptionKeyInput, 'vowlink-symmetric')
-  bytes encrypted_content = 2;
+  // NOTE: `signature` has to be made by the leaf key in the `tbs.chain`
+  bytes signature = 2;
 }
 
 message Query {

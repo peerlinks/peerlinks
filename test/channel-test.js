@@ -38,13 +38,12 @@ describe('Channel', () => {
 
   const msg = (text, parents, height, timestamp, id = identity) => {
     return new Message({
-      sodium,
-      channel,
-      content: id.signMessageBody(Message.json(text), channel, {
+      ...id.signMessageBody(Message.json(text), channel, {
         height,
         parents: parents.map((p) => p.hash),
         timestamp,
       }),
+      sodium,
     });
   };
 
@@ -143,12 +142,12 @@ describe('Channel', () => {
       assert.strictEqual(middle.parents.length, 1);
       assert.strictEqual(middle.parents[0].toString('hex'),
         end.hash.toString('hex'));
-      assert.strictEqual(middle.content.timestamp, end.content.timestamp);
+      assert.strictEqual(middle.timestamp, end.timestamp);
 
       assert.strictEqual(end.parents.length, 1);
       assert.strictEqual(end.parents[0].toString('hex'),
         start.hash.toString('hex'));
-      assert.strictEqual(end.content.timestamp, timestamp + 2000);
+      assert.strictEqual(end.timestamp, timestamp + 2000);
     });
   });
 
@@ -168,19 +167,17 @@ describe('Channel', () => {
     });
 
     it('should throw on invalid signature', async () => {
+      const content = {
+        parents: [ root.hash ],
+        height: 1,
+        chain: new Chain([]),
+        timestamp: now(),
+        body: Message.json('wrong'),
+        signature: Buffer.alloc(sodium.crypto_sign_BYTES),
+      };
       const wrong = new Message({
+        ...content,
         sodium,
-        channel,
-        content: {
-          parents: [ root.hash ],
-          height: 1,
-          chain: [],
-          timestamp: now(),
-          body: {
-            json: 'wrong',
-          },
-          signature: Buffer.alloc(sodium.crypto_sign_BYTES),
-        },
       });
 
       await assert.rejects(channel.receive(wrong), {
@@ -196,12 +193,11 @@ describe('Channel', () => {
       }
 
       const wrong = new Message({
-        sodium,
-        channel,
-        content: identity.signMessageBody(Message.json('wrong'), channel, {
+        ...identity.signMessageBody(Message.json('wrong'), channel, {
           height: 1,
           parents,
         }),
+        sodium,
       });
 
       await assert.rejects(channel.receive(wrong), {
@@ -219,12 +215,11 @@ describe('Channel', () => {
       const altRoot = await alt.getRoot();
 
       const wrong = new Message({
-        sodium,
-        channel,
-        content: identity.signMessageBody(Message.json('wrong'), channel, {
+        ...identity.signMessageBody(Message.json('wrong'), channel, {
           height: 1,
           parents: [ altRoot.hash ],
         }),
+        sodium,
       });
 
       await assert.rejects(channel.receive(wrong), {
@@ -284,13 +279,12 @@ describe('Channel', () => {
       trustee.addChain(channel, chain);
 
       const invalid = new Message({
-        sodium,
-        channel,
-        content: identity.signMessageBody(Message.root(), channel, {
+        ...identity.signMessageBody(Message.root(), channel, {
           height: 1,
           parents: [ root.hash ],
           timestamp: now(),
         }),
+        sodium,
       });
 
       await assert.rejects(channel.receive(invalid), {

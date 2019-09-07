@@ -12,8 +12,7 @@ The goals of this protocol are:
 3. Efficient synchronization of channel messages between semi-trusted and
    untrusted peers
 4. Confidentiality of messages. Only past and current channel participants
-   can read the messages. NOTE: There is no end-to-end encryption involved
-   at least in not in this version of the protocol
+   can read the messages.
 5. Eventual consistency. Messages must be viewable offline. New messages can be
    posted offline and distributed once remote peers are available.
 
@@ -38,7 +37,7 @@ Channel identifier is generated with:
 ```
 channel_id = HASH(channel_pub_key, 'vowlink-channel-id')[:32]
 ```
-inspired by [DAT][] all channel messages are encrypted with `sodium.secretBox`
+inspired by [DAT][] all channel packets are encrypted with `sodium.secretBox`
 using:
 ```
 symmetric_key = HASH(channel_pub_key, 'vowlink-symmetric')[:sodium.secretBox.keySize]
@@ -141,15 +140,7 @@ message ChannelMessage {
     }
   }
 
-  message Content {
-    message TBS {
-      repeated bytes parents = 1;
-      int64 height = 2;
-      repeated Link chain = 3;
-      double timestamp = 4;
-      Body body = 5;
-    }
-
+  message TBS {
     // NOTE: can be empty only in the root message
     repeated bytes parents = 1;
 
@@ -165,19 +156,12 @@ message ChannelMessage {
 
     // body of the message
     Body body = 5;
-
-    bytes signature = 6;
   }
 
-  message EncryptionKeyInput {
-    bytes channel_pub_key = 1;
-  }
+  TBS tbs = 1;
 
-  // Encryption nonce for Sodium
-  bytes nonce = 1;
-
-  // NOTE: encryption key = HASH(EncryptionKeyInput, 'vowlink-symmetric')
-  bytes encrypted_content = 2;
+  // NOTE: `signature` has to be made by the leaf key in the `tbs.chain`
+  bytes signature = 2;
 }
 ```
 
@@ -313,11 +297,6 @@ with slightly out-of-sync time. 2 minutes in the past should be safe to use.
 The `message.signature` MUST be generated using the private key that corresponds
 to the last public key in the chain, or the channel's private key if the chain
 is empty.
-
-`nonce` MUST be a random value used by [Sodium][]'s `secretBox` to encrypt the
-contents of the message with `symmetric_key`. Note: because `symmetric_key` is
-known only to those who know the `channel_pub_key`, the messages can be stored
-on untrusted peers without any loss of confidentiality.
 
 ### Invite
 
