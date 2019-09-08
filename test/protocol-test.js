@@ -147,7 +147,6 @@ describe('Protocol', () => {
 
       const readonly = await b.channelFromPublicKey(channelA.publicKey, {
         name: 'readonly',
-        isFeed: true,
       });
       assert.ok(readonly.isFeed);
       assert.ok(!idB.canInvite(readonly));
