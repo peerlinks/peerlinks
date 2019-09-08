@@ -210,6 +210,9 @@ describe('Channel', () => {
       const alt = await Channel.fromIdentity(identity, {
         name: 'test-alt',
         sodium,
+
+        // Make sure that `alt` has different hash
+        timestamp: now() - 3600,
       });
 
       const altRoot = await alt.getRoot();
