@@ -173,6 +173,46 @@ describe('Protocol', () => {
     await b.close();
   });
 
+  it('should not sync normal channels as read-only', async () => {
+    const [ idA, channelA ] = await a.createIdentityPair('a', {
+      isFeed: false,
+    });
+    assert.ok(!channelA.isFeed);
+    const [ idB, _ ] = await b.createIdentityPair('b');
+
+    const run = async () => {
+      // Post a message
+      await channelA.post(Message.json('ohai'), idA);
+
+      const readonly = await b.feedFromPublicKey(channelA.publicKey, {
+        name: 'readonly',
+      });
+      assert.ok(readonly.isFeed);
+      assert.ok(!idB.canInvite(readonly));
+      assert.ok(!idB.canPost(readonly));
+
+      assert.strictEqual(await readonly.getMessageCount(), 0);
+
+      await readonly.waitForIncomingMessage().promise;
+    };
+
+    await assert.rejects(Promise.race([
+      Promise.all([
+        a.connect(socketA),
+        b.connect(socketB),
+      ]),
+      run(),
+    ]), {
+      name: 'BanError',
+      message: /Expected (chain|publicKey) in SyncRequest/,
+    });
+
+    await Promise.all([
+      a.close(),
+      b.close(),
+    ]);
+  });
+
   it('should self-resolve invite', async () => {
     const [ idA, _ ] = await a.createIdentityPair('a');
     const [ idB, channelB ] = await a.createIdentityPair('b');
