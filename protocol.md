@@ -7,12 +7,9 @@
 The goals of this protocol are:
 1. Provide semi-trusted parties with the means of peer-to-peer communication in
    group chats (channels)
-2. Use untrusted parties that do not participate in the channels as the means
-   of transport of channel messages to interested peers (Mesh network)
-3. Efficient synchronization of channel messages between semi-trusted and
-   untrusted peers
+3. Efficient synchronization of channel messages between semi-trusted peers
 4. Confidentiality of messages. Only past and current channel participants
-   can read the messages.
+   can read the messages. Read and write access has limited timespan
 5. Eventual consistency. Messages must be viewable offline. New messages can be
    posted offline and distributed once remote peers are available.
 
