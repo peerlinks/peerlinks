@@ -86,14 +86,12 @@ message ChannelMessage {
 }
 
 message Query {
-  repeated Link chain = 1;
-
   oneof cursor {
-    int64 height = 2;
-    bytes hash = 3;
+    int64 height = 1;
+    bytes hash = 2;
   }
-  bool is_backward = 4;
-  uint32 limit = 5;
+  bool is_backward = 3;
+  uint32 limit = 4;
 }
 
 message QueryResponse {
@@ -108,9 +106,7 @@ message QueryResponse {
 }
 
 message Bulk {
-  repeated Link chain = 1;
-
-  repeated bytes hashes = 2;
+  repeated bytes hashes = 1;
 }
 
 message BulkResponse {
@@ -118,26 +114,41 @@ message BulkResponse {
   uint32 forward_index = 2;
 }
 
-message Error {
-  string reason = 1;
-}
-
-message ChannelPacket {
+message SyncRequest {
   message Content {
     oneof content {
       Query query = 1;
-      QueryResponse query_response = 2;
-      Bulk bulk = 3;
-      BulkResponse bulk_response = 4;
+      Bulk bulk = 2;
+    }
+  }
+
+  bytes channel_id = 1;
+  uint32 seq = 2;
+  repeated Link chain = 3;
+
+  // `crypto_secretbox_easy`
+  bytes nonce = 4;
+  bytes box = 5;
+}
+
+// TODO(indutny): clarify sync response to unknown channel
+message SyncResponse {
+  message Content {
+    oneof content {
+      QueryResponse query = 1;
+      BulkResponse bulk = 2;
     }
   }
 
   bytes channel_id = 1;
   uint32 seq = 2;
 
-  // `crypto_secretbox_easy`
-  bytes nonce = 3;
-  bytes box = 4;
+  // Encrypted with `crypto_box_seal` using `chain.leaf_key` from `SyncRequest`
+  bytes box = 3;
+}
+
+message Error {
+  string reason = 1;
 }
 
 message Notification {
@@ -150,10 +161,11 @@ message Packet {
     EncryptedInvite invite = 2;
 
     // Synchronization
-    ChannelPacket channel_packet = 3;
+    SyncRequest sync_request = 3;
+    SyncResponse sync_response = 4;
 
     // Request synchronization on new messages
-    Notification notification = 4;
+    Notification notification = 5;
   }
 }
 
