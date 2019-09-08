@@ -135,7 +135,10 @@ describe('Protocol', () => {
   });
 
   it('should sync read-only channels', async () => {
-    const [ idA, channelA ] = await a.createIdentityPair('a');
+    const [ idA, channelA ] = await a.createIdentityPair('a', {
+      isFeed: true,
+    });
+    assert.ok(channelA.isFeed);
     const [ idB, _ ] = await b.createIdentityPair('b');
 
     const run = async () => {
@@ -144,7 +147,9 @@ describe('Protocol', () => {
 
       const readonly = await b.channelFromPublicKey(channelA.publicKey, {
         name: 'readonly',
+        isFeed: true,
       });
+      assert.ok(readonly.isFeed);
       assert.ok(!idB.canInvite(readonly));
       assert.ok(!idB.canPost(readonly));
 
