@@ -207,8 +207,7 @@ export default class Chat {
 
       return name;
     });
-    const time = new Date(message.content.timestamp * 1000)
-      .toLocaleTimeString();
+    const time = new Date(message.timestamp * 1000).toLocaleTimeString();
     const author = displayPath.join('>');
 
     let text;
