@@ -2,6 +2,7 @@
 import * as assert from 'assert';
 import * as sodium from 'sodium-universal';
 
+import { now } from '../lib/utils';
 import { Chain, Channel, Identity, Message } from '../';
 
 describe('Identity', () => {
@@ -36,5 +37,10 @@ describe('Identity', () => {
     assert.deepStrictEqual(copy.getMetadata(), { ok: true });
 
     await channel.post(Message.json('test'), copy);
+
+    assert.strictEqual(trustee.getChannelIds(now() + 1e9).length, 0);
+    assert.strictEqual(trustee.getChain(channel, now() + 1e9), false);
+    assert.strictEqual(identity.getChain(channel, now() + 1e9),
+      identity.getChain(channel));
   });
 });
