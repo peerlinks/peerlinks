@@ -109,7 +109,7 @@ for (const message of messages.slice().reverse()) {
 
 Create read-only channel using its public key obtained elsewhere:
 ```js
-cosnt channel = await vowLink.channelFromPublicKey(
+cosnt feed = await vowLink.feedFromPublicKey(
   publicKey,
   { name: 'channel-name' });
 ```

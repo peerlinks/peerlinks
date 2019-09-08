@@ -145,7 +145,7 @@ describe('Protocol', () => {
       // Post a message
       await channelA.post(Message.json('ohai'), idA);
 
-      const readonly = await b.channelFromPublicKey(channelA.publicKey, {
+      const readonly = await b.feedFromPublicKey(channelA.publicKey, {
         name: 'readonly',
       });
       assert.ok(readonly.isFeed);
