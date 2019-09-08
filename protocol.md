@@ -37,11 +37,12 @@ Channel identifier is generated with:
 ```
 channel_id = HASH(channel_pub_key, 'vowlink-channel-id')[:32]
 ```
-inspired by [DAT][] all channel packets are encrypted with `sodium.secretBox`
-using:
+inspired by [DAT][] all `ChannelPacket`s are encrypted with
+`crypto_secretbox_easy` and `crypto_secretbox_open_easy` and using:
 ```
-symmetric_key = HASH(channel_pub_key, 'vowlink-symmetric')[:sodium.secretBox.keySize]
+symmetric_key = HASH(channel_pub_key, 'vowlink-symmetric')[:crypto_secretbox_KEYBYTES]
 ```
+and random `nonce`.
 
 The protocol below is transport-agnostic in a sense that it could be run using
 any available transport: [MultipeerConnectivity][], https, ...
@@ -91,19 +92,34 @@ NOTE: `reason.length` MUST be checked to be less than 1024 utf-8 characters.
 
 Further communication between peers happens using:
 ```proto
+message ChannelPacket {
+  message Content {
+    oneof content {
+      Query query = 1;
+      QueryResponse query_response = 2;
+      Bulk bulk = 3;
+      BulkResponse bulk_response = 4;
+    }
+  }
+
+  bytes channel_id = 1;
+  uint32 seq = 2;
+
+  // `crypto_secretbox_easy`
+  bytes nonce = 3;
+  bytes box = 4;
+}
+
 message Packet {
   oneof content {
     Error error = 1;
     EncryptedInvite invite = 2;
 
     // Synchronization
-    Query query = 3;
-    QueryResponse query_response = 4;
-    Bulk bulk = 5;
-    BulkResponse bulk_response = 6;
+    ChannelPacket channel_packet = 3;
 
     // Request synchronization on new messages
-    Notification notification = 7;
+    Notification notification = 4;
   }
 }
 ```
@@ -257,12 +273,12 @@ message Link {
   message TBS {
     bytes trustee_pub_key = 1;
     string trustee_display_name = 2;
-    double valid_from = 4;
-    double valid_to = 5;
+    double valid_from = 3;
+    double valid_to = 4;
 
     // NOTE: This MUST be filled either by sender/recipient before
     // generating/verifying the signature below.
-    bytes channel_id = 6;
+    bytes channel_id = 5;
   }
 
   TBS tbs = 1;
@@ -366,14 +382,12 @@ Unencrypted `Query` is sent in order to request the latest messages from the
 channel:
 ```proto
 message Query {
-  bytes channel_id = 1;
-  uint32 seq = 2;
   oneof cursor {
-    int64 height = 3;
-    bytes hash = 4;
+    int64 height = 1;
+    bytes hash = 2;
   }
-  bool is_backward = 5;
-  uint32 limit = 6;
+  bool is_backward = 3;
+  uint32 limit = 4;
 }
 ```
 The `query.cursor` MUST be either of `height` or `hash`.
@@ -386,11 +400,9 @@ message QueryResponse {
     bytes hash = 2;
   }
 
-  bytes channel_id = 1;
-  uint32 seq = 2;
-  repeated Abbreviated abbreviated_messages = 3;
-  bytes forward_hash = 4;
-  bytes backward_hash = 5;
+  repeated Abbreviated abbreviated_messages = 1;
+  bytes forward_hash = 2;
+  bytes backward_hash = 3;
 }
 ```
 
@@ -424,9 +436,7 @@ During synchronization process above the recipient MUST request the messages
 that are not present in their dataset. This can be done with `Bulk` packet:
 ```proto
 message Bulk {
-  bytes channel_id = 1;
-  uint32 seq = 2;
-  repeated bytes hashes = 3;
+  repeated bytes hashes = 1;
 }
 ```
 
@@ -437,10 +447,8 @@ are omitted due to some constraints. In the latter case `forward_index` MUST be
 set to the number of processes messages:
 ```proto
 message BulkResponse {
-  bytes channel_id = 1;
-  uint32 seq = 2;
-  repeated ChannelMessage messages = 3;
-  uint32 forward_index = 4;
+  repeated ChannelMessage messages = 1;
+  uint32 forward_index = 2;
 }
 ```
 
