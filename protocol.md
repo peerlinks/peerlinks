@@ -534,30 +534,6 @@ message Notification {
 to notify ALL connected peers that new data is available for the channel. The
 subscribed peers SHOULD attempt to do a synchronization.
 
-## Storage and eviction policies
-
-WIP
-
-The amount of storage SHOULD be configurable in the application (with potential
-notifications for increasing the limit when needed). The split between public
-pool and subscribed feeds MAY be configurable.
-
-Public pool sorts the messages in the order they were received. Duplicates are
-ignored and do not change the order (TODO: reconsider this?). When the available
-storage is exhausted messages are evicted one-by-one until the required amount
-of storage is regained. Public pool SHOULD not evict messages unless needed.
-Public pool SHOULD persist messages between application restarts.
-
-_(TODO(indutny): does 30 day delta mechanism help here?)_
-There is no mechanism for evicting the messages from channels the user is
-subscribed too. However, in the future versions the channel operator MAY be able
-to issue a new channel root from time to time so that past DAGs may be evicted.
-
-## Relays
-
-HTTPS webserver MAY be used as a remote peer to facilitate synchronization
-between peers that are not in vicinity of each other physically.
-
 #### Ideas
 
 *(Something that is not implemented in neither client nor protocol, but might
