@@ -43,7 +43,7 @@ message EncryptedInvite {
   bytes box = 2;
 }
 
-// QR Code
+// Could be a QR Code, or a text message
 message InviteRequest {
   bytes peer_id = 1;
   bytes trustee_pub_key = 2;
