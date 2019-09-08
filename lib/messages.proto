@@ -86,12 +86,14 @@ message ChannelMessage {
 }
 
 message Query {
+  repeated Link chain = 1;
+
   oneof cursor {
-    int64 height = 1;
-    bytes hash = 2;
+    int64 height = 2;
+    bytes hash = 3;
   }
-  bool is_backward = 3;
-  uint32 limit = 4;
+  bool is_backward = 4;
+  uint32 limit = 5;
 }
 
 message QueryResponse {
@@ -106,7 +108,9 @@ message QueryResponse {
 }
 
 message Bulk {
-  repeated bytes hashes = 1;
+  repeated Link chain = 1;
+
+  repeated bytes hashes = 2;
 }
 
 message BulkResponse {

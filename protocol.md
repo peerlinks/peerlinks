@@ -379,17 +379,20 @@ Unencrypted `Query` is sent in order to request the latest messages from the
 channel:
 ```proto
 message Query {
+  repeated Link chain = 1;
+
   oneof cursor {
-    int64 height = 1;
-    bytes hash = 2;
+    int64 height = 2;
+    bytes hash = 3;
   }
-  bool is_backward = 3;
-  uint32 limit = 4;
+  bool is_backward = 4;
+  uint32 limit = 5;
 }
 ```
 The `query.cursor` MUST be either of `height` or `hash`.
 
-The remote peer responds with:
+If `query.chain` is valid (see [Link][] section above) the remote peer MUST
+respond with:
 ```proto
 message QueryResponse {
   message Abbreviated {
@@ -433,15 +436,18 @@ During synchronization process above the recipient MUST request the messages
 that are not present in their dataset. This can be done with `Bulk` packet:
 ```proto
 message Bulk {
-  repeated bytes hashes = 1;
+  repeated Link chain = 1;
+
+  repeated bytes hashes = 2;
 }
 ```
 
-Remote side SHOULD reply with as many messages as possible. The messages should
-be in the side order as in `bulk.hashes`, except for allowed omissions for
-those hashes that were not found in the datastore or the trailing hashes that
-are omitted due to some constraints. In the latter case `forward_index` MUST be
-set to the number of processes messages:
+If `bulk.chain` is valid (see [Link][] section above) the remote peer MUST
+respond with as many messages as possible, but NOT LESS THAN one. The messages
+should be in the same order as in `bulk.hashes`, except for allowed omissions
+for those hashes that were not found in the datastore or the trailing hashes
+that are omitted due to some constraints. In the latter case `forward_index`
+MUST be set to the number of processes messages:
 ```proto
 message BulkResponse {
   repeated ChannelMessage messages = 1;
