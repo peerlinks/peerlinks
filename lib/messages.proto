@@ -135,8 +135,8 @@ message SyncRequest {
 message SyncResponse {
   message Content {
     oneof content {
-      QueryResponse query = 1;
-      BulkResponse bulk = 2;
+      QueryResponse queryResponse = 1;
+      BulkResponse bulkResponse = 2;
     }
   }
 
