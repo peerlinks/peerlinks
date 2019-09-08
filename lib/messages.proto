@@ -132,7 +132,7 @@ message SyncRequest {
   oneof identity {
     Chain chain = 3;
 
-    // Only for public feeds
+    // Only for read-only feeds
     bytes public_key = 4;
   }
 
@@ -141,7 +141,6 @@ message SyncRequest {
   bytes box = 6;
 }
 
-// TODO(indutny): clarify sync response to unknown channel
 message SyncResponse {
   message Content {
     oneof content {
@@ -153,7 +152,9 @@ message SyncResponse {
   bytes channel_id = 1;
   uint32 seq = 2;
 
-  // Encrypted with `crypto_box_seal` using `chain.leaf_key` from `SyncRequest`
+  // Encrypted with `crypto_box_seal` using `sync_request.chain.leaf_key`
+  // from `SyncRequest` for channels and `sync_request.public_key` for
+  // read-only feeds
   bytes box = 3;
 }
 

@@ -34,7 +34,7 @@ Channel identifier is generated with:
 ```
 channel_id = HASH(channel_pub_key, 'vowlink-channel-id')[:32]
 ```
-inspired by [DAT][] all `ChannelPacket`s are encrypted with
+inspired by [DAT][] all `SyncRequest`s are encrypted with
 `crypto_secretbox_easy` and `crypto_secretbox_open_easy` and using:
 ```
 symmetric_key = HASH(channel_pub_key, 'vowlink-symmetric')[:crypto_secretbox_KEYBYTES]
@@ -89,22 +89,48 @@ NOTE: `reason.length` MUST be checked to be less than 1024 utf-8 characters.
 
 Further communication between peers happens using:
 ```proto
-message ChannelPacket {
+message SyncRequest {
   message Content {
     oneof content {
       Query query = 1;
-      QueryResponse query_response = 2;
-      Bulk bulk = 3;
-      BulkResponse bulk_response = 4;
+      Bulk bulk = 2;
+    }
+  }
+
+  message Chain {
+    repeated Link links = 1;
+  }
+
+  bytes channel_id = 1;
+  uint32 seq = 2;
+
+  oneof identity {
+    Chain chain = 3;
+
+    // Only for read-only feeds
+    bytes public_key = 4;
+  }
+
+  // `crypto_secretbox_easy`
+  bytes nonce = 5;
+  bytes box = 6;
+}
+
+message SyncResponse {
+  message Content {
+    oneof content {
+      QueryResponse queryResponse = 1;
+      BulkResponse bulkResponse = 2;
     }
   }
 
   bytes channel_id = 1;
   uint32 seq = 2;
 
-  // `crypto_secretbox_easy`
-  bytes nonce = 3;
-  bytes box = 4;
+  // Encrypted with `crypto_box_seal` using `sync_request.chain.leaf_key`
+  // from `SyncRequest` for channels and `sync_request.public_key` for
+  // read-only feeds
+  bytes box = 3;
 }
 
 message Packet {
@@ -113,10 +139,11 @@ message Packet {
     EncryptedInvite invite = 2;
 
     // Synchronization
-    ChannelPacket channel_packet = 3;
+    SyncRequest sync_request = 3;
+    SyncResponse sync_response = 4;
 
     // Request synchronization on new messages
-    Notification notification = 4;
+    Notification notification = 5;
   }
 }
 ```
@@ -366,6 +393,35 @@ The `invite.links` MUST be a chain from `channel_priv_key` to the
 `request.trustee_key`.
 
 ### Synchronization
+
+#### Notes
+
+All requests has to be encrypted with a symmetric key derived from the
+channel public key:
+```
+symmetric_key = HASH(channel_pub_key, 'vowlink-symmetric')[:crypto_secretbox_KEYBYTES]
+```
+and wrapped into `SyncRequest` packet's `box` and `nonce` fields using
+`crypto_secretbox_easy`. Additional fields are:
+
+* `channel_id` - identifier of the channel (hash of public key)
+* `seq` - integer id of the request to be used in `SyncResponse`
+* `chain` - valid [Chain][Link] for channels with no public read-only access
+* `public_key` - ephemeral (generated for every request) public key for
+  channels with public read-only access (feeds).
+
+`SyncResponse` is constructred by encrypting sub-response using either
+`sync_request.chain.leaf_key` or `sync_request.public_key` depending on the
+type of the feed. The encryption/decyption methods are similar to ones
+used in [Invite][] process (`crypto_box_seal`, etc).
+
+When `chain` is present it MUST be checked to be valid using current time.
+
+`SyncRequest` could be issued for the channel that is not known to the peer.
+In such case `SyncResponse`'s `box` MUST be empty. Issuer of `SyncRequest` MUST
+handle such responses as empty responses.
+
+#### Details
 
 This DAG would make little sense without synchronization.
 
