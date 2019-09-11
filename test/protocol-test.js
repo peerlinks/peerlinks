@@ -294,6 +294,10 @@ describe('Protocol', () => {
       while ((await readonlyC.getMessageCount()) !== 2) {
         await readonlyC.waitForIncomingMessage().promise;
       }
+
+      // Let it linger for some time to make sure that it doesn't loop
+      // (seen only in debug logs)
+      await new Promise((resolve) => setTimeout(resolve, 100));
     };
 
     await Promise.race([
