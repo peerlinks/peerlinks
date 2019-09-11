@@ -80,7 +80,7 @@ describe('Protocol', () => {
 
       // Issue invite
       const { encryptedInvite, peerId } = idB.issueInvite(
-        channelB, request, 'b');
+        channelB, request, 'a');
 
       // Post a message
       await channelB.post(Message.json('ohai'), idB);
@@ -119,6 +119,31 @@ describe('Protocol', () => {
       assert.strictEqual(last[0].json, 'ohai');
     };
 
+    const checkAChains = async () => {
+      await a.waitForChainMapUpdate().promise;
+      const map = a.computeChainMap();
+
+      assert.strictEqual(map.size, 1);
+
+      // `a` is connected to `b`, which is root
+      const chains = Array.from(map.values())[0];
+      assert.strictEqual(chains.length, 1);
+      assert.strictEqual(chains[0].length, 0);
+    };
+
+    const checkBChains = async () => {
+      await b.waitForChainMapUpdate().promise;
+      const map = b.computeChainMap();
+
+      assert.strictEqual(map.size, 1);
+
+      // `a` is non-root
+      const chains = Array.from(map.values())[0];
+      assert.strictEqual(chains.length, 1);
+      assert.strictEqual(chains[0].length, 1);
+      assert.deepStrictEqual(chains[0].getDisplayPath(), [ 'a' ]);
+    };
+
     const [ socketC, socketD ] = Socket.pair();
 
     await Promise.race([
@@ -130,7 +155,11 @@ describe('Protocol', () => {
         a.connect(socketC),
         b.connect(socketD),
       ]),
-      run(),
+      Promise.all([
+        checkAChains(),
+        checkBChains(),
+        run(),
+      ]),
     ]);
 
     await a.close();
@@ -307,6 +336,8 @@ describe('Protocol', () => {
       while ((await readonlyC.getMessageCount()) !== 2) {
         await readonlyC.waitForIncomingMessage().promise;
       }
+
+      assert.strictEqual(a.computeChainMap().size, 0);
 
       // Let it linger for some time to make sure that it doesn't loop
       // (seen only in debug logs)
