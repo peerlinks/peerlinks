@@ -70,6 +70,9 @@ describe('Protocol', () => {
     const [ idB, channelB ] = await b.createIdentityPair('b');
     const [ idC, duplicate ] = await b.createIdentityPair('a');
 
+    assert.strictEqual(a.peerCount, 0);
+    assert.strictEqual(b.peerCount, 0);
+
     const run = async () => {
       // Generate invite request
       const { requestId, request, decrypt } = idA.requestInvite(a.id);
@@ -279,6 +282,16 @@ describe('Protocol', () => {
     const [ socketBC, socketCB ] = Socket.pair();
 
     const run = async () => {
+      assert.strictEqual(a.peerCount, 0);
+      assert.strictEqual(b.peerCount, 0);
+      assert.strictEqual(c.peerCount, 0);
+
+      // A <-> B, B <-> C
+      await Promise.all([ a.waitForPeer().promise, c.waitForPeer().promise ]);
+      assert.strictEqual(a.peerCount, 1);
+      assert.strictEqual(c.peerCount, 1);
+      assert.strictEqual(b.peerCount, 2);
+
       const readonlyB = await b.feedFromPublicKey(channelA.publicKey, {
         name: 'b:feed',
       });
