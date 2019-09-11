@@ -265,4 +265,49 @@ describe('Protocol', () => {
     await a.close();
     await b.close();
   });
+
+  it('should re-distribute messages', async () => {
+    const c = new Protocol({ sodium });
+    await c.load();
+
+    const [ idA, channelA ] = await a.createIdentityPair('a:source', {
+      isFeed: true,
+    });
+    const idB = (await b.createIdentityPair('b'))[0];
+    const idC = (await b.createIdentityPair('c'))[0];
+
+    const [ socketBC, socketCB ] = Socket.pair();
+
+    const run = async () => {
+      const readonlyB = await b.feedFromPublicKey(channelA.publicKey, {
+        name: 'b:feed',
+      });
+      const readonlyC = await c.feedFromPublicKey(channelA.publicKey, {
+        name: 'c:feed',
+      });
+
+      await channelA.post(Message.json('ohai'), idA);
+
+      while ((await readonlyB.getMessageCount()) !== 2) {
+        await readonlyB.waitForIncomingMessage().promise;
+      }
+      while ((await readonlyC.getMessageCount()) !== 2) {
+        await readonlyC.waitForIncomingMessage().promise;
+      }
+    };
+
+    await Promise.race([
+      a.connect(socketA),
+      b.connect(socketB),
+      b.connect(socketBC),
+      c.connect(socketCB),
+
+      // Lame, but okay
+      run(),
+    ]);
+
+    await a.close();
+    await b.close();
+    await c.close();
+  });
 });
