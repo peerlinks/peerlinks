@@ -166,6 +166,14 @@ message Notification {
   bytes channel_id = 1;
 }
 
+message Ping {
+  uint32 seq = 1;
+}
+
+message Pong {
+  uint32 seq = 1;
+}
+
 message Packet {
   oneof content {
     Error error = 1;
@@ -177,6 +185,10 @@ message Packet {
 
     // Request synchronization on new messages
     Notification notification = 5;
+
+    // Networking
+    Ping ping = 6;
+    Pong pong = 7;
   }
 }
 
