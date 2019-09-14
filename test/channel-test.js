@@ -116,9 +116,9 @@ describe('Channel', () => {
 
     it('should notify message waiters', async () => {
       const [ message, same ] = await Promise.all([
-        channel.waitForOutgoingMessage().promise,
-        channel.waitForOutgoingMessage().promise,
-        channel.waitForUpdate().promise,
+        channel.waitForOutgoingMessage(),
+        channel.waitForOutgoingMessage(),
+        channel.waitForUpdate(),
         channel.post(Message.json('hello'), identity),
       ]);
 
@@ -307,8 +307,8 @@ describe('Channel', () => {
       const remote = await clone.post(Message.json('okay'), identity);
 
       const [ message ] = await Promise.all([
-        channel.waitForIncomingMessage().promise,
-        channel.waitForUpdate().promise,
+        channel.waitForIncomingMessage(),
+        channel.waitForUpdate(),
         channel.receive(remote),
       ]);
 

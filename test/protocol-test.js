@@ -76,7 +76,7 @@ describe('Protocol', () => {
     const run = async () => {
       // Generate invite request
       const { requestId, request, decrypt } = idA.requestInvite(a.id);
-      const invitePromise = a.waitForInvite(requestId).promise;
+      const invitePromise = a.waitForInvite(requestId);
 
       // Issue invite
       const { encryptedInvite, peerId } = idB.issueInvite(
@@ -86,7 +86,7 @@ describe('Protocol', () => {
       await channelB.post(Message.json('ohai'), idB);
 
       // Send it back
-      const peer = await b.waitForPeer(peerId).promise;
+      const peer = await b.waitForPeer(peerId);
       await peer.sendInvite(encryptedInvite);
 
       // Decrypt and create channel
@@ -120,7 +120,7 @@ describe('Protocol', () => {
     };
 
     const checkAChains = async () => {
-      await a.waitForChainMapUpdate().promise;
+      await a.waitForChainMapUpdate();
       const map = a.computeChainMap();
 
       assert.strictEqual(map.size, 1);
@@ -132,7 +132,7 @@ describe('Protocol', () => {
     };
 
     const checkBChains = async () => {
-      await b.waitForChainMapUpdate().promise;
+      await b.waitForChainMapUpdate();
       const map = b.computeChainMap();
 
       assert.strictEqual(map.size, 1);
@@ -186,7 +186,7 @@ describe('Protocol', () => {
 
       assert.strictEqual(await readonly.getMessageCount(), 0);
       while ((await readonly.getMessageCount()) !== 2) {
-        await readonly.waitForIncomingMessage().promise;
+        await readonly.waitForIncomingMessage();
       }
 
       const last = await readonly.getReverseMessagesAtOffset(0);
@@ -225,7 +225,7 @@ describe('Protocol', () => {
 
       assert.strictEqual(await readonly.getMessageCount(), 0);
 
-      await readonly.waitForIncomingMessage().promise;
+      await readonly.waitForIncomingMessage();
     };
 
     await assert.rejects(Promise.race([
@@ -251,7 +251,7 @@ describe('Protocol', () => {
 
     // Generate invite request
     const { requestId, request, decrypt } = idA.requestInvite(a.id);
-    const invitePromise = a.waitForInvite(requestId).promise;
+    const invitePromise = a.waitForInvite(requestId);
 
     // Issue invite
     const { encryptedInvite, peerId } = idB.issueInvite(
@@ -316,7 +316,7 @@ describe('Protocol', () => {
       assert.strictEqual(c.peerCount, 0);
 
       // A <-> B, B <-> C
-      await Promise.all([ a.waitForPeer().promise, c.waitForPeer().promise ]);
+      await Promise.all([ a.waitForPeer(), c.waitForPeer() ]);
       assert.strictEqual(a.peerCount, 1);
       assert.strictEqual(c.peerCount, 1);
       assert.strictEqual(b.peerCount, 2);
@@ -331,10 +331,10 @@ describe('Protocol', () => {
       await channelA.post(Message.json('ohai'), idA);
 
       while ((await readonlyB.getMessageCount()) !== 2) {
-        await readonlyB.waitForIncomingMessage().promise;
+        await readonlyB.waitForIncomingMessage();
       }
       while ((await readonlyC.getMessageCount()) !== 2) {
-        await readonlyC.waitForIncomingMessage().promise;
+        await readonlyC.waitForIncomingMessage();
       }
 
       assert.strictEqual(a.computeChainMap().size, 0);
