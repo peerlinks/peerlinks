@@ -71,7 +71,7 @@ Process incoming messages (and similarly outgoing with `waitForOutgoingMessage`:
 ```js
 function loop() {
   const wait = channel.waitForIncomingMessage();
-  wait.promise.then((message) => {
+  wait.then((message) => {
     // Display message
     loop();
   });

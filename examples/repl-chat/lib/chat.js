@@ -66,7 +66,7 @@ export default class Chat {
     console.log('...waiting');
 
     const encryptedInvite = await this.swarm.waitForInvite(
-      requestId, INVITE_TIMEOUT).promise;
+      requestId, INVITE_TIMEOUT);
     const invite = decrypt(encryptedInvite);
 
     const channel = await this.protocol.channelFromInvite(
@@ -95,7 +95,7 @@ export default class Chat {
     await this.swarm.sendInvite({
       peerId,
       encryptedInvite,
-    }, INVITE_TIMEOUT).promise;
+    }, INVITE_TIMEOUT);
 
     return '(issued invite)';
   }
@@ -142,7 +142,7 @@ export default class Chat {
     const loop = () => {
       this.channelWait = channel.waitForIncomingMessage();
 
-      this.channelWait.promise.then(() => {
+      this.channelWait.then(() => {
         this.channelWait = null;
 
         // Bell sound
