@@ -33,12 +33,12 @@ Here and below [Sodium][] is used for all cryptography operations.
 
 Channel identifier is generated with:
 ```
-channel_id = HASH(channel_pub_key, 'vowlink-channel-id')[:32]
+channel_id = HASH(channel_pub_key, 'peerlinks-channel-id')[:32]
 ```
 inspired by [DAT][] all `SyncRequest`s are encrypted with
 `crypto_secretbox_easy` and `crypto_secretbox_open_easy` and using:
 ```
-symmetric_key = HASH(channel_pub_key, 'vowlink-symmetric')[:crypto_secretbox_KEYBYTES]
+symmetric_key = HASH(channel_pub_key, 'peerlinks-symmetric')[:crypto_secretbox_KEYBYTES]
 ```
 and random `nonce`.
 
@@ -361,7 +361,7 @@ consider the invitation carefully and ONLY IN CASE of user confirmation issue
 an `EncryptedInvite`:
 ```proto
 message EncryptedInvite {
-  // NOTE: `request_id = HASH(req.trustee_pub_key, 'vowlink-invite')[:32]`
+  // NOTE: `request_id = HASH(req.trustee_pub_key, 'peerlinks-invite')[:32]`
   bytes request_id = 1;
 
   bytes box = 2;
@@ -400,7 +400,7 @@ The `invite.links` MUST be a chain from `channel_priv_key` to the
 All requests has to be encrypted with a symmetric key derived from the
 channel public key:
 ```
-symmetric_key = HASH(channel_pub_key, 'vowlink-symmetric')[:crypto_secretbox_KEYBYTES]
+symmetric_key = HASH(channel_pub_key, 'peerlinks-symmetric')[:crypto_secretbox_KEYBYTES]
 ```
 and wrapped into `SyncRequest` packet's `box` and `nonce` fields using
 `crypto_secretbox_easy`. Additional fields are:

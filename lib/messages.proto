@@ -37,7 +37,7 @@ message Invite {
 }
 
 message EncryptedInvite {
-  // NOTE: `request_id = HASH(req.trustee_pub_key, 'vowlink-invite')[:32]`
+  // NOTE: `request_id = HASH(req.trustee_pub_key, 'peerlinks-invite')[:32]`
   bytes request_id = 1;
 
   bytes box = 2;

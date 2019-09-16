@@ -1,9 +1,9 @@
-# VowLink
-[![Build Status](https://travis-ci.org/vowlink/vowlink.svg?branch=master)](http://travis-ci.org/vowlink/vowlink)
-[![IRC Channel](https://img.shields.io/badge/IRC-%23vowlink-1e72ff.svg?style=flat)][comm-irc]
-![License](https://img.shields.io/npm/l/@vowlink/protocol)
+# PeerLinks
+[![Build Status](https://travis-ci.org/peerlinks/peerlinks.svg?branch=master)](http://travis-ci.org/peerlinks/peerlinks)
+[![IRC Channel](https://img.shields.io/badge/IRC-%23peerlinks-1e72ff.svg?style=flat)][comm-irc]
+![License](https://img.shields.io/npm/l/@peerlinks/protocol)
 
-VowLink is a protocol for building "Distributed Secure IRC" (or distributed
+PeerLinks is a protocol for building "Distributed Secure IRC" (or distributed
 Slack if you wish). The core principles are:
 
 * No server required
@@ -23,13 +23,13 @@ Once requested an invite to other's channel, or approved an invite for someone
 else the familiar UI (:wink:) will help to make the conversation over a P2P
 network.
 
-![screenshot](https://raw.githubusercontent.com/vowlink/vowlink-desktop/master/Artwork/desktop-demo.gif)
+![screenshot](https://raw.githubusercontent.com/peerlinks/peerlinks-desktop/master/Artwork/desktop-demo.gif)
 
 ## Protocol
 
 The [Protocol][Protocol] and all repositories in [GitHub organization][org] are
 Open Source (MIT Licensed). Aside from other benefits this means that a custom
-client can connect to the network. VowLink is not a [walled garden][Slack].
+client can connect to the network. PeerLinks is not a [walled garden][Slack].
 
 ## Usage
 
@@ -37,8 +37,8 @@ Initialization (requires [`sodium-universal`][sodium] or any other library with
 compatible API):
 ```js
 import * as sodium from 'sodium-universal';
-import VowLink, { Message, StreamSocket } from '@vowlink/protocol';
-import SqliteStorage from '@vowlink/sqlite-storage';
+import PeerLinks, { Message, StreamSocket } from '@peerlinks/protocol';
+import SqliteStorage from '@peerlinks/sqlite-storage';
 
 // Initialize persistence layer
 const storage = new SqliteStorage({
@@ -48,23 +48,23 @@ const storage = new SqliteStorage({
 await storage.open();
 
 // Initialize protocol layer
-const vowLink = new VowLink({
+const peerLinks = new PeerLinks({
   sodium,
   storage,
   passphrase: 'secret',
 });
-const isRightPassphrase = await vowLink.load();
+const isRightPassphrase = await peerLinks.load();
 if (!isRightPassPhrase) {
   throw new Error('Invalid passphrase');
 }
 
 // Create identity (and associated channel)
 // NOTE: multiple identities/channels are supported
-const identity = await vowlink.createIdentity('identity-name');
-const channel = vowlink.getChannel('identity-name');
+const identity = await peerLinks.createIdentity('identity-name');
+const channel = peerLinks.getChannel('identity-name');
 ```
 
-See [@vowlink/hyperswarm][swarm] for details on connecting to remote peers and
+See [@peerlinks/hyperswarm][swarm] for details on connecting to remote peers and
 requesting/issuing invites.
 
 Process incoming messages (and similarly outgoing with `waitForOutgoingMessage`:
@@ -109,7 +109,7 @@ for (const message of messages.slice().reverse()) {
 
 Create read-only channel using its public key obtained elsewhere:
 ```js
-cosnt feed = await vowLink.feedFromPublicKey(
+cosnt feed = await peerLinks.feedFromPublicKey(
   publicKey,
   { name: 'channel-name' });
 ```
@@ -129,7 +129,7 @@ Not exhaustive list of possible issues:
 
 ## Community
 
-* [#vowlink][comm-irc] IRC Channel on FreeNode
+* [#peerlinks][comm-irc] IRC Channel on FreeNode
 * [Slack][comm-slack] channel
 
 ## LICENSE
@@ -159,10 +159,10 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 [Protocol]: protocol.md
 [promise-waitlist]: https://github.com/indutny/promise-waitlist
-[swarm]: https://github.com/vowlink/vowlink-swarm
-[desktop]: https://github.com/vowlink/vowlink-desktop/releases/latest
-[comm-irc]: https://www.irccloud.com/invite?channel=%23vowlink&hostname=irc.freenode.net&port=6697&ssl=1
-[comm-slack]: https://join.slack.com/t/vowlink/shared_invite/enQtNzM1MjEzMjM1Njg2LTg2NGM2YjI0ODA0YWQ3ZDJhMGE5NTU2YTc0MTZhZGNjY2EzYjc2NmUzMTFmNTZlOGE0ZmZkMTQxMGNkMTdhYzQ
+[swarm]: https://github.com/peerlinks/peerlinks-swarm
+[desktop]: https://github.com/peerlinks/peerlinks-desktop/releases/latest
+[comm-irc]: https://www.irccloud.com/invite?channel=%23peerlinks&hostname=irc.freenode.net&port=6697&ssl=1
+[comm-slack]: https://join.slack.com/t/peerlinks/shared_invite/enQtNzM1MjEzMjM1Njg2LTg2NGM2YjI0ODA0YWQ3ZDJhMGE5NTU2YTc0MTZhZGNjY2EzYjc2NmUzMTFmNTZlOGE0ZmZkMTQxMGNkMTdhYzQ
 [sodium]: https://github.com/sodium-friends/sodium-universal
-[org]: https://github.com/vowlink/
+[org]: https://github.com/peerlinks/
 [Slack]: https://slack.com/
