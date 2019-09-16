@@ -3,6 +3,8 @@
 [![IRC Channel](https://img.shields.io/badge/IRC-%23peerlinks-1e72ff.svg?style=flat)][comm-irc]
 ![License](https://img.shields.io/npm/l/@peerlinks/protocol)
 
+![banner](https://raw.githubusercontent.com/peerlinks/peerlinks-desktop/master/Artwork/banner-1280x640.png)
+
 PeerLinks is a protocol for building "Distributed Secure IRC" (or distributed
 Slack if you wish). The core principles are:
 
