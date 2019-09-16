@@ -129,8 +129,7 @@ Not exhaustive list of possible issues:
 
 ## Community
 
-* [#peerlinks][comm-irc] IRC Channel on FreeNode
-* [Slack][comm-slack] channel
+* [#peerlinks][comm-irc] IRC Channel on FreeNode.
 
 ## LICENSE
 
@@ -162,7 +161,6 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 [swarm]: https://github.com/peerlinks/peerlinks-swarm
 [desktop]: https://github.com/peerlinks/peerlinks-desktop/releases/latest
 [comm-irc]: https://www.irccloud.com/invite?channel=%23peerlinks&hostname=irc.freenode.net&port=6697&ssl=1
-[comm-slack]: https://join.slack.com/t/peerlinks/shared_invite/enQtNzM1MjEzMjM1Njg2LTg2NGM2YjI0ODA0YWQ3ZDJhMGE5NTU2YTc0MTZhZGNjY2EzYjc2NmUzMTFmNTZlOGE0ZmZkMTQxMGNkMTdhYzQ
 [sodium]: https://github.com/sodium-friends/sodium-universal
 [org]: https://github.com/peerlinks/
 [Slack]: https://slack.com/
