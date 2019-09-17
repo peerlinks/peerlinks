@@ -131,6 +131,10 @@ Not exhaustive list of possible issues:
 
 * [#peerlinks][comm-irc] IRC Channel on FreeNode.
 
+## Credits
+
+* Project name suggestion by [heapwolf][].
+
 ## LICENSE
 
 This software is licensed under the MIT License.
@@ -164,3 +168,4 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 [sodium]: https://github.com/sodium-friends/sodium-universal
 [org]: https://github.com/peerlinks/
 [Slack]: https://slack.com/
+[heapwolf]: https://github.com/heapwolf/
