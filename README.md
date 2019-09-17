@@ -8,8 +8,7 @@ PeerLinks is a protocol for building "Distributed Secure IRC" (or distributed
 Slack if you wish). The core principles are:
 
 * No server required
-* Untrusted parties help distribute messages
-* Invites reveal messages to new participants
+* Only invited participants can read and post messages
 * The "invite chain" involves 3 people or less
 * Write access expires after 99 days.
 
