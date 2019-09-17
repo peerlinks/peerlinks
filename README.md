@@ -10,7 +10,7 @@ Slack if you wish). The core principles are:
 * No server required
 * Only invited participants can read and post messages
 * The "invite chain" involves 3 people or less
-* Write access expires after 99 days.
+* Invite expires after 99 days.
 
 **NOTE: The protocol is still under development. Breaking changes will be
 avoided whenever possible.**
