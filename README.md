@@ -1,4 +1,4 @@
-![PeerLinks](https://raw.githubusercontent.com/peerlinks/peerlinks-desktop/master/Artwork/banner-slim-1280x320.png)
+![PeerLinks](https://raw.githubusercontent.com/peerlinks/peerlinks-desktop/master/Artwork/banner-slim-1280x360.png)
 
 [![Build Status](https://travis-ci.org/peerlinks/peerlinks.svg?branch=master)](http://travis-ci.org/peerlinks/peerlinks)
 [![IRC Channel](https://img.shields.io/badge/IRC-%23peerlinks-1e72ff.svg?style=flat)][comm-irc]
