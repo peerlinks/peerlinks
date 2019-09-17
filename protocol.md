@@ -538,10 +538,9 @@ subscribed peers SHOULD attempt to do a synchronization.
 #### Ideas
 
 *(Something that is not implemented in neither client nor protocol, but might
-be desired)*
+be desired in the future)*
 
-1. User has to recite channel "vows" before receiving the trust link
-2. Backward and forward secrecy of messages. Perhaps [KDF chain][KDF] could be
+1. Backward and forward secrecy of messages. Perhaps [KDF chain][KDF] could be
    used at least?
 
 [DAT]: https://docs.datproject.org/
