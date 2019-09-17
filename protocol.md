@@ -36,7 +36,7 @@ Channel identifier is generated with:
 channel_id = HASH(channel_pub_key, 'peerlinks-channel-id')[:32]
 ```
 inspired by [DAT][] all `SyncRequest`s are encrypted with
-`crypto_secretbox_easy` and `crypto_secretbox_open_easy` and using:
+`crypto_secretbox_easy` and `crypto_secretbox_open_easy` using:
 ```
 symmetric_key = HASH(channel_pub_key, 'peerlinks-symmetric')[:crypto_secretbox_KEYBYTES]
 ```
