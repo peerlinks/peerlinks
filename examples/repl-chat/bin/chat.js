@@ -1,7 +1,7 @@
 import * as repl from 'repl';
 import * as vm from 'vm';
 
-import Storage from '@vowlink/sqlite-storage';
+import Storage from '@peerlinks/sqlite-storage';
 
 import Chat from '../';
 
@@ -19,7 +19,7 @@ async function main() {
 
   const storage = new Storage({
     file: 'chat.sqlite',
-    trace: !!process.env.VOWLINK_TRACE_DB,
+    trace: !!process.env.PEERLINKS_TRACE_DB,
   });
 
   await storage.open();

@@ -2,8 +2,8 @@ import { Buffer } from 'buffer';
 import * as sodium from 'sodium-universal';
 import * as bs58 from 'bs58';
 
-import Protocol, { Message }from '@vowlink/protocol';
-import Swarm from '@vowlink/swarm';
+import Protocol, { Message }from '@peerlinks/protocol';
+import Swarm from '@peerlinks/swarm';
 
 const DISPLAY_COUNT = 30;
 
