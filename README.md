@@ -4,8 +4,8 @@
 [![IRC Channel](https://img.shields.io/badge/IRC-%23peerlinks-1e72ff.svg?style=flat)][comm-irc]
 ![License](https://img.shields.io/npm/l/@peerlinks/protocol)
 
-PeerLinks is a protocol for building "Distributed Secure IRC" (or distributed
-Slack if you wish). The core principles are:
+PeerLinks is a [protocol][Protocol] for building "Distributed Secure IRC" (or
+distributed Slack if you wish). The core principles are:
 
 * No server required
 * Only invited participants can read and post messages
