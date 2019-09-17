@@ -133,6 +133,8 @@ Not exhaustive list of possible issues:
 
 ## Credits
 
+* Thank you [joshmh][] and [bcomnes][] for hours of testing through multitude of
+  versions
 * Project name suggestion by [heapwolf][].
 
 ## LICENSE
@@ -169,3 +171,5 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 [org]: https://github.com/peerlinks/
 [Slack]: https://slack.com/
 [heapwolf]: https://github.com/heapwolf/
+[joshmh]: https://github.com/joshmh
+[bcomnes]: https://github.com/bcomnes
