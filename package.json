@@ -2,6 +2,7 @@
   "name": "@peerlinks/protocol",
   "version": "6.1.0",
   "description": "PeerLinks Protocol implementation",
+  "type": "module",
   "main": "lib/protocol.js",
   "scripts": {
     "compile-proto": "pbjs --es6 -w es6 -t static-module lib/messages.proto -o lib/messages.js",
