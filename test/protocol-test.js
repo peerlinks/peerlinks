@@ -236,7 +236,7 @@ describe('Protocol', () => {
       run(),
     ]), {
       name: 'BanError',
-      message: /Expected (chain|publicKey) in SyncRequest/,
+      message: /Expected valid chain in SyncRequest/,
     });
 
     await Promise.all([

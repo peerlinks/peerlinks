@@ -98,23 +98,24 @@ message SyncRequest {
     }
   }
 
-  message Chain {
-    repeated Link links = 1;
+  message TBS {
+    bytes channel_id = 1;
+    uint32 seq = 2;
+
+    // Empty for Feeds
+    repeated Link chain = 3;
+
+    // `crypto_secretbox_easy`
+    bytes nonce = 4;
+    bytes box = 5;
+
+    bytes response_pub_key = 6;
   }
 
-  bytes channel_id = 1;
-  uint32 seq = 2;
+  TBS tbs = 1;
 
-  oneof identity {
-    Chain chain = 3;
-
-    // Only for read-only feeds
-    bytes public_key = 4;
-  }
-
-  // `crypto_secretbox_easy`
-  bytes nonce = 5;
-  bytes box = 6;
+  // crypto_sign_detached(signature, tbs, leafSecretKey)
+  bytes signature = 2;
 }
 
 message SyncResponse {
@@ -128,9 +129,8 @@ message SyncResponse {
   bytes channel_id = 1;
   uint32 seq = 2;
 
-  // Encrypted with `crypto_box_seal` using `sync_request.chain.leaf_key`
-  // from `SyncRequest` for channels and `sync_request.public_key` for
-  // read-only feeds
+  // Encrypted with `crypto_box_seal` using `sync_request.response_pub_key`
+  // from `SyncRequest`
   bytes box = 3;
 }
 
@@ -201,7 +201,7 @@ message ChannelMessage {
 
   TBS tbs = 1;
 
-  // NOTE: `signature` has to be made by the leaf key in the `tbs.chain`
+  // crypto_sign_detached(signature, tbs, leafSecretKey)
   bytes signature = 2;
 }
 ```
@@ -307,6 +307,8 @@ message Link {
   }
 
   TBS tbs = 1;
+
+  // crypto_sign_detached(signature, tbs, parentSecretKey)
   bytes signature = 2;
 }
 ```
@@ -350,9 +352,12 @@ form of scanned QR code (or by other means):
 message InviteRequest {
   bytes peer_id = 1;
   bytes trustee_pub_key = 2;
+  bytes box_pub_key = 3;
 }
 ```
-where `trustee_pub_key` is the invitee's public key.
+where `trustee_pub_key` is the invitee's public key, and `box_pub_key` is a
+public part of result of `crypto_box_keypair` from Sodium (with the secret part
+being `box_secret_key`).
 
 NOTE: requesting invite reveals public key and an associated channel.
 
@@ -368,11 +373,8 @@ message EncryptedInvite {
 }
 ```
 
-NOTE: `crypto_sign_ed25519_pk_to_curve25519`,
-`crypto_sign_ed25519_sk_to_curve25519`,
-`crypto_box_seal`, `crypto_box_seal_open` from Sodium are used for getting
-encryption keys out of `trustee_pub_key` and (not sent over the wire)
-`trustee_priv_key`, and encrypting/decrypting the `box` contents respectively.
+NOTE: `crypto_box_seal`, `crypto_box_seal_open` from Sodium are used for
+encrypting/decrypting the `box` contents using `box_secret_key`.
 
 NOTE: `peer_id.length` MUST be checked to be equal to 32 bytes.
 `trustee_pub_key` length MUST be checked.
