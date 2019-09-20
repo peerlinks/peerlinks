@@ -49,4 +49,11 @@ describe('Invite', () => {
     // And receiving it on original chnanel
     await channel.receive(posted);
   });
+
+  it('should produce different request ids', async () => {
+    const { requestId: a } = invitee.requestInvite(Buffer.from('peer-id'));
+    const { requestId: b } = invitee.requestInvite(Buffer.from('peer-id'));
+
+    assert.ok(!a.equals(b));
+  });
 });
