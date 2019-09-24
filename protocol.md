@@ -18,9 +18,6 @@ The goals of this protocol are:
 
 Current version of protocol **DOES NOT** have:
 
-* Forward secrecy and backward secrecy (once invited to the channel - the
-  participant downloads all history and read all further conversations even
-  though they write access will expire in 99 days)
 * Data obfuscation. The messages in this protocol could be filtered by
   firewalls. Obfuscation can potentially happen on transport level (e.g.,
   using [Noise Protocol Framework][Noise])
