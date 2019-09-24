@@ -218,12 +218,11 @@ The hash of the message is computed as:
 hash = HASH(Content)[:32]
 ```
 
-Maximum text length in `json` is:
+Maximum text length of `json` in UTF-8 characters MUST be enforced and is:
 * Unlimited for `chain.length == 0`
 * `262144` for `chain.length == 1`
 * `8192` for `chain.length == 2`
-* `256` for `chain.length == 3`
-in UTF-8 characters and MUST be enforced.
+* `256` for `chain.length == 3`.
 
 `content.body` MUST be `json` for non-root messages.
 
