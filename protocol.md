@@ -28,11 +28,12 @@ Here and below [Sodium][] is used for all cryptography operations.
 
 [Protocol Buffers][] are used for encoding of all messages.
 
-Channel identifier is generated with:
+Inspired by [DAT][], channel identifiers are generated with:
 ```
 channel_id = HASH(channel_pub_key, 'peerlinks-channel-id')[:32]
 ```
-inspired by [DAT][] all `SyncRequest`s are encrypted with
+
+All `SyncRequest`s are encrypted with
 `crypto_secretbox_easy` and `crypto_secretbox_open_easy` using:
 ```
 symmetric_key = HASH(channel_pub_key, 'peerlinks-symmetric')[:crypto_secretbox_KEYBYTES]
@@ -43,7 +44,8 @@ The protocol below is transport-agnostic in a sense that it could be run using
 any available transport: [MultipeerConnectivity][], https, ...
 
 Everywhere below "TBS" stands for To Be Signed and indicates the data that is
-signed by the `signature`.
+signed by some secret key, and the signature is stored in `signature` field of
+next to `tbs` field.
 
 ## Initialization sequence
 
