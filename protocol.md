@@ -320,7 +320,8 @@ over participants. The number `3` MAY be revised in the future version of the
 protocol.)
 
 `trustee_display_name` is assigned by the issuer of the link. Maximum length of
-this string is 128 UTF-8 characters and MUST be enforced. Note that each
+this string is 128 UTF-8 characters and MUST be enforced. Minimum length is `1`
+and MUST be enforced. Note that each
 participant of the channel gets unique "display path" (array of display names)
 starting from the root.
 
