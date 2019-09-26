@@ -85,7 +85,7 @@ account to prevent duplicate connections. `shake.is_duplicate` SHOULD be set to
 `true` only if the connection to remote peer is deemed to be duplicate by
 sender. In this case the connection SHOULD be closed after sending `Shake`.
 
-NOTE: `reason.length` MUST be checked to be less than 1024 utf-8 characters.
+NOTE: `reason.length` MUST be checked to be less than 1024 utf-8 codepoints.
 
 Further communication between peers happens using:
 ```proto
@@ -218,7 +218,7 @@ The hash of the message is computed as:
 hash = HASH(Content)[:32]
 ```
 
-Maximum text length of `json` in UTF-8 characters MUST be enforced and is:
+Maximum text length of `json` in UTF-8 codepoints MUST be enforced and is:
 * Unlimited for `chain.length == 0`
 * `262144` for `chain.length == 1`
 * `8192` for `chain.length == 2`
@@ -320,7 +320,7 @@ over participants. The number `3` MAY be revised in the future version of the
 protocol.)
 
 `trustee_display_name` is assigned by the issuer of the link. Maximum length of
-this string is 128 UTF-8 characters and MUST be enforced. Minimum length is `1`
+this string is 128 UTF-8 codepoints and MUST be enforced. Minimum length is `1`
 and MUST be enforced. Note that each
 participant of the channel gets unique "display path" (array of display names)
 starting from the root.
@@ -389,7 +389,7 @@ message Invite {
 ```
 
 The `channel_name` is a suggested name for the channel and MUST have no more
-than `128` UTF-8 characters.
+than `128` UTF-8 codepoints.
 
 The `invite.links` MUST be a chain from `channel_priv_key` to the
 `request.trustee_key`.
