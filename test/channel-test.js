@@ -436,11 +436,11 @@ describe('Channel', () => {
       });
 
       it('should be limited for non-root\'s messages', async () => {
-        const body = Message.json('x'.repeat(1024 * 1024));
+        const body = Message.json('x'.repeat(5 * 1024 * 1024));
         await assert.rejects(channel.post(body, trustee), {
           name: 'BanError',
           message: 'Message body length overflow. Expected less or equal to: ' +
-            '262144. Got: 1048578'
+            '2097152. Got: 5242882'
         });
       });
     });
@@ -452,12 +452,12 @@ describe('Channel', () => {
       });
 
       it('should be limited for non-root\'s messages', async () => {
-        const invalid = msg('x'.repeat(1024 * 1024), [ root ], 1,
+        const invalid = msg('x'.repeat(5 * 1024 * 1024), [ root ], 1,
           now(), trustee);
         await assert.rejects(channel.receive(invalid), {
           name: 'BanError',
           message: 'Message body length overflow. Expected less or equal to: ' +
-            '262144. Got: 1048578'
+            '2097152. Got: 5242882'
         });
       });
     });
