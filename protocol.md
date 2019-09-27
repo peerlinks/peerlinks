@@ -220,9 +220,9 @@ hash = HASH(Content)[:32]
 
 Maximum text length of `json` in UTF-8 codepoints MUST be enforced and is:
 * Unlimited for `chain.length == 0`
-* `262144` for `chain.length == 1`
-* `8192` for `chain.length == 2`
-* `256` for `chain.length == 3`.
+* `2097152` for `chain.length == 1` (2mb)
+* `524288` for `chain.length == 2` (512kb)
+* `8192` for `chain.length == 3` (8kb, no images or attachments).
 
 `content.body` MUST be `json` for non-root messages.
 
