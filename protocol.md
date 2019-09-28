@@ -543,6 +543,7 @@ be desired in the future)*
 
 1. Backward and forward secrecy of messages. Perhaps [KDF chain][KDF] could be
    used at least?
+2. Partial sync up to the last available message signed by root
 
 [DAT]: https://docs.datproject.org/
 [Sodium]: https://download.libsodium.org/doc/
