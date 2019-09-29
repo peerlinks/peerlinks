@@ -90,31 +90,31 @@ NOTE: `reason.length` MUST be checked to be less than 1024 utf-8 codepoints.
 Further communication between peers happens using:
 ```proto
 message SyncRequest {
-  message Content {
-    oneof content {
-      Query query = 1;
-      Bulk bulk = 2;
-    }
-  }
-
   message TBS {
-    bytes channel_id = 1;
-    uint32 seq = 2;
-
     // Empty for Feeds
-    repeated Link chain = 3;
+    repeated Link chain = 1;
 
-    // `crypto_secretbox_easy`
-    bytes nonce = 4;
-    bytes box = 5;
+    oneof content {
+      Query query = 2;
+      Bulk bulk = 3;
+    }
 
-    bytes response_pub_key = 6;
+    bytes response_pub_key = 4;
   }
 
-  TBS tbs = 1;
+  message Content {
+    TBS tbs = 1;
 
-  // crypto_sign_detached(signature, tbs, leafSecretKey)
-  bytes signature = 2;
+    // crypto_sign_detached(signature, tbs, leafSecretKey)
+    bytes signature = 2;
+  }
+
+  bytes channel_id = 1;
+  uint32 seq = 2;
+
+  // `crypto_secretbox_easy(out, Content, symmetric_key)`
+  bytes nonce = 3;
+  bytes box = 4;
 }
 
 message SyncResponse {
