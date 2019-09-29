@@ -14,7 +14,7 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "@peerlinks/protocol": "^7.3.0",
+    "@peerlinks/protocol": "^7.3.1",
     "@peerlinks/sqlite-storage": "^3.0.0",
     "@peerlinks/swarm": "^3.0.2",
     "bs58": "^4.0.1",
