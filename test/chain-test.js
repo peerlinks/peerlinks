@@ -160,4 +160,27 @@ describe('Chain', () => {
     assert.ok(root.isBetterThan(chain));
     assert.ok(!chain.isBetterThan(root));
   });
+
+  it('should compare chains', () => {
+    const empty = new Chain([]);
+    assert.strictEqual(Chain.compare(empty, empty), 0);
+
+    const chainA = new Chain([
+      idA.issueLink(channelA, dataB),
+      idB.issueLink(channelA, Object.assign(dataC, {
+        validFrom: now() + 1000,
+        validTo: now() + 2000,
+      })),
+      idC.issueLink(channelA, dataD),
+    ]);
+    const chainB = new Chain([
+      idA.issueLink(channelA, dataB),
+    ]);
+
+    assert.strictEqual(Chain.compare(empty, chainA), -1);
+    assert.strictEqual(Chain.compare(chainA, empty), 1);
+    assert.strictEqual(Chain.compare(chainA, chainA), 0);
+    assert.strictEqual(Chain.compare(chainA, chainB), 1);
+    assert.strictEqual(Chain.compare(chainB, chainB), 0);
+  });
 });
