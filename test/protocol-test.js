@@ -123,6 +123,9 @@ describe('Protocol', () => {
       await a.waitForChainMapUpdate();
       const map = a.computeChainMap();
 
+      // Recomputing should result in the same unchanged object
+      assert.strictEqual(a.computeChainMap(), map);
+
       assert.strictEqual(map.size, 1);
 
       // `a` is connected to `b`, which is root
@@ -134,6 +137,9 @@ describe('Protocol', () => {
     const checkBChains = async () => {
       await b.waitForChainMapUpdate();
       const map = b.computeChainMap();
+
+      // Recomputing should result in the same unchanged object
+      assert.strictEqual(b.computeChainMap(), map);
 
       assert.strictEqual(map.size, 1);
 
@@ -338,6 +344,7 @@ describe('Protocol', () => {
       }
 
       assert.strictEqual(a.computeChainMap().size, 0);
+      assert.strictEqual(a.computeChainMap(), a.computeChainMap());
 
       // Let it linger for some time to make sure that it doesn't loop
       // (seen only in debug logs)
