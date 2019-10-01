@@ -120,7 +120,7 @@ describe('Protocol', () => {
     };
 
     const checkAChains = async () => {
-      await a.waitForChainMapUpdate();
+      assert.ok(await a.waitForChainMapUpdate());
       const map = a.computeChainMap();
 
       // Recomputing should result in the same unchanged object
@@ -135,7 +135,7 @@ describe('Protocol', () => {
     };
 
     const checkBChains = async () => {
-      await b.waitForChainMapUpdate();
+      assert.ok(await b.waitForChainMapUpdate());
       const map = b.computeChainMap();
 
       // Recomputing should result in the same unchanged object
