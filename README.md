@@ -37,7 +37,7 @@ Initialization (requires [`sodium-universal`][sodium] or any other library with
 compatible API):
 ```js
 import * as sodium from 'sodium-universal';
-import PeerLinks, { Message, StreamSocket } from '@peerlinks/protocol';
+import PeerLinks, { Message } from '@peerlinks/protocol';
 import SqliteStorage from '@peerlinks/sqlite-storage';
 
 // Initialize persistence layer
