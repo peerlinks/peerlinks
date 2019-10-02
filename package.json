@@ -36,9 +36,9 @@
     "quick-lru": "^4.0.1"
   },
   "devDependencies": {
-    "eslint": "^6.4.0",
+    "eslint": "^6.5.1",
     "esm": "^3.2.25",
-    "mocha": "^6.2.0",
+    "mocha": "^6.2.1",
     "nyc": "^14.1.1",
     "sodium-universal": "^2.0.0"
   }
