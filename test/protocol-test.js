@@ -28,7 +28,7 @@ describe('Protocol', () => {
   });
 
   it('should create new identity with a channel', async () => {
-    const [ test, _ ] = await a.createIdentityPair('test');
+    const [ test ] = await a.createIdentityPair('test');
     assert.strictEqual(test.name, 'test');
 
     assert.strictEqual(a.identities.length, 1);
@@ -66,9 +66,11 @@ describe('Protocol', () => {
   });
 
   it('should connect peers', async () => {
-    const [ idA, _ ] = await a.createIdentityPair('a');
+    const [ idA ] = await a.createIdentityPair('a');
     const [ idB, channelB ] = await b.createIdentityPair('b');
     const [ idC, duplicate ] = await b.createIdentityPair('a');
+
+    assert.strictEqual(idC.name, 'a');
 
     assert.strictEqual(a.peerCount, 0);
     assert.strictEqual(b.peerCount, 0);
@@ -177,7 +179,7 @@ describe('Protocol', () => {
       isFeed: true,
     });
     assert.ok(channelA.isFeed);
-    const [ idB, _ ] = await b.createIdentityPair('b');
+    const [ idB ] = await b.createIdentityPair('b');
 
     const run = async () => {
       // Post a message
@@ -216,7 +218,7 @@ describe('Protocol', () => {
       isFeed: false,
     });
     assert.ok(!channelA.isFeed);
-    const [ idB, _ ] = await b.createIdentityPair('b');
+    const [ idB ] = await b.createIdentityPair('b');
 
     const run = async () => {
       // Post a message
@@ -252,7 +254,7 @@ describe('Protocol', () => {
   });
 
   it('should self-resolve invite', async () => {
-    const [ idA, _ ] = await a.createIdentityPair('a');
+    const [ idA ] = await a.createIdentityPair('a');
     const [ idB, channelB ] = await a.createIdentityPair('b');
 
     // Generate invite request
@@ -289,8 +291,8 @@ describe('Protocol', () => {
   });
 
   it('should work when peers have no common channels', async () => {
-    const idA = (await a.createIdentityPair('a'))[0];
-    const idB = (await b.createIdentityPair('b'))[0];
+    await a.createIdentityPair('a');
+    await b.createIdentityPair('b');
 
     await Promise.race([
       a.connect(socketA),
@@ -311,8 +313,8 @@ describe('Protocol', () => {
     const [ idA, channelA ] = await a.createIdentityPair('a:source', {
       isFeed: true,
     });
-    const idB = (await b.createIdentityPair('b'))[0];
-    const idC = (await b.createIdentityPair('c'))[0];
+    await b.createIdentityPair('b');
+    await b.createIdentityPair('c');
 
     const [ socketBC, socketCB ] = Socket.pair();
 

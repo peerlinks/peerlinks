@@ -77,12 +77,12 @@ describe('Channel', () => {
       assert.strictEqual(root.height, 0);
 
       assert.deepStrictEqual(first.parents.map((p) => p.toString('hex')), [
-        root.hash.toString('hex')
+        root.hash.toString('hex'),
       ]);
       assert.strictEqual(first.height, 1);
 
       assert.deepStrictEqual(second.parents.map((p) => p.toString('hex')), [
-        first.hash.toString('hex')
+        first.hash.toString('hex'),
       ]);
       assert.strictEqual(second.height, 2);
     });
@@ -440,7 +440,7 @@ describe('Channel', () => {
         await assert.rejects(channel.post(body, trustee), {
           name: 'BanError',
           message: 'Message body length overflow. Expected less or equal to: ' +
-            '2097152. Got: 5242882'
+            '2097152. Got: 5242882',
         });
       });
     });
@@ -457,7 +457,7 @@ describe('Channel', () => {
         await assert.rejects(channel.receive(invalid), {
           name: 'BanError',
           message: 'Message body length overflow. Expected less or equal to: ' +
-            '2097152. Got: 5242882'
+            '2097152. Got: 5242882',
         });
       });
     });
@@ -488,14 +488,14 @@ describe('Channel', () => {
     assert.deepStrictEqual(messages.map((m) => m.json), [
       'd',
       'c',
-    ])
+    ]);
 
     const messages2 = await channel.getReverseMessagesAtOffset(2, 1000);
     assert.deepStrictEqual(messages2.map((m) => m.json || '<root>'), [
       'b',
       'a',
       '<root>',
-    ])
+    ]);
 
     const messages3 = await channel.getReverseMessagesAtOffset(100);
     assert.strictEqual(messages3.length, 0);

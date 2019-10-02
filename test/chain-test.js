@@ -37,19 +37,19 @@ describe('Chain', () => {
     dataA = {
       trusteePubKey: idA.publicKey,
       trusteeDisplayName: 'a',
-    }
+    };
     dataB = {
       trusteePubKey: idB.publicKey,
       trusteeDisplayName: 'b',
-    }
+    };
     dataC = {
       trusteePubKey: idC.publicKey,
       trusteeDisplayName: 'c',
-    }
+    };
     dataD = {
       trusteePubKey: idD.publicKey,
       trusteeDisplayName: 'd',
-    }
+    };
   });
 
   afterEach(() => {

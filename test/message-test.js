@@ -84,7 +84,7 @@ describe('Message', () => {
       });
 
     assert.throws(() => {
-      const _ = new Message({
+      new Message({
         ...content,
         sodium,
       });
