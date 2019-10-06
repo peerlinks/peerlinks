@@ -6,6 +6,8 @@ import * as sodium from 'sodium-universal';
 import { Chain, Channel, Identity, Message } from '../';
 import { now } from '../lib/utils';
 
+import DelayStorage from './fixtures/delay-storage';
+
 describe('Channel', () => {
   let identity = null;
   let channel = null;
@@ -336,6 +338,47 @@ describe('Channel', () => {
 
       await channel.sync(clone);
       assert.strictEqual(await channel.getMessageCount(), 15 + 1);
+    });
+
+    it('should concurrently synchronize the channel', async function() {
+      this.timeout(200000);
+
+      const source = await Channel.fromIdentity(identity, {
+        name: 'source',
+        storage: new DelayStorage(),
+        sodium,
+
+        // Force low limits to trigger more branches
+        maxQueryLimit: 5,
+        maxBulkCount: 2,
+      });
+
+      // Post three times the query limit
+      for (let i = 0; i < 15; i++) {
+        await source.post(Message.json(`message: ${i}`), identity);
+      }
+
+      const targetA = await Channel.fromPublicKey(source.publicKey, {
+        name: 'target:a',
+        storage: new DelayStorage(),
+        sodium,
+      });
+
+      await targetA.sync(source);
+      assert.strictEqual(await targetA.getMessageCount(), 15 + 1);
+
+      const targetB = await Channel.fromPublicKey(source.publicKey, {
+        name: 'target:b',
+        storage: new DelayStorage(),
+        sodium,
+      });
+
+      await Promise.all([
+        targetB.sync(source),
+        targetB.sync(targetA),
+      ]);
+
+      assert.strictEqual(await targetB.getMessageCount(), 15 + 1);
     });
 
     it('should synchronize diverging branches', async () => {
