@@ -3,6 +3,7 @@ import * as assert from 'assert';
 import * as sodium from 'sodium-universal';
 
 import { Chain, Channel, Identity, Message } from '../';
+import { now } from '../lib/utils';
 
 describe('Message', () => {
   let id = null;
@@ -50,6 +51,46 @@ describe('Message', () => {
     assert.ok(message.verify(channel));
 
     assert.strictEqual(message.chain.getLeafKey(channel).toString('hex'),
+      second.publicKey.toString('hex'));
+  });
+
+  it('should be verified after expiration of the link', () => {
+    // Expired a day ago
+    const validTo = now() - 24 * 3600;
+
+    // Posted an hour before expiration
+    const postTime = validTo - 3600;
+
+    const second = new Identity('second', { sodium });
+    const chain = new Chain([
+      id.issueLink(channel, {
+        validFrom: 0,
+        validTo,
+
+        trusteePubKey: second.publicKey,
+        trusteeDisplayName: 'second',
+      }),
+    ]);
+
+    second.addChain(channel, chain, postTime);
+
+    const content = second.signMessageBody(
+      Message.json('okay'),
+      channel,
+      {
+        height: 0,
+        parents: [],
+        timestamp: postTime,
+      });
+
+    const message = new Message({
+      ...content,
+      sodium,
+    });
+    assert.ok(message.verify(channel));
+
+    assert.strictEqual(
+      message.chain.getLeafKey(channel, postTime).toString('hex'),
       second.publicKey.toString('hex'));
   });
 
