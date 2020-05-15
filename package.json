@@ -32,13 +32,13 @@
   "dependencies": {
     "debug": "^4.1.1",
     "promise-waitlist": "^1.5.0",
-    "protobufjs": "^6.8.8",
+    "protobufjs": "^6.9.0",
     "quick-lru": "^4.0.1"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
     "esm": "^3.2.25",
-    "mocha": "^6.2.2",
+    "mocha": "^6.2.3",
     "nyc": "^14.1.1",
     "sodium-universal": "^2.0.0"
   }
