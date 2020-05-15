@@ -2,7 +2,7 @@
 import * as assert from 'assert';
 import * as sodium from 'sodium-universal';
 
-import Protocol, { Channel, Message } from '../';
+import Protocol, { Chain, Channel, Message } from '../';
 
 import Socket from './fixtures/socket';
 
@@ -246,6 +246,56 @@ describe('Protocol', () => {
       name: 'BanError',
       message: /Expected valid chain in SyncRequest/,
     });
+
+    await Promise.all([
+      a.close(),
+      b.close(),
+    ]);
+  });
+
+  it('should not sync if there is no valid chain', async () => {
+    const [ idA, channelA ] = await a.createIdentityPair('a', {
+      isFeed: false,
+    });
+    assert.ok(!channelA.isFeed);
+    const [ idB ] = await b.createIdentityPair('b');
+
+    // Invite to channel using stale chain
+    const validFrom = 0;
+    const validTo = 10;
+
+    const link = idA.issueLink(channelA, {
+      trusteePubKey: idB.publicKey,
+      trusteeDisplayName: 'trustee',
+
+      // Long time in the past
+      validFrom,
+      validTo,
+    });
+
+    const channelB = await Channel.fromPublicKey(channelA.publicKey, {
+      name: 'copy',
+      sodium,
+    });
+
+    const chain = new Chain([ link ]);
+    idB.addChain(channelB, chain, (validFrom + validTo) / 2);
+    await b.addChannel(channelB);
+
+    const run = async () => {
+      await b.waitForPeer();
+
+      // Lame, but okay. We don't want to call internals here
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    };
+
+    await Promise.race([
+      Promise.all([
+        a.connect(socketA),
+        b.connect(socketB),
+      ]),
+      run(),
+    ]);
 
     await Promise.all([
       a.close(),
