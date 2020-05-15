@@ -1,7 +1,7 @@
 /* eslint-env node, mocha */
 import * as assert from 'assert';
 import { Buffer } from 'buffer';
-import * as sodium from 'sodium-universal';
+import * as sodium from 'sodium-native';
 
 import { Chain, Channel, Identity, Message } from '../';
 import { now } from '../lib/utils';

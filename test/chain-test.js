@@ -1,6 +1,6 @@
 /* eslint-env node, mocha */
 import * as assert from 'assert';
-import * as sodium from 'sodium-universal';
+import * as sodium from 'sodium-native';
 
 import { Chain, Channel, Identity } from '../';
 import { now } from '../lib/utils';
