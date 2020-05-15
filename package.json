@@ -1,6 +1,6 @@
 {
   "name": "@peerlinks/protocol",
-  "version": "7.4.6",
+  "version": "7.4.7",
   "description": "PeerLinks Protocol implementation",
   "main": "lib/protocol.js",
   "scripts": {
